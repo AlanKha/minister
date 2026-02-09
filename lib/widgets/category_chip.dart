@@ -1,48 +1,37 @@
 import 'package:flutter/material.dart';
-
-const _categoryColors = <String, Color>{
-  'Dining': Color(0xFFE57373),
-  'Grocery': Color(0xFF81C784),
-  'Superstore': Color(0xFF64B5F6),
-  'Transit': Color(0xFFFFB74D),
-  'Shopping': Color(0xFFBA68C8),
-  'Subscription': Color(0xFF4FC3F7),
-  'Gas': Color(0xFFA1887F),
-  'Utilities': Color(0xFF90A4AE),
-  'Health': Color(0xFFFF8A65),
-  'Travel': Color(0xFF4DD0E1),
-  'Transfer': Color(0xFFAED581),
-  'Entertainment': Color(0xFFF06292),
-  'Rent': Color(0xFF7986CB),
-  'Fee': Color(0xFFE0E0E0),
-  'N/A': Color(0xFFBDBDBD),
-};
+import '../theme.dart';
 
 class CategoryChip extends StatelessWidget {
   final String category;
+  final bool dense;
 
-  const CategoryChip({super.key, required this.category});
+  const CategoryChip({super.key, required this.category, this.dense = false});
 
   @override
   Widget build(BuildContext context) {
-    final color = _categoryColors[category] ?? _categoryColors['N/A']!;
+    final color =
+        AppColors.categoryColors[category] ?? AppColors.categoryColors['N/A']!;
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+      padding: EdgeInsets.symmetric(
+        horizontal: dense ? 8 : 10,
+        vertical: dense ? 2 : 4,
+      ),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.2),
-        borderRadius: BorderRadius.circular(12),
+        color: color.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(8),
       ),
       child: Text(
         category,
         style: TextStyle(
-          fontSize: 12,
+          fontSize: dense ? 11 : 12,
           color: color,
-          fontWeight: FontWeight.w500,
+          fontWeight: FontWeight.w600,
+          letterSpacing: 0.2,
         ),
       ),
     );
   }
 }
 
-List<String> get allCategories => _categoryColors.keys.toList();
+List<String> get allCategories => AppColors.categoryColors.keys.toList();

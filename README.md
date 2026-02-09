@@ -54,7 +54,7 @@ flutter run -d macos     # macOS (requires Xcode)
 
 ## File structure
 
-```
+```bash
 lib/                           # Flutter app source
 server/
   bin/server.dart              # Entry point (Cascade: API routes + static files)

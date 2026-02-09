@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../providers/transactions_provider.dart';
 import '../widgets/transaction_tile.dart';
 import '../widgets/filter_bar.dart';
+import '../theme.dart';
 
 class TransactionsScreen extends ConsumerWidget {
   const TransactionsScreen({super.key});
@@ -14,26 +15,58 @@ class TransactionsScreen extends ConsumerWidget {
     final filters = ref.watch(transactionFiltersProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Transactions')),
+      backgroundColor: AppColors.surface,
       body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Header
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 24, 20, 0),
+            child: Text(
+              'Transactions',
+              style: const TextStyle(
+                fontSize: 26,
+                fontWeight: FontWeight.w700,
+                color: AppColors.textPrimary,
+                letterSpacing: -0.8,
+              ),
+            ),
+          ),
           const FilterBar(),
           Expanded(
             child: page.when(
               data: (txPage) {
                 if (txPage.data.isEmpty) {
-                  return const Center(child: Text('No transactions found'));
+                  return Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.receipt_long_outlined,
+                            size: 48, color: AppColors.textTertiary),
+                        const SizedBox(height: 12),
+                        Text(
+                          'No transactions found',
+                          style: TextStyle(
+                            fontSize: 15,
+                            color: AppColors.textTertiary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
                 }
                 return Column(
                   children: [
                     Expanded(
                       child: RefreshIndicator(
+                        color: AppColors.accent,
+                        backgroundColor: AppColors.surfaceContainer,
                         onRefresh: () async {
                           ref.invalidate(transactionsProvider);
                         },
-                        child: ListView.separated(
+                        child: ListView.builder(
+                          padding: const EdgeInsets.symmetric(vertical: 4),
                           itemCount: txPage.data.length,
-                          separatorBuilder: (_, _) => const Divider(height: 1),
                           itemBuilder: (context, index) {
                             final tx = txPage.data[index];
                             return TransactionTile(
@@ -47,38 +80,50 @@ class TransactionsScreen extends ConsumerWidget {
                     ),
                     // Pagination
                     if (txPage.totalPages > 1)
-                      Padding(
-                        padding: const EdgeInsets.all(8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 20, vertical: 12),
+                        decoration: const BoxDecoration(
+                          border: Border(
+                            top: BorderSide(color: AppColors.border),
+                          ),
+                        ),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            IconButton(
-                              onPressed: filters.page > 1
-                                  ? () {
-                                      ref
-                                          .read(transactionFiltersProvider
-                                              .notifier)
-                                          .state = filters.copyWith(
-                                              page: filters.page - 1);
-                                    }
-                                  : null,
-                              icon: const Icon(Icons.chevron_left),
+                            _PaginationButton(
+                              icon: Icons.chevron_left_rounded,
+                              enabled: filters.page > 1,
+                              onTap: () {
+                                ref
+                                    .read(
+                                        transactionFiltersProvider.notifier)
+                                    .state = filters.copyWith(
+                                        page: filters.page - 1);
+                              },
                             ),
-                            Text(
-                              'Page ${txPage.page} of ${txPage.totalPages}',
-                              style: Theme.of(context).textTheme.bodyMedium,
+                            Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 20),
+                              child: Text(
+                                '${txPage.page} / ${txPage.totalPages}',
+                                style: const TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w500,
+                                  color: AppColors.textSecondary,
+                                ),
+                              ),
                             ),
-                            IconButton(
-                              onPressed: filters.page < txPage.totalPages
-                                  ? () {
-                                      ref
-                                          .read(transactionFiltersProvider
-                                              .notifier)
-                                          .state = filters.copyWith(
-                                              page: filters.page + 1);
-                                    }
-                                  : null,
-                              icon: const Icon(Icons.chevron_right),
+                            _PaginationButton(
+                              icon: Icons.chevron_right_rounded,
+                              enabled: filters.page < txPage.totalPages,
+                              onTap: () {
+                                ref
+                                    .read(
+                                        transactionFiltersProvider.notifier)
+                                    .state = filters.copyWith(
+                                        page: filters.page + 1);
+                              },
                             ),
                           ],
                         ),
@@ -86,16 +131,27 @@ class TransactionsScreen extends ConsumerWidget {
                   ],
                 );
               },
-              loading: () =>
-                  const Center(child: CircularProgressIndicator()),
+              loading: () => const Center(
+                child: CircularProgressIndicator(
+                  color: AppColors.accent,
+                  strokeWidth: 2,
+                ),
+              ),
               error: (e, _) => Center(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(Icons.error_outline, size: 48),
-                    const SizedBox(height: 8),
-                    Text('Error: $e'),
-                    const SizedBox(height: 8),
+                    Icon(Icons.error_outline_rounded,
+                        size: 48, color: AppColors.textTertiary),
+                    const SizedBox(height: 12),
+                    Text(
+                      'Something went wrong',
+                      style: TextStyle(
+                        fontSize: 15,
+                        color: AppColors.textTertiary,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
                     ElevatedButton(
                       onPressed: () => ref.invalidate(transactionsProvider),
                       child: const Text('Retry'),
@@ -106,6 +162,40 @@ class TransactionsScreen extends ConsumerWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _PaginationButton extends StatelessWidget {
+  final IconData icon;
+  final bool enabled;
+  final VoidCallback onTap;
+
+  const _PaginationButton({
+    required this.icon,
+    required this.enabled,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: enabled ? onTap : null,
+      borderRadius: BorderRadius.circular(8),
+      child: Container(
+        width: 34,
+        height: 34,
+        decoration: BoxDecoration(
+          color: AppColors.surfaceContainerHigh,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: AppColors.border),
+        ),
+        child: Icon(
+          icon,
+          size: 20,
+          color: enabled ? AppColors.textPrimary : AppColors.textTertiary,
+        ),
       ),
     );
   }

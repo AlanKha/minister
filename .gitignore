@@ -49,3 +49,7 @@ server/data/
 
 # Compiled Dart
 *.dill
+
+
+# Environment variables
+.env
