@@ -4,12 +4,37 @@ late final String stripeSecretKey;
 late final String stripePublishableKey;
 late final String stripeEnv;
 
-void loadConfig() {
-  stripeEnv = Platform.environment['stripe_env'] ?? 'sandbox';
+Map<String, String> _loadEnvFile() {
+  final envVars = <String, String>{};
+  final script = Platform.script.toFilePath();
+  // Walk up from server/bin/server.dart to the project root
+  var dir = File(script).parent.parent.parent;
+  final envFile = File('${dir.path}/.env');
+  if (envFile.existsSync()) {
+    for (final line in envFile.readAsLinesSync()) {
+      final trimmed = line.trim();
+      if (trimmed.isEmpty || trimmed.startsWith('#')) continue;
+      final idx = trimmed.indexOf('=');
+      if (idx > 0) {
+        envVars[trimmed.substring(0, idx).trim()] =
+            trimmed.substring(idx + 1).trim();
+      }
+    }
+  }
+  return envVars;
+}
 
-  final secret = Platform.environment['stripe_${stripeEnv}_secret_key'];
-  final publishable =
-      Platform.environment['stripe_${stripeEnv}_publishable_key'];
+String? _env(String key, Map<String, String> fileVars) {
+  return Platform.environment[key] ?? fileVars[key];
+}
+
+void loadConfig() {
+  final fileVars = _loadEnvFile();
+
+  stripeEnv = _env('stripe_env', fileVars) ?? 'sandbox';
+
+  final secret = _env('stripe_${stripeEnv}_secret_key', fileVars);
+  final publishable = _env('stripe_${stripeEnv}_publishable_key', fileVars);
 
   if (secret == null || publishable == null) {
     stderr.writeln(
