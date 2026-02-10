@@ -15,6 +15,7 @@ String get _accountFile => p.join(dataDir, 'linked_account.json');
 String get _txFile => p.join(dataDir, 'transactions.json');
 String get _cleanFile => p.join(dataDir, 'transactions_clean.json');
 String get _overridesFile => p.join(dataDir, 'category_overrides.json');
+String get _categoryRulesFile => p.join(dataDir, 'category_rules.json');
 
 AccountData readAccountData() {
   try {
@@ -89,4 +90,52 @@ String accountLabel(LinkedAccount acct) {
   return [acct.institution, acct.displayName, acct.last4 != null ? '****${acct.last4}' : null]
       .where((s) => s != null && s.isNotEmpty)
       .join(' ');
+}
+
+class CategoryRule {
+  final String id;
+  final String category;
+  final String pattern;
+  final bool caseSensitive;
+
+  CategoryRule({
+    required this.id,
+    required this.category,
+    required this.pattern,
+    this.caseSensitive = false,
+  });
+
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'category': category,
+        'pattern': pattern,
+        'caseSensitive': caseSensitive,
+      };
+
+  factory CategoryRule.fromJson(Map<String, dynamic> json) => CategoryRule(
+        id: json['id'] as String,
+        category: json['category'] as String,
+        pattern: json['pattern'] as String,
+        caseSensitive: json['caseSensitive'] as bool? ?? false,
+      );
+
+  RegExp toRegExp() => RegExp(pattern, caseSensitive: caseSensitive);
+}
+
+List<CategoryRule> loadCategoryRules() {
+  try {
+    final content = File(_categoryRulesFile).readAsStringSync();
+    return (jsonDecode(content) as List<dynamic>)
+        .map((e) => CategoryRule.fromJson(e as Map<String, dynamic>))
+        .toList();
+  } catch (_) {
+    return [];
+  }
+}
+
+void saveCategoryRules(List<CategoryRule> rules) {
+  Directory(dataDir).createSync(recursive: true);
+  File(_categoryRulesFile).writeAsStringSync(
+    const JsonEncoder.withIndent('  ').convert(rules.map((r) => r.toJson()).toList()),
+  );
 }

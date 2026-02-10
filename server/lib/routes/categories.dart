@@ -1,115 +1,27 @@
-import 'dart:io';
-import 'package:shelf/shelf.dart';
-import 'package:shelf/shelf_io.dart' as io;
-import 'package:shelf_router/shelf_router.dart';
-import 'package:shelf_static/shelf_static.dart';
-import 'package:path/path.dart' as p;
-import 'package:finance_server/config.dart';
-import 'package:finance_server/store/json_store.dart';
-import 'package:finance_server/routes/accounts.dart';
-import 'package:finance_server/routes/transactions.dart';
-import 'package:finance_server/routes/sync.dart';
-import 'package:finance_server/routes/analytics.dart';
-import 'package:finance_server/services/cleaning_service.dart';
-import 'package:finance_server/category_rules.dart';
 import 'dart:convert';
+import 'package:shelf/shelf.dart';
+import 'package:shelf_router/shelf_router.dart';
+import '../store/json_store.dart';
+import '../services/cleaning_service.dart';
 
-Middleware corsMiddleware() {
-  return (Handler handler) {
-    return (Request request) async {
-      if (request.method == 'OPTIONS') {
-        return Response.ok('', headers: {
-          'Access-Control-Allow-Origin': '*',
-          'Access-Control-Allow-Methods': 'GET, POST, PUT, PATCH, DELETE, OPTIONS',
-          'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-        });
-      }
+Router categoryRoutes() {
+  final router = Router();
 
-      final response = await handler(request);
-      return response.change(headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'GET, POST, PUT, PATCH, DELETE, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-      });
-    };
-  };
-}
-
-void main() async {
-  loadConfig();
-
-  final serverRoot = p.dirname(p.dirname(Platform.script.toFilePath()));
-  initStore(serverRoot);
-
-  final app = Router();
-
-  // Mount API routes
-  final accounts = accountRoutes();
-  final txns = transactionRoutes();
-  final sync = syncRoutes();
-  final analytics = analyticsRoutes();
-
-  // Account routes
-  app.get('/api/accounts', accounts.call);
-  app.get('/config', accounts.call);
-  app.post('/create-session', accounts.call);
-  app.post('/save-account', accounts.call);
-
-  // Transaction routes
-  app.get('/api/transactions', txns.call);
-  app.patch('/api/transactions/<id>', txns.call);
-
-  // Sync routes
-  app.post('/api/sync', sync.call);
-  app.post('/api/sync/fetch', sync.call);
-  app.post('/api/sync/clean', sync.call);
-
-  // Analytics routes
-  app.get('/api/analytics/categories', analytics.call);
-  app.get('/api/analytics/monthly', analytics.call);
-  app.get('/api/analytics/weekly', analytics.call);
-
-  // Category management routes - inline handlers
-  app.get('/api/categories', (Request request) {
-    final allRules = getCategoryRules();
-    final userRules = loadCategoryRules();
-    final userRuleIds = userRules.map((r) => r.id).toSet();
-
-    // Convert default rules to JSON format
-    final rulesJson = <Map<String, dynamic>>[];
-
-    // Add user-defined rules first
-    for (final rule in userRules) {
-      rulesJson.add(rule.toJson());
-    }
-
-    // Add default rules (with generated IDs)
-    final seenPatterns = <String>{};
-    for (var i = 0; i < defaultCategoryRules.length; i++) {
-      final rule = defaultCategoryRules[i];
-      final pattern = rule.key.pattern;
-      if (!seenPatterns.contains(pattern)) {
-        seenPatterns.add(pattern);
-        rulesJson.add({
-          'id': 'default_$i',
-          'category': rule.value,
-          'pattern': pattern,
-          'caseSensitive': false,
-          'isDefault': true,
-        });
-      }
-    }
-
+  // GET /api/categories - List all user-defined category rules
+  router.get('/api/categories', (Request request) {
+    final rules = loadCategoryRules();
     return Response.ok(
-      jsonEncode(rulesJson),
+      jsonEncode(rules.map((r) => r.toJson()).toList()),
       headers: {'Content-Type': 'application/json'},
     );
   });
 
-  app.post('/api/categories', (Request request) async {
+  // POST /api/categories - Add new regex pattern
+  router.post('/api/categories', (Request request) async {
     try {
       final body = await request.readAsString();
       final json = jsonDecode(body) as Map<String, dynamic>;
+
       final pattern = json['pattern'] as String?;
       final category = json['category'] as String?;
       final caseSensitive = json['caseSensitive'] as bool? ?? false;
@@ -128,6 +40,7 @@ void main() async {
         );
       }
 
+      // Validate regex pattern
       try {
         RegExp(pattern, caseSensitive: caseSensitive);
       } catch (e) {
@@ -144,8 +57,12 @@ void main() async {
         pattern: pattern,
         caseSensitive: caseSensitive,
       );
+
       rules.add(newRule);
       saveCategoryRules(rules);
+
+      // Trigger re-categorization
+      cleanAllTransactions();
 
       return Response.ok(
         jsonEncode(newRule.toJson()),
@@ -159,21 +76,12 @@ void main() async {
     }
   });
 
-  app.get('/api/transactions/uncategorized', (Request request) {
-    final transactions = loadCleanTransactions();
-    final uncategorized = transactions
-        .where((tx) => tx.data['category'] == 'Uncategorized')
-        .toList();
-    return Response.ok(
-      jsonEncode(uncategorized.map((t) => t.toJson()).toList()),
-      headers: {'Content-Type': 'application/json'},
-    );
-  });
-
-  app.put('/api/categories/<id>', (Request request, String id) async {
+  // PUT /api/categories/<id> - Update regex pattern
+  router.put('/api/categories/<id>', (Request request, String id) async {
     try {
       final body = await request.readAsString();
       final json = jsonDecode(body) as Map<String, dynamic>;
+
       final rules = loadCategoryRules();
       final index = rules.indexWhere((r) => r.id == id);
 
@@ -188,6 +96,32 @@ void main() async {
       final category = json['category'] as String?;
       final caseSensitive = json['caseSensitive'] as bool?;
 
+      if (pattern != null && pattern.isEmpty) {
+        return Response.badRequest(
+          body: jsonEncode({'error': 'Pattern cannot be empty'}),
+          headers: {'Content-Type': 'application/json'},
+        );
+      }
+
+      if (category != null && category.isEmpty) {
+        return Response.badRequest(
+          body: jsonEncode({'error': 'Category cannot be empty'}),
+          headers: {'Content-Type': 'application/json'},
+        );
+      }
+
+      // Validate regex pattern if provided
+      if (pattern != null) {
+        try {
+          RegExp(pattern, caseSensitive: caseSensitive ?? rules[index].caseSensitive);
+        } catch (e) {
+          return Response.badRequest(
+            body: jsonEncode({'error': 'Invalid regex pattern: $e'}),
+            headers: {'Content-Type': 'application/json'},
+          );
+        }
+      }
+
       final updatedRule = CategoryRule(
         id: id,
         category: category ?? rules[index].category,
@@ -197,6 +131,8 @@ void main() async {
 
       rules[index] = updatedRule;
       saveCategoryRules(rules);
+
+      // Trigger re-categorization
       cleanAllTransactions();
 
       return Response.ok(
@@ -211,7 +147,8 @@ void main() async {
     }
   });
 
-  app.delete('/api/categories/<id>', (Request request, String id) {
+  // DELETE /api/categories/<id> - Delete regex pattern
+  router.delete('/api/categories/<id>', (Request request, String id) {
     try {
       final rules = loadCategoryRules();
       final initialLength = rules.length;
@@ -225,6 +162,8 @@ void main() async {
       }
 
       saveCategoryRules(rules);
+
+      // Trigger re-categorization
       cleanAllTransactions();
 
       return Response.ok(
@@ -239,10 +178,26 @@ void main() async {
     }
   });
 
-  app.post('/api/transactions/<id>/categorize', (Request request, String id) async {
+  // GET /api/transactions/uncategorized - Get all uncategorized transactions
+  router.get('/api/transactions/uncategorized', (Request request) {
+    final transactions = loadCleanTransactions();
+    final uncategorized = transactions
+        .where((tx) => tx.data['category'] == 'Uncategorized')
+        .toList();
+
+    return Response.ok(
+      jsonEncode(uncategorized.map((t) => t.toJson()).toList()),
+      headers: {'Content-Type': 'application/json'},
+    );
+  });
+
+  // POST /api/transactions/<id>/categorize - Manually categorize a transaction
+  router.post('/api/transactions/<id>/categorize',
+      (Request request, String id) async {
     try {
       final body = await request.readAsString();
       final json = jsonDecode(body) as Map<String, dynamic>;
+
       final category = json['category'] as String?;
       final createRule = json['createRule'] as bool? ?? false;
       final rulePattern = json['rulePattern'] as String?;
@@ -254,13 +209,16 @@ void main() async {
         );
       }
 
+      // Load overrides and add this transaction
       final overrides = loadOverrides();
       overrides[id] = category;
       saveOverrides(overrides);
 
+      // If createRule is true, add a new regex rule
       if (createRule && rulePattern != null && rulePattern.isNotEmpty) {
         try {
           RegExp(rulePattern, caseSensitive: false);
+
           final rules = loadCategoryRules();
           final newRule = CategoryRule(
             id: DateTime.now().millisecondsSinceEpoch.toString(),
@@ -278,6 +236,7 @@ void main() async {
         }
       }
 
+      // Trigger re-categorization
       cleanAllTransactions();
 
       return Response.ok(
@@ -292,20 +251,5 @@ void main() async {
     }
   });
 
-  // Static file handler for public/
-  final publicDir = p.join(serverRoot, 'public');
-  final staticHandler =
-      createStaticHandler(publicDir, defaultDocument: 'index.html');
-
-  // Cascade: try API routes first, then static files
-  final cascade = Cascade().add(app.call).add(staticHandler);
-
-  final handler = const Pipeline()
-      .addMiddleware(logRequests())
-      .addMiddleware(corsMiddleware())
-      .addHandler(cascade.handler);
-
-  final server = await io.serve(handler, InternetAddress.anyIPv4, 3000);
-  print('Stripe mode: $stripeEnv');
-  print('Server running at http://localhost:${server.port}');
+  return router;
 }

@@ -71,10 +71,10 @@ class _TransactionDetailScreenState
         Center(
           child: Text(
             tx.amountFormatted,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 42,
               fontWeight: FontWeight.w700,
-              color: AppColors.textPrimary,
+              color: tx.amount >= 0 ? AppColors.positive : AppColors.textPrimary,
               letterSpacing: -1.5,
             ),
           ),
@@ -120,7 +120,7 @@ class _TransactionDetailScreenState
         Wrap(
           spacing: 8,
           runSpacing: 8,
-          children: allCategories.where((c) => c != 'N/A').map((cat) {
+          children: allCategories.where((c) => c != 'Uncategorized').map((cat) {
             final isSelected = cat == tx.category;
             final catColor =
                 AppColors.categoryColors[cat] ?? AppColors.textTertiary;

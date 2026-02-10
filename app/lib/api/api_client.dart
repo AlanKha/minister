@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import 'package:minister_shared/models/account.dart';
 import 'package:minister_shared/models/transaction.dart';
 import 'package:minister_shared/models/analytics.dart';
+import 'package:minister_shared/models/category_rule.dart';
 import '../config.dart';
 
 class ApiClient {
@@ -145,5 +146,81 @@ class ApiClient {
     return (jsonDecode(response.body) as List<dynamic>)
         .map((e) => WeeklyBreakdown.fromJson(e as Map<String, dynamic>))
         .toList();
+  }
+
+  // Category Management
+  Future<List<CategoryRule>> getCategoryRules() async {
+    final response = await _client.get(_uri('/api/categories'));
+    return (jsonDecode(response.body) as List<dynamic>)
+        .map((e) => CategoryRule.fromJson(e as Map<String, dynamic>))
+        .toList();
+  }
+
+  Future<CategoryRule> createCategoryRule({
+    required String category,
+    required String pattern,
+    bool caseSensitive = false,
+  }) async {
+    final response = await _client.post(
+      _uri('/api/categories'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        'category': category,
+        'pattern': pattern,
+        'caseSensitive': caseSensitive,
+      }),
+    );
+    return CategoryRule.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
+    );
+  }
+
+  Future<CategoryRule> updateCategoryRule({
+    required String id,
+    String? category,
+    String? pattern,
+    bool? caseSensitive,
+  }) async {
+    final body = <String, dynamic>{};
+    if (category != null) body['category'] = category;
+    if (pattern != null) body['pattern'] = pattern;
+    if (caseSensitive != null) body['caseSensitive'] = caseSensitive;
+
+    final response = await _client.put(
+      _uri('/api/categories/$id'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode(body),
+    );
+    return CategoryRule.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
+    );
+  }
+
+  Future<void> deleteCategoryRule(String id) async {
+    await _client.delete(_uri('/api/categories/$id'));
+  }
+
+  Future<List<CleanTransaction>> getUncategorizedTransactions() async {
+    final response = await _client.get(_uri('/api/transactions/uncategorized'));
+    return (jsonDecode(response.body) as List<dynamic>)
+        .map((e) => CleanTransaction.fromJson(e as Map<String, dynamic>))
+        .toList();
+  }
+
+  Future<void> categorizeTransaction({
+    required String id,
+    required String category,
+    bool createRule = false,
+    String? rulePattern,
+  }) async {
+    await _client.post(
+      _uri('/api/transactions/$id/categorize'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        'category': category,
+        'createRule': createRule,
+        'rulePattern': rulePattern,
+      }),
+    );
   }
 }

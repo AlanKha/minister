@@ -3,10 +3,13 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'theme.dart';
 import 'screens/dashboard_screen.dart';
+import 'screens/cash_flow_screen.dart';
 import 'screens/transactions_screen.dart';
 import 'screens/transaction_detail_screen.dart';
 import 'screens/analytics_screen.dart';
 import 'screens/accounts_screen.dart';
+import 'screens/categories_screen.dart';
+import 'screens/review_uncategorized_screen.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 
@@ -31,6 +34,10 @@ const _navItems = [
       icon: Icons.grid_view_outlined,
       activeIcon: Icons.grid_view_rounded,
       label: 'Overview'),
+  _NavItem(
+      icon: Icons.waterfall_chart_outlined,
+      activeIcon: Icons.waterfall_chart_rounded,
+      label: 'Cash Flow'),
   _NavItem(
       icon: Icons.receipt_long_outlined,
       activeIcon: Icons.receipt_long_rounded,
@@ -59,7 +66,7 @@ class AdaptiveShell extends StatelessWidget {
   }
 }
 
-// ── Desktop: slim sidebar ──────────────────────────────────────
+// ── Desktop: wide sidebar ──────────────────────────────────────
 class _DesktopShell extends StatelessWidget {
   final StatefulNavigationShell navigationShell;
   const _DesktopShell({required this.navigationShell});
@@ -74,28 +81,45 @@ class _DesktopShell extends StatelessWidget {
         children: [
           // Sidebar
           Container(
-            width: 72,
+            width: 220,
             decoration: const BoxDecoration(
-              color: AppColors.surfaceContainer,
+              color: AppColors.sidebarBg,
               border: Border(
                 right: BorderSide(color: AppColors.border, width: 1),
               ),
             ),
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const SizedBox(height: 20),
                 // Logo
-                Container(
-                  width: 36,
-                  height: 36,
-                  decoration: BoxDecoration(
-                    color: AppColors.accent,
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: const Icon(
-                    Icons.monetization_on_rounded,
-                    color: AppColors.surface,
-                    size: 20,
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 24, 20, 0),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 40,
+                        height: 40,
+                        decoration: BoxDecoration(
+                          color: AppColors.accent,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: const Icon(
+                          Icons.monetization_on_rounded,
+                          color: Colors.white,
+                          size: 22,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      const Text(
+                        'Minister',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.textPrimary,
+                          letterSpacing: -0.3,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
                 const SizedBox(height: 32),
@@ -137,33 +161,30 @@ class _SidebarItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(10),
         child: Container(
-          width: 52,
-          padding: const EdgeInsets.symmetric(vertical: 10),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
           decoration: BoxDecoration(
             color: isActive ? AppColors.accentSurface : Colors.transparent,
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(10),
           ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
+          child: Row(
             children: [
               Icon(
                 icon,
-                size: 22,
-                color: isActive ? AppColors.accent : AppColors.textTertiary,
+                size: 20,
+                color: isActive ? AppColors.accent : AppColors.textSecondary,
               ),
-              const SizedBox(height: 4),
+              const SizedBox(width: 12),
               Text(
                 label,
                 style: TextStyle(
-                  fontSize: 10,
+                  fontSize: 14,
                   fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
-                  color: isActive ? AppColors.accent : AppColors.textTertiary,
-                  letterSpacing: 0.2,
+                  color: isActive ? AppColors.accent : AppColors.textSecondary,
                 ),
               ),
             ],
@@ -188,7 +209,7 @@ class _MobileShell extends StatelessWidget {
       body: navigationShell,
       bottomNavigationBar: Container(
         decoration: const BoxDecoration(
-          color: AppColors.surfaceContainer,
+          color: AppColors.surface,
           border: Border(
             top: BorderSide(color: AppColors.border, width: 1),
           ),
@@ -283,6 +304,14 @@ final router = GoRouter(
         StatefulShellBranch(
           routes: [
             GoRoute(
+              path: '/cash-flow',
+              builder: (context, state) => const CashFlowScreen(),
+            ),
+          ],
+        ),
+        StatefulShellBranch(
+          routes: [
+            GoRoute(
               path: '/transactions',
               builder: (context, state) => const TransactionsScreen(),
               routes: [
@@ -315,6 +344,16 @@ final router = GoRouter(
           ],
         ),
       ],
+    ),
+    GoRoute(
+      path: '/categories',
+      parentNavigatorKey: _rootNavigatorKey,
+      builder: (context, state) => const CategoriesScreen(),
+    ),
+    GoRoute(
+      path: '/review-uncategorized',
+      parentNavigatorKey: _rootNavigatorKey,
+      builder: (context, state) => const ReviewUncategorizedScreen(),
     ),
   ],
 );

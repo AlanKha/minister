@@ -7,7 +7,6 @@ const _dropFields = [
   'account',
   'livemode',
   'updated',
-  'account_id',
   'transaction_refresh',
   'transacted_at',
 ];
@@ -20,7 +19,7 @@ String categorize(
   for (final entry in categoryRules) {
     if (entry.key.hasMatch(description)) return entry.value;
   }
-  return 'N/A';
+  return 'Uncategorized';
 }
 
 CleanTransaction cleanTransaction(

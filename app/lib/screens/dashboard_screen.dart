@@ -1,6 +1,10 @@
+import 'dart:io' show Platform;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:minister_shared/models/account.dart';
+import 'package:minister_shared/models/analytics.dart';
+import 'package:minister_shared/models/transaction.dart';
 import '../providers/accounts_provider.dart';
 import '../providers/transactions_provider.dart';
 import '../providers/analytics_provider.dart';
@@ -8,6 +12,14 @@ import '../widgets/sync_button.dart';
 import '../widgets/spending_chart.dart';
 import '../widgets/transaction_tile.dart';
 import '../theme.dart';
+
+bool get _isDesktop {
+  try {
+    return Platform.isMacOS || Platform.isLinux || Platform.isWindows;
+  } catch (_) {
+    return false;
+  }
+}
 
 class DashboardScreen extends ConsumerWidget {
   const DashboardScreen({super.key});
@@ -18,11 +30,45 @@ class DashboardScreen extends ConsumerWidget {
     final transactions = ref.watch(transactionsProvider);
     final categories = ref.watch(categoryBreakdownProvider);
 
+    final width = MediaQuery.of(context).size.width;
+    final showSidebar = _isDesktop && width > 900;
+
+    final mainContent = _buildMainContent(
+        context, ref, accounts, transactions, categories, width);
+
+    if (!showSidebar) return mainContent;
+
+    return Scaffold(
+      backgroundColor: AppColors.surface,
+      body: Row(
+        children: [
+          Expanded(flex: 3, child: mainContent),
+          SizedBox(
+            width: 280,
+            child: _DesktopSidebar(
+              accounts: accounts,
+              transactions: transactions,
+              categories: categories,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMainContent(
+    BuildContext context,
+    WidgetRef ref,
+    AsyncValue<List<LinkedAccount>> accounts,
+    AsyncValue<TransactionPage> transactions,
+    AsyncValue<List<CategoryBreakdown>> categories,
+    double width,
+  ) {
     return Scaffold(
       backgroundColor: AppColors.surface,
       body: RefreshIndicator(
         color: AppColors.accent,
-        backgroundColor: AppColors.surfaceContainer,
+        backgroundColor: AppColors.surface,
         onRefresh: () async {
           ref.invalidate(accountsProvider);
           ref.invalidate(transactionsProvider);
@@ -69,40 +115,15 @@ class DashboardScreen extends ConsumerWidget {
 
             const SliverToBoxAdapter(child: SizedBox(height: 24)),
 
-            // Summary cards row
+            // 4 Metric cards
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: accounts.when(
-                        data: (accts) => _MetricCard(
-                          label: 'ACCOUNTS',
-                          value: '${accts.length}',
-                          icon: Icons.account_balance_outlined,
-                          accentColor: AppColors.info,
-                        ),
-                        loading: () => const _MetricCardLoading(),
-                        error: (e, _) =>
-                            _MetricCardError(error: e.toString()),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: transactions.when(
-                        data: (page) => _MetricCard(
-                          label: 'TRANSACTIONS',
-                          value: '${page.total}',
-                          icon: Icons.receipt_long_outlined,
-                          accentColor: AppColors.accent,
-                        ),
-                        loading: () => const _MetricCardLoading(),
-                        error: (e, _) =>
-                            _MetricCardError(error: e.toString()),
-                      ),
-                    ),
-                  ],
+                child: _MetricCardsGrid(
+                  accounts: accounts,
+                  transactions: transactions,
+                  categories: categories,
+                  narrow: width < 600,
                 ),
               ),
             ),
@@ -116,8 +137,8 @@ class DashboardScreen extends ConsumerWidget {
                 child: Container(
                   padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
-                    color: AppColors.surfaceContainer,
-                    borderRadius: BorderRadius.circular(16),
+                    color: AppColors.surface,
+                    borderRadius: BorderRadius.circular(12),
                     border: Border.all(color: AppColors.border),
                   ),
                   child: Column(
@@ -214,20 +235,31 @@ class DashboardScreen extends ConsumerWidget {
                         ),
                       );
                     }
+                    final items = page.data.take(8).toList();
                     return Container(
                       decoration: BoxDecoration(
-                        color: AppColors.surfaceContainer,
-                        borderRadius: BorderRadius.circular(16),
+                        color: AppColors.surface,
+                        borderRadius: BorderRadius.circular(12),
                         border: Border.all(color: AppColors.border),
                       ),
-                      child: Column(
-                        children: page.data.take(8).map((tx) {
+                      child: ListView.separated(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        itemCount: items.length,
+                        separatorBuilder: (_, __) => const Divider(
+                          height: 1,
+                          indent: 16,
+                          endIndent: 16,
+                          color: AppColors.border,
+                        ),
+                        itemBuilder: (context, index) {
+                          final tx = items[index];
                           return TransactionTile(
                             transaction: tx,
                             onTap: () =>
                                 context.go('/transactions/${tx.id}'),
                           );
-                        }).toList(),
+                        },
                       ),
                     );
                   },
@@ -261,42 +293,132 @@ class DashboardScreen extends ConsumerWidget {
   }
 }
 
+// ── 4 Metric Cards Grid ───────────────────────────────────────
+class _MetricCardsGrid extends StatelessWidget {
+  final AsyncValue<List<LinkedAccount>> accounts;
+  final AsyncValue<TransactionPage> transactions;
+  final AsyncValue<List<CategoryBreakdown>> categories;
+  final bool narrow;
+
+  const _MetricCardsGrid({
+    required this.accounts,
+    required this.transactions,
+    required this.categories,
+    required this.narrow,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final accountsCard = accounts.when(
+      data: (accts) =>
+          _MetricCard(label: 'ACCOUNTS', value: '${accts.length}'),
+      loading: () => const _MetricCardLoading(),
+      error: (e, _) => _MetricCardError(error: e.toString()),
+    );
+
+    final txCountCard = transactions.when(
+      data: (page) => _MetricCard(label: 'TRANSACTIONS', value: '${page.total}'),
+      loading: () => const _MetricCardLoading(),
+      error: (e, _) => _MetricCardError(error: e.toString()),
+    );
+
+    final spendingCard = categories.when(
+      data: (cats) {
+        int totalCents = 0;
+        for (final c in cats) {
+          totalCents += c.totalCents.abs();
+        }
+        return _MetricCard(
+          label: 'TOTAL SPENDING',
+          value: '\$${(totalCents / 100).toStringAsFixed(0)}',
+        );
+      },
+      loading: () => const _MetricCardLoading(),
+      error: (e, _) => _MetricCardError(error: e.toString()),
+    );
+
+    final avgCard = _buildAvgCard();
+
+    if (narrow) {
+      return Column(
+        children: [
+          Row(children: [
+            Expanded(child: accountsCard),
+            const SizedBox(width: 12),
+            Expanded(child: txCountCard),
+          ]),
+          const SizedBox(height: 12),
+          Row(children: [
+            Expanded(child: spendingCard),
+            const SizedBox(width: 12),
+            Expanded(child: avgCard),
+          ]),
+        ],
+      );
+    }
+
+    return Row(
+      children: [
+        Expanded(child: accountsCard),
+        const SizedBox(width: 12),
+        Expanded(child: txCountCard),
+        const SizedBox(width: 12),
+        Expanded(child: spendingCard),
+        const SizedBox(width: 12),
+        Expanded(child: avgCard),
+      ],
+    );
+  }
+
+  Widget _buildAvgCard() {
+    // Need both categories (for total) and transactions (for count)
+    return categories.when(
+      data: (cats) {
+        return transactions.when(
+          data: (page) {
+            int totalCents = 0;
+            for (final c in cats) {
+              totalCents += c.totalCents.abs();
+            }
+            final count = page.total;
+            final avg = count > 0 ? totalCents / count / 100 : 0.0;
+            return _MetricCard(
+              label: 'AVG TRANSACTION',
+              value: '\$${avg.toStringAsFixed(0)}',
+            );
+          },
+          loading: () => const _MetricCardLoading(),
+          error: (e, _) => _MetricCardError(error: e.toString()),
+        );
+      },
+      loading: () => const _MetricCardLoading(),
+      error: (e, _) => _MetricCardError(error: e.toString()),
+    );
+  }
+}
+
 // ── Metric Card ────────────────────────────────────────────────
 class _MetricCard extends StatelessWidget {
   final String label;
   final String value;
-  final IconData icon;
-  final Color accentColor;
 
   const _MetricCard({
     required this.label,
     required this.value,
-    required this.icon,
-    required this.accentColor,
   });
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(18),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: AppColors.surfaceContainer,
-        borderRadius: BorderRadius.circular(16),
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(12),
         border: Border.all(color: AppColors.border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            width: 34,
-            height: 34,
-            decoration: BoxDecoration(
-              color: accentColor.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(9),
-            ),
-            child: Icon(icon, size: 18, color: accentColor),
-          ),
-          const SizedBox(height: 14),
           Text(
             label,
             style: const TextStyle(
@@ -306,7 +428,7 @@ class _MetricCard extends StatelessWidget {
               letterSpacing: 1.2,
             ),
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 6),
           Text(
             value,
             style: const TextStyle(
@@ -328,11 +450,11 @@ class _MetricCardLoading extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(18),
-      height: 120,
+      padding: const EdgeInsets.all(20),
+      height: 90,
       decoration: BoxDecoration(
-        color: AppColors.surfaceContainer,
-        borderRadius: BorderRadius.circular(16),
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(12),
         border: Border.all(color: AppColors.border),
       ),
       child: const Center(
@@ -352,10 +474,10 @@ class _MetricCardError extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(18),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: AppColors.surfaceContainer,
-        borderRadius: BorderRadius.circular(16),
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(12),
         border: Border.all(color: AppColors.negative.withValues(alpha: 0.3)),
       ),
       child: Text(
@@ -364,6 +486,151 @@ class _MetricCardError extends StatelessWidget {
         maxLines: 2,
         overflow: TextOverflow.ellipsis,
       ),
+    );
+  }
+}
+
+// ── Desktop Summary Sidebar ───────────────────────────────────
+class _DesktopSidebar extends StatelessWidget {
+  final AsyncValue<List<LinkedAccount>> accounts;
+  final AsyncValue<TransactionPage> transactions;
+  final AsyncValue<List<CategoryBreakdown>> categories;
+
+  const _DesktopSidebar({
+    required this.accounts,
+    required this.transactions,
+    required this.categories,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: const BoxDecoration(
+        border: Border(left: BorderSide(color: AppColors.border)),
+      ),
+      child: ListView(
+        padding: const EdgeInsets.all(20),
+        children: [
+          const Text(
+            'Summary',
+            style: TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w600,
+              color: AppColors.textPrimary,
+            ),
+          ),
+          const SizedBox(height: 20),
+          Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: AppColors.surface,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: AppColors.border),
+            ),
+            child: Column(
+              children: [
+                accounts.when(
+                  data: (accts) => _SummaryRow(
+                      label: 'Total Accounts',
+                      value: '${accts.length}'),
+                  loading: () =>
+                      const _SummaryRow(label: 'Total Accounts', value: '...'),
+                  error: (_, __) =>
+                      const _SummaryRow(label: 'Total Accounts', value: '--'),
+                ),
+                const Divider(color: AppColors.border, height: 20),
+                transactions.when(
+                  data: (page) => _SummaryRow(
+                      label: 'Total Transactions', value: '${page.total}'),
+                  loading: () => const _SummaryRow(
+                      label: 'Total Transactions', value: '...'),
+                  error: (_, __) => const _SummaryRow(
+                      label: 'Total Transactions', value: '--'),
+                ),
+                const Divider(color: AppColors.border, height: 20),
+                categories.when(
+                  data: (cats) {
+                    int totalCents = 0;
+                    for (final c in cats) {
+                      totalCents += c.totalCents.abs();
+                    }
+                    return _SummaryRow(
+                      label: 'Total Spending',
+                      value:
+                          '\$${(totalCents / 100).toStringAsFixed(2)}',
+                    );
+                  },
+                  loading: () => const _SummaryRow(
+                      label: 'Total Spending', value: '...'),
+                  error: (_, __) => const _SummaryRow(
+                      label: 'Total Spending', value: '--'),
+                ),
+                const Divider(color: AppColors.border, height: 20),
+                _buildAvgRow(),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAvgRow() {
+    return categories.when(
+      data: (cats) {
+        return transactions.when(
+          data: (page) {
+            int totalCents = 0;
+            for (final c in cats) {
+              totalCents += c.totalCents.abs();
+            }
+            final count = page.total;
+            final avg = count > 0 ? totalCents / count / 100 : 0.0;
+            return _SummaryRow(
+              label: 'Avg Transaction',
+              value: '\$${avg.toStringAsFixed(2)}',
+            );
+          },
+          loading: () =>
+              const _SummaryRow(label: 'Avg Transaction', value: '...'),
+          error: (_, __) =>
+              const _SummaryRow(label: 'Avg Transaction', value: '--'),
+        );
+      },
+      loading: () =>
+          const _SummaryRow(label: 'Avg Transaction', value: '...'),
+      error: (_, __) =>
+          const _SummaryRow(label: 'Avg Transaction', value: '--'),
+    );
+  }
+}
+
+class _SummaryRow extends StatelessWidget {
+  final String label;
+  final String value;
+  const _SummaryRow({required this.label, required this.value});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          label,
+          style: const TextStyle(
+            fontSize: 13,
+            color: AppColors.textSecondary,
+          ),
+        ),
+        Text(
+          value,
+          style: const TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+            color: AppColors.textPrimary,
+          ),
+        ),
+      ],
     );
   }
 }

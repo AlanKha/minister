@@ -40,6 +40,16 @@ echo ""
 echo "📦 Starting Dart server in Docker..."
 echo "   Server will be available at http://localhost:3000"
 cd "$PROJECT_ROOT"
+
+# Setup cleanup on exit
+cleanup() {
+    echo ""
+    echo "🧹 Shutting down development environment..."
+    cd "$PROJECT_ROOT"
+    docker-compose down
+}
+trap cleanup EXIT
+
 docker-compose up -d
 
 # Wait for server to be healthy
@@ -70,8 +80,5 @@ flutter run -d macos
 
 echo ""
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo "✅ Development environment started!"
+echo "✅ Development environment closed!"
 echo ""
-echo "To stop everything:"
-echo "  1. Close the macOS app (⌘Q)"
-echo "  2. Run: docker-compose down"

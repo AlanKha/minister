@@ -11,7 +11,7 @@ services:
       - stripe_sandbox_secret_key=${STRIPE_SECRET_KEY:-sk_test_example}
       - stripe_sandbox_publishable_key=${STRIPE_PUBLISHABLE_KEY:-pk_test_example}
     volumes:
-      - server_data:/app/data
+      - ./server/data:/app/data
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:3000/api/accounts"]
@@ -19,6 +19,3 @@ services:
       timeout: 10s
       retries: 3
       start_period: 40s
-
-volumes:
-  server_data:

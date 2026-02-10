@@ -10,7 +10,7 @@ class CategoryChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final color =
-        AppColors.categoryColors[category] ?? AppColors.categoryColors['N/A']!;
+        AppColors.categoryColors[category] ?? AppColors.categoryColors['Uncategorized']!;
 
     return Container(
       padding: EdgeInsets.symmetric(

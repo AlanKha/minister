@@ -30,11 +30,13 @@ class CleanTransaction {
   int get amount => data['amount'] as int;
   String get description => data['description'] as String? ?? '';
   String get status => data['status'] as String? ?? '';
-  String get category => data['category'] as String? ?? 'N/A';
+  // Default to 'Uncategorized' to match UI and filtering logic
+  String get category => data['category'] as String? ?? 'Uncategorized';
   set category(String value) => data['category'] = value;
   String get date => data['date'] as String? ?? '';
   int get year => data['year'] as int? ?? 0;
   int get month => data['month'] as int? ?? 0;
+  String? get account => data['account_id'] as String?;
   String get accountLabel => data['account_label'] as String? ?? '';
 
   /// Format amount as currency (e.g., "-$42.50" or "$100.00")
@@ -69,14 +71,15 @@ class TransactionPage {
   }) : total = total ?? 0;
 
   factory TransactionPage.fromJson(Map<String, dynamic> json) {
+    final pagination = json['pagination'] as Map<String, dynamic>? ?? {};
     return TransactionPage(
-      data: (json['transactions'] as List<dynamic>?)
+      data: (json['data'] as List<dynamic>?)
               ?.map((t) => CleanTransaction.fromJson(t as Map<String, dynamic>))
               .toList() ??
           [],
-      page: json['page'] as int? ?? 1,
-      totalPages: json['total_pages'] as int? ?? 1,
-      total: json['total'] as int? ?? 0,
+      page: pagination['page'] as int? ?? 1,
+      totalPages: pagination['totalPages'] as int? ?? 1,
+      total: pagination['total'] as int? ?? 0,
     );
   }
 }

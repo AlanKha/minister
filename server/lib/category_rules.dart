@@ -1,4 +1,6 @@
-final List<MapEntry<RegExp, String>> categoryRules = [
+import 'store/json_store.dart';
+
+final List<MapEntry<RegExp, String>> defaultCategoryRules = [
   // Grocery
   MapEntry(RegExp(r'TRADER JOE', caseSensitive: false), 'Grocery'),
   MapEntry(RegExp(r'WHOLE FOODS', caseSensitive: false), 'Grocery'),
@@ -136,10 +138,21 @@ final List<MapEntry<RegExp, String>> categoryRules = [
   MapEntry(RegExp(r'WATER BILL', caseSensitive: false), 'Utilities'),
   MapEntry(RegExp(r'GAS BILL', caseSensitive: false), 'Utilities'),
 
-  // Health
-  MapEntry(RegExp(r'CVS', caseSensitive: false), 'Health'),
-  MapEntry(RegExp(r'WALGREENS', caseSensitive: false), 'Health'),
-  MapEntry(RegExp(r'PHARMACY', caseSensitive: false), 'Health'),
+  // Medical
+  MapEntry(RegExp(r'CVS', caseSensitive: false), 'Medical'),
+  MapEntry(RegExp(r'WALGREENS', caseSensitive: false), 'Medical'),
+  MapEntry(RegExp(r'PHARMACY', caseSensitive: false), 'Medical'),
+  MapEntry(RegExp(r'DOCTOR', caseSensitive: false), 'Medical'),
+  MapEntry(RegExp(r'DENTIST', caseSensitive: false), 'Medical'),
+  MapEntry(RegExp(r'HOSPITAL', caseSensitive: false), 'Medical'),
+  MapEntry(RegExp(r'URGENT CARE', caseSensitive: false), 'Medical'),
+  MapEntry(RegExp(r'OPTOMETRY', caseSensitive: false), 'Medical'),
+
+  // Loan Payments
+  MapEntry(RegExp(r'LOAN PAYMENT', caseSensitive: false), 'Loan'),
+  MapEntry(RegExp(r'MORTGAGE', caseSensitive: false), 'Loan'),
+  MapEntry(RegExp(r'AUTO LOAN', caseSensitive: false), 'Loan'),
+  MapEntry(RegExp(r'STUDENT LOAN', caseSensitive: false), 'Loan'),
 
   // Travel
   MapEntry(RegExp(r'AIRLINE', caseSensitive: false), 'Travel'),
@@ -179,3 +192,14 @@ final List<MapEntry<RegExp, String>> categoryRules = [
   // Fees
   MapEntry(RegExp(r'LATE FEE', caseSensitive: false), 'Fee'),
 ];
+
+// Combine default rules with user-defined rules from persistent storage
+List<MapEntry<RegExp, String>> getCategoryRules() {
+  final userRules = loadCategoryRules();
+  final userEntries = userRules.map((r) => MapEntry(r.toRegExp(), r.category)).toList();
+  // User rules take precedence by coming first
+  return [...userEntries, ...defaultCategoryRules];
+}
+
+// For backward compatibility, expose as categoryRules
+List<MapEntry<RegExp, String>> get categoryRules => getCategoryRules();

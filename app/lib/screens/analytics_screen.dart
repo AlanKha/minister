@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../providers/analytics_provider.dart';
 import '../widgets/spending_chart.dart';
 import '../theme.dart';
@@ -17,35 +18,48 @@ class AnalyticsScreen extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Header
-            const Padding(
-              padding: EdgeInsets.fromLTRB(20, 24, 20, 16),
-              child: Text(
-                'Analytics',
-                style: TextStyle(
-                  fontSize: 26,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.textPrimary,
-                  letterSpacing: -0.8,
-                ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 24, 20, 16),
+              child: Row(
+                children: [
+                  const Text(
+                    'Analytics',
+                    style: TextStyle(
+                      fontSize: 26,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.textPrimary,
+                      letterSpacing: -0.8,
+                    ),
+                  ),
+                  const Spacer(),
+                  OutlinedButton.icon(
+                    onPressed: () => context.push('/categories'),
+                    icon: const Icon(Icons.tune_rounded, size: 18),
+                    label: const Text('Manage'),
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      side: const BorderSide(color: AppColors.border),
+                    ),
+                  ),
+                ],
               ),
             ),
-            // Tabs
+            // Tabs — underline style
             Container(
               margin: const EdgeInsets.symmetric(horizontal: 20),
-              decoration: BoxDecoration(
-                color: AppColors.surfaceContainerHigh,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: AppColors.border),
+              decoration: const BoxDecoration(
+                border: Border(
+                  bottom: BorderSide(color: AppColors.border, width: 1),
+                ),
               ),
               child: TabBar(
-                padding: const EdgeInsets.all(4),
-                indicator: BoxDecoration(
-                  color: AppColors.surfaceContainerHighest,
-                  borderRadius: BorderRadius.circular(9),
+                indicatorSize: TabBarIndicatorSize.label,
+                indicator: const UnderlineTabIndicator(
+                  borderSide:
+                      BorderSide(color: AppColors.accent, width: 2.5),
                 ),
-                indicatorSize: TabBarIndicatorSize.tab,
                 dividerHeight: 0,
-                labelColor: AppColors.textPrimary,
+                labelColor: AppColors.accent,
                 unselectedLabelColor: AppColors.textTertiary,
                 labelStyle: const TextStyle(
                   fontSize: 13,
@@ -85,89 +99,116 @@ class _CategoriesTab extends ConsumerWidget {
     final data = ref.watch(categoryBreakdownProvider);
 
     return data.when(
-      data: (categories) => RefreshIndicator(
-        color: AppColors.accent,
-        backgroundColor: AppColors.surfaceContainer,
-        onRefresh: () async => ref.invalidate(categoryBreakdownProvider),
-        child: ListView(
-          padding: const EdgeInsets.all(20),
-          children: [
-            Container(
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: AppColors.surfaceContainer,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: AppColors.border),
-              ),
-              child: SizedBox(
-                height: 200,
-                child: CategoryPieChart(data: categories),
-              ),
-            ),
-            const SizedBox(height: 24),
-            const Text(
-              'Breakdown',
-              style: TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.w600,
-                color: AppColors.textPrimary,
-              ),
-            ),
-            const SizedBox(height: 12),
-            ...categories.map((cat) {
-              final color = AppColors.categoryColors[cat.category] ??
-                  AppColors.textTertiary;
-              return Padding(
-                padding: const EdgeInsets.symmetric(vertical: 6),
-                child: Row(
-                  children: [
-                    Container(
-                      width: 8,
-                      height: 8,
-                      decoration: BoxDecoration(
-                        color: color,
-                        borderRadius: BorderRadius.circular(2),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            cat.category,
-                            style: const TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w500,
-                              color: AppColors.textPrimary,
-                            ),
-                          ),
-                          Text(
-                            '${cat.count} transactions',
-                            style: const TextStyle(
-                              fontSize: 12,
-                              color: AppColors.textTertiary,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Text(
-                      cat.total,
-                      style: const TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.textPrimary,
-                        letterSpacing: -0.3,
-                      ),
-                    ),
-                  ],
+      data: (categories) {
+        final grandTotal =
+            categories.fold<int>(0, (sum, c) => sum + c.totalCents.abs());
+
+        return RefreshIndicator(
+          color: AppColors.accent,
+          backgroundColor: AppColors.surface,
+          onRefresh: () async => ref.invalidate(categoryBreakdownProvider),
+          child: ListView(
+            padding: const EdgeInsets.all(20),
+            children: [
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: AppColors.surface,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: AppColors.border),
                 ),
-              );
-            }),
-          ],
-        ),
-      ),
+                child: SizedBox(
+                  height: 200,
+                  child: CategoryPieChart(data: categories),
+                ),
+              ),
+              const SizedBox(height: 24),
+              const Text(
+                'Breakdown',
+                style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+              const SizedBox(height: 12),
+              ListView.separated(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: categories.length,
+                separatorBuilder: (_, __) => const Divider(
+                  height: 1,
+                  color: AppColors.border,
+                ),
+                itemBuilder: (_, index) {
+                  final cat = categories[index];
+                  final color = AppColors.categoryColors[cat.category] ??
+                      AppColors.textTertiary;
+                  final pct = grandTotal > 0
+                      ? (cat.totalCents.abs() / grandTotal * 100)
+                          .toStringAsFixed(1)
+                      : '0.0';
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 10),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 8,
+                          height: 8,
+                          decoration: BoxDecoration(
+                            color: color,
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                cat.category,
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w500,
+                                  color: AppColors.textPrimary,
+                                ),
+                              ),
+                              Text(
+                                '${cat.count} transactions',
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  color: AppColors.textTertiary,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Text(
+                          '$pct%',
+                          style: const TextStyle(
+                            fontSize: 13,
+                            color: AppColors.textTertiary,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Text(
+                          cat.total,
+                          style: const TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.textPrimary,
+                            letterSpacing: -0.3,
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+            ],
+          ),
+        );
+      },
       loading: () => const Center(
         child: CircularProgressIndicator(
           color: AppColors.accent,
@@ -190,7 +231,7 @@ class _MonthlyTab extends ConsumerWidget {
     return data.when(
       data: (months) => RefreshIndicator(
         color: AppColors.accent,
-        backgroundColor: AppColors.surfaceContainer,
+        backgroundColor: AppColors.surface,
         onRefresh: () async => ref.invalidate(monthlyBreakdownProvider),
         child: ListView(
           padding: const EdgeInsets.all(20),
@@ -198,8 +239,8 @@ class _MonthlyTab extends ConsumerWidget {
             Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: AppColors.surfaceContainer,
-                borderRadius: BorderRadius.circular(16),
+                color: AppColors.surface,
+                borderRadius: BorderRadius.circular(12),
                 border: Border.all(color: AppColors.border),
               ),
               child: MonthlyBarChart(data: months),
@@ -214,8 +255,18 @@ class _MonthlyTab extends ConsumerWidget {
               ),
             ),
             const SizedBox(height: 12),
-            ...months.map((m) => Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 6),
+            ListView.separated(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: months.length,
+              separatorBuilder: (_, __) => const Divider(
+                height: 1,
+                color: AppColors.border,
+              ),
+              itemBuilder: (_, index) {
+                final m = months[index];
+                return Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 10),
                   child: Row(
                     children: [
                       Expanded(
@@ -251,7 +302,9 @@ class _MonthlyTab extends ConsumerWidget {
                       ),
                     ],
                   ),
-                )),
+                );
+              },
+            ),
           ],
         ),
       ),
@@ -277,7 +330,7 @@ class _WeeklyTab extends ConsumerWidget {
     return data.when(
       data: (weeks) => RefreshIndicator(
         color: AppColors.accent,
-        backgroundColor: AppColors.surfaceContainer,
+        backgroundColor: AppColors.surface,
         onRefresh: () async => ref.invalidate(weeklyBreakdownProvider),
         child: ListView(
           padding: const EdgeInsets.all(20),
@@ -285,8 +338,8 @@ class _WeeklyTab extends ConsumerWidget {
             Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: AppColors.surfaceContainer,
-                borderRadius: BorderRadius.circular(16),
+                color: AppColors.surface,
+                borderRadius: BorderRadius.circular(12),
                 border: Border.all(color: AppColors.border),
               ),
               child: WeeklyBarChart(data: weeks),
@@ -301,8 +354,18 @@ class _WeeklyTab extends ConsumerWidget {
               ),
             ),
             const SizedBox(height: 12),
-            ...weeks.map((w) => Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 6),
+            ListView.separated(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: weeks.length,
+              separatorBuilder: (_, __) => const Divider(
+                height: 1,
+                color: AppColors.border,
+              ),
+              itemBuilder: (_, index) {
+                final w = weeks[index];
+                return Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 10),
                   child: Row(
                     children: [
                       Expanded(
@@ -338,7 +401,9 @@ class _WeeklyTab extends ConsumerWidget {
                       ),
                     ],
                   ),
-                )),
+                );
+              },
+            ),
           ],
         ),
       ),

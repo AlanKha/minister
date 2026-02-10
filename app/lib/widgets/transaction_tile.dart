@@ -17,6 +17,8 @@ class TransactionTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final catColor = AppColors.categoryColors[transaction.category] ??
         AppColors.textTertiary;
+    final amountColor =
+        transaction.amount >= 0 ? AppColors.positive : AppColors.textPrimary;
 
     return InkWell(
       onTap: onTap,
@@ -70,6 +72,18 @@ class TransactionTile extends StatelessWidget {
                           category: transaction.category, dense: true),
                     ],
                   ),
+                  if (transaction.accountLabel.isNotEmpty) ...[
+                    const SizedBox(height: 2),
+                    Text(
+                      transaction.accountLabel,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: AppColors.textTertiary,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
                 ],
               ),
             ),
@@ -77,10 +91,10 @@ class TransactionTile extends StatelessWidget {
             // Amount
             Text(
               transaction.amountFormatted,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 15,
                 fontWeight: FontWeight.w600,
-                color: AppColors.textPrimary,
+                color: amountColor,
                 letterSpacing: -0.3,
               ),
             ),

@@ -116,7 +116,7 @@ class _FilterBarState extends ConsumerState<FilterBar> {
                 Navigator.pop(ctx);
               },
             ),
-          ...allCategories.where((c) => c != 'N/A').map((c) => ListTile(
+          ...allCategories.where((c) => c != 'Uncategorized').map((c) => ListTile(
                 title: Text(c),
                 onTap: () {
                   ref.read(transactionFiltersProvider.notifier).state =
@@ -187,14 +187,14 @@ class _FilterPill extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(10),
+      borderRadius: BorderRadius.circular(20),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
         decoration: BoxDecoration(
           color: isActive
               ? AppColors.accentSurface
               : AppColors.surfaceContainerHigh,
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(20),
           border: Border.all(
             color: isActive ? AppColors.accent.withValues(alpha: 0.3) : AppColors.border,
           ),

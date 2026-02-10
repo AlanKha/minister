@@ -4,53 +4,78 @@ import 'package:google_fonts/google_fonts.dart';
 // ── Color Palette ──────────────────────────────────────────────
 class AppColors {
   // Backgrounds
-  static const surface = Color(0xFF0F1117);
-  static const surfaceContainer = Color(0xFF181A20);
-  static const surfaceContainerHigh = Color(0xFF1F2128);
-  static const surfaceContainerHighest = Color(0xFF262830);
+  static const surface = Color(0xFFFFFFFF);
+  static const surfaceContainer = Color(0xFFFFFFFF);
+  static const surfaceContainerHigh = Color(0xFFF5F5F3);
+  static const surfaceContainerHighest = Color(0xFFEFEFED);
 
-  // Accent — warm amber/gold
-  static const accent = Color(0xFFE2A84B);
-  static const accentMuted = Color(0xFFBF8A3A);
-  static const accentSurface = Color(0x1AE2A84B); // 10% opacity
+  // Sidebar
+  static const sidebarBg = Color(0xFFF7F6F4);
+  static const sidebarHover = Color(0xFFEEEDE9);
+
+  // Accent — warm coral/orange
+  static const accent = Color(0xFFE8642C);
+  static const accentMuted = Color(0xFFD4551F);
+  static const accentSurface = Color(0x14E8642C); // 8% opacity
 
   // Text
-  static const textPrimary = Color(0xFFF0EDE6);
-  static const textSecondary = Color(0xFF9B9DA5);
-  static const textTertiary = Color(0xFF636571);
+  static const textPrimary = Color(0xFF1A1A1A);
+  static const textSecondary = Color(0xFF6B6B6B);
+  static const textTertiary = Color(0xFF9B9B9B);
 
   // Semantic
-  static const positive = Color(0xFF5CB88A);
-  static const negative = Color(0xFFE56B6F);
+  static const positive = Color(0xFF2D8C4E);
+  static const negative = Color(0xFFD6423E);
   static const info = Color(0xFF6BA3D6);
 
   // Borders & dividers
-  static const border = Color(0xFF2A2C34);
-  static const borderSubtle = Color(0xFF22242A);
+  static const border = Color(0xFFE8E8E6);
+  static const borderSubtle = Color(0xFFF0F0EE);
 
-  // Category palette — refined, desaturated tones
+  // Category palette — Plaid-compliant taxonomy with refined colors
   static const categoryColors = <String, Color>{
-    'Rent': Color(0xFFB07D62),
-    'Travel': Color(0xFF5CBAA3),
+    // Food & Drink
     'Dining': Color(0xFFE07A6E),
-    'Subscription': Color(0xFF8A8DE0),
-    'Superstore': Color(0xFF6BA3D6),
-    'Transit': Color(0xFFD4A853),
-    'Entertainment': Color(0xFFD680B0),
-    'Utilities': Color(0xFF7A9BAE),
-    'Transfer': Color(0xFF8DB580),
-    'Shopping': Color(0xFFBD82D6),
-    'Gas': Color(0xFFA68E7A),
-    'Health': Color(0xFFE09878),
     'Grocery': Color(0xFF6ABB8A),
+
+    // Shopping & General Merchandise
+    'Shopping': Color(0xFFBD82D6),
+    'Superstore': Color(0xFF6BA3D6),
+
+    // Transportation
+    'Transit': Color(0xFFD4A853),
+    'Gas': Color(0xFFA68E7A),
+
+    // Home & Living
+    'Rent': Color(0xFFB07D62),
+    'Utilities': Color(0xFF7A9BAE),
+
+    // Financial
+    'Transfer': Color(0xFF8DB580),
     'Fee': Color(0xFF8A8C94),
-    'N/A': Color(0xFF636571),
+    'Loan': Color(0xFFB88A6E),
+
+    // Entertainment & Leisure
+    'Entertainment': Color(0xFFD680B0),
+    'Travel': Color(0xFF5CBAA3),
+    'Subscription': Color(0xFF8A8DE0),
+
+    // Health & Personal Care
+    'Medical': Color(0xFFE09878),
+    'Personal Care': Color(0xFFD8A8C4),
+
+    // Services & Professional
+    'Professional Services': Color(0xFF9CA8B8),
+    'Education': Color(0xFF88B5D6),
+
+    // Uncategorized
+    'Uncategorized': Color(0xFF9B9B9B),
   };
 }
 
 // ── Theme Builder ──────────────────────────────────────────────
 ThemeData buildAppTheme() {
-  final base = ThemeData.dark(useMaterial3: true);
+  final base = ThemeData.light(useMaterial3: true);
 
   final textTheme = GoogleFonts.dmSansTextTheme(base.textTheme).copyWith(
     displayLarge: GoogleFonts.dmSans(
@@ -143,15 +168,15 @@ ThemeData buildAppTheme() {
   return base.copyWith(
     scaffoldBackgroundColor: AppColors.surface,
     textTheme: textTheme,
-    colorScheme: const ColorScheme.dark(
+    colorScheme: const ColorScheme.light(
       primary: AppColors.accent,
-      onPrimary: AppColors.surface,
+      onPrimary: Colors.white,
       secondary: AppColors.accentMuted,
       onSecondary: AppColors.textPrimary,
       surface: AppColors.surfaceContainer,
       onSurface: AppColors.textPrimary,
       error: AppColors.negative,
-      onError: AppColors.textPrimary,
+      onError: Colors.white,
       outline: AppColors.border,
       outlineVariant: AppColors.borderSubtle,
       surfaceContainerHighest: AppColors.surfaceContainerHighest,
@@ -218,7 +243,7 @@ ThemeData buildAppTheme() {
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
         backgroundColor: AppColors.accent,
-        foregroundColor: AppColors.surface,
+        foregroundColor: Colors.white,
         elevation: 0,
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -242,6 +267,9 @@ ThemeData buildAppTheme() {
       unselectedLabelColor: AppColors.textTertiary,
       indicatorColor: AppColors.accent,
       indicatorSize: TabBarIndicatorSize.label,
+      indicator: const UnderlineTabIndicator(
+        borderSide: BorderSide(color: AppColors.accent, width: 2.5),
+      ),
       labelStyle: GoogleFonts.dmSans(
         fontSize: 13,
         fontWeight: FontWeight.w600,
@@ -252,16 +280,16 @@ ThemeData buildAppTheme() {
       ),
     ),
     bottomSheetTheme: const BottomSheetThemeData(
-      backgroundColor: AppColors.surfaceContainer,
+      backgroundColor: AppColors.surface,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
     ),
     snackBarTheme: SnackBarThemeData(
-      backgroundColor: AppColors.surfaceContainerHighest,
+      backgroundColor: AppColors.textPrimary,
       contentTextStyle: GoogleFonts.dmSans(
         fontSize: 13,
-        color: AppColors.textPrimary,
+        color: Colors.white,
       ),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       behavior: SnackBarBehavior.floating,

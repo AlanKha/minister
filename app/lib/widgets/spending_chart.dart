@@ -17,33 +17,60 @@ class CategoryPieChart extends StatelessWidget {
     }
 
     final colors = AppColors.categoryColors;
+    final grandTotal = data.fold<int>(0, (sum, e) => sum + e.totalCents.abs());
 
     return Row(
       children: [
-        // Chart
+        // Chart with center label
         Expanded(
           flex: 5,
           child: AspectRatio(
             aspectRatio: 1,
-            child: PieChart(
-              PieChartData(
-                sections: data.map((item) {
-                  final color =
-                      colors[item.category] ?? AppColors.textTertiary;
-                  return PieChartSectionData(
-                    value: item.totalCents.abs().toDouble(),
-                    color: color,
-                    title: '',
-                    radius: 40,
-                    borderSide: BorderSide(
-                      color: AppColors.surface,
-                      width: 2,
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                PieChart(
+                  PieChartData(
+                    sections: data.map((item) {
+                      final color =
+                          colors[item.category] ?? AppColors.textTertiary;
+                      return PieChartSectionData(
+                        value: item.totalCents.abs().toDouble(),
+                        color: color,
+                        title: '',
+                        radius: 32,
+                        borderSide: const BorderSide(
+                          color: Colors.white,
+                          width: 2,
+                        ),
+                      );
+                    }).toList(),
+                    sectionsSpace: 0,
+                    centerSpaceRadius: 44,
+                  ),
+                ),
+                Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      '\$${(grandTotal / 100).toStringAsFixed(0)}',
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.textPrimary,
+                        letterSpacing: -0.5,
+                      ),
                     ),
-                  );
-                }).toList(),
-                sectionsSpace: 0,
-                centerSpaceRadius: 36,
-              ),
+                    const Text(
+                      'Total',
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: AppColors.textTertiary,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
           ),
         ),
@@ -56,6 +83,10 @@ class CategoryPieChart extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: data.take(8).map((item) {
               final color = colors[item.category] ?? AppColors.textTertiary;
+              final pct = grandTotal > 0
+                  ? (item.totalCents.abs() / grandTotal * 100)
+                      .toStringAsFixed(1)
+                  : '0.0';
               return Padding(
                 padding: const EdgeInsets.symmetric(vertical: 3),
                 child: Row(
@@ -65,7 +96,7 @@ class CategoryPieChart extends StatelessWidget {
                       height: 8,
                       decoration: BoxDecoration(
                         color: color,
-                        borderRadius: BorderRadius.circular(2),
+                        borderRadius: BorderRadius.circular(4),
                       ),
                     ),
                     const SizedBox(width: 8),
@@ -79,6 +110,14 @@ class CategoryPieChart extends StatelessWidget {
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
+                    Text(
+                      '$pct%',
+                      style: const TextStyle(
+                        fontSize: 11,
+                        color: AppColors.textTertiary,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
                     Text(
                       item.total,
                       style: const TextStyle(
@@ -133,7 +172,7 @@ class MonthlyBarChart extends StatelessWidget {
                     end: Alignment.topCenter,
                     colors: [
                       AppColors.accent,
-                      Color(0xFFEDC06C),
+                      Color(0xFFEFA06A),
                     ],
                   ),
                   width: 18,
@@ -230,7 +269,7 @@ class WeeklyBarChart extends StatelessWidget {
               barRods: [
                 BarChartRodData(
                   toY: entry.value.totalCents.abs().toDouble(),
-                  color: AppColors.info,
+                  color: AppColors.accent,
                   width: 14,
                   borderRadius: const BorderRadius.vertical(
                     top: Radius.circular(5),
