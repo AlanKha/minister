@@ -1,5 +1,6 @@
 name: finance_server
 description: Personal finance Dart server
+publish_to: none
 version: 1.0.0
 
 environment:
