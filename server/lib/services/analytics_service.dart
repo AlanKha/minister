@@ -1,4 +1,4 @@
-import '../models/transaction.dart';
+import 'package:minister_shared/models/transaction.dart';
 import '../store/json_store.dart';
 
 class Filters {

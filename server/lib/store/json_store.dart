@@ -1,8 +1,8 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:path/path.dart' as p;
-import '../models/account.dart';
-import '../models/transaction.dart';
+import 'package:minister_shared/models/account.dart';
+import 'package:minister_shared/models/transaction.dart';
 
 late final String dataDir;
 

@@ -1,0 +1,32 @@
+# Build stage
+FROM google/dart:latest as builder
+
+WORKDIR /app
+
+# Copy shared package
+COPY shared/ ./shared/
+
+# Copy server package
+COPY server/ ./server/
+
+# Build the server
+WORKDIR /app/server
+RUN dart pub get
+RUN dart compile exe bin/server.dart -o bin/server
+
+# Runtime stage
+FROM google/dart:latest
+
+WORKDIR /app
+
+# Copy built executable from builder
+COPY --from=builder /app/server/bin/server /app/bin/server
+
+# Create data directory
+RUN mkdir -p /app/data
+
+# Expose port
+EXPOSE 3000
+
+# Run the server
+CMD ["/app/bin/server"]

@@ -1,10 +1,10 @@
 import 'dart:convert';
 import 'package:shelf/shelf.dart';
 import 'package:shelf_router/shelf_router.dart';
-import '../config.dart';
+import 'package:minister_shared/config/config.dart';
+import 'package:minister_shared/models/account.dart';
 import '../stripe_client.dart';
 import '../store/json_store.dart';
-import '../models/account.dart';
 
 Router accountRoutes() {
   final router = Router();

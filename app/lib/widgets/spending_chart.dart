@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
-import '../models/analytics.dart';
+import 'package:minister_shared/models/analytics.dart';
 import '../theme.dart';
 
 class CategoryPieChart extends StatelessWidget {

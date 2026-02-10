@@ -1,5 +1,5 @@
+import 'package:minister_shared/models/transaction.dart';
 import '../stripe_client.dart';
-import '../models/transaction.dart';
 import '../store/json_store.dart';
 
 class SyncResult {

@@ -1,5 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../models/transaction.dart';
+import 'package:minister_shared/models/transaction.dart';
 import 'accounts_provider.dart';
 
 class TransactionFilters {

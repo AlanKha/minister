@@ -1,5 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../models/analytics.dart';
+import 'package:minister_shared/models/analytics.dart';
 import 'accounts_provider.dart';
 
 final categoryBreakdownProvider =

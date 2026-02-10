@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'config.dart';
+import 'package:minister_shared/config/config.dart';
 
 const _baseUrl = 'https://api.stripe.com/v1';
 

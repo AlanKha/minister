@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../models/transaction.dart';
+import 'package:minister_shared/models/transaction.dart';
 import '../theme.dart';
 import 'category_chip.dart';
 

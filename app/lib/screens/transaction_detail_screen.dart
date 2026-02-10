@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:minister_shared/models/transaction.dart';
 import '../providers/accounts_provider.dart';
 import '../providers/transactions_provider.dart';
-import '../models/transaction.dart';
 import '../widgets/category_chip.dart';
 import '../theme.dart';
 

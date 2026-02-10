@@ -30,11 +30,11 @@ Minister is a personal finance tracker powered by Stripe Financial Connections. 
 
 ## 🏗 Architecture
 
-The project is split into two main components:
+The project is organized into three main directories for clarity and simplicity:
 
-- **Root (App)** — A Flutter application that serves as the user interface.
-- **`server/`** — A Dart shelf HTTP server (default port 3000) that handles Stripe OAuth flows, transaction fetching, processing, and data persistence.
-- **`server/data/`** — Acts as a simple database using JSON files for transactions, account mappings, and analytics.
+- **`app/`** — The Flutter mobile and web interface. This is what users see and interact with.
+- **`shared/`** — Shared data models and configuration used by both the app and server. Think of this as the "data structure" that both parts agree to use.
+- **`server/`** — The Dart backend server (default port 3000) that handles Stripe OAuth flows, transaction fetching, processing, and data storage using JSON files.
 
 ## 🚀 Getting Started
 
@@ -44,7 +44,33 @@ The project is split into two main components:
 - [Dart SDK](https://dart.dev/get-started/sdk)
 - Stripe Account (for Financial Connections keys)
 
-### 2. Server Setup
+### 2. Environment Variables
+
+Copy the example environment file:
+
+```bash
+cp .env.example .env
+```
+
+Edit `.env` with your Stripe keys:
+
+```env
+stripe_env=sandbox
+stripe_sandbox_secret_key=sk_test_...
+stripe_sandbox_publishable_key=pk_test_...
+```
+
+### 3. Server Setup (Two Options)
+
+#### Option A: Run with Docker (Recommended for Non-Technical Users)
+
+```bash
+docker-compose up
+```
+
+The server will start on `http://localhost:3000`. Your data will persist in a Docker volume.
+
+#### Option B: Run Locally with Dart
 
 Navigate to the server directory and install dependencies:
 
@@ -53,21 +79,13 @@ cd server
 dart pub get
 ```
 
-Set up your Stripe environment variables:
-
-```bash
-export stripe_env=sandbox
-export stripe_sandbox_secret_key=sk_test_...
-export stripe_sandbox_publishable_key=pk_test_...
-```
-
 Run the server:
 
 ```bash
 dart run bin/server.dart
 ```
 
-### 3. App Setup
+### 4. App Setup
 
 From the project root:
 
@@ -108,19 +126,41 @@ The server exposes the following REST API:
 ## 📁 File Structure
 
 ```text
-lib/                           # Flutter app source
-  ├── api/                     # API client & networking
-  ├── models/                  # Data models (Account, Transaction, etc.)
-  ├── providers/               # Riverpod state providers
-  ├── screens/                 # Main UI screens (Dashboard, Transactions, etc.)
-  └── widgets/                 # Reusable UI components
-server/
-  ├── bin/server.dart          # Server entry point
+app/                           # Flutter mobile/web app
   ├── lib/
-  │   ├── routes/              # shelf_router API routes
+  │   ├── api/                 # API client & networking
+  │   ├── config.dart          # App configuration (API base URL)
+  │   ├── main.dart            # App entry point
+  │   ├── providers/           # Riverpod state providers
+  │   ├── screens/             # Main UI screens (Dashboard, Transactions, etc.)
+  │   ├── widgets/             # Reusable UI components
+  │   └── router.dart          # Navigation routing
+  ├── ios/                      # iOS-specific files
+  ├── macos/                    # macOS-specific files
+  ├── web/                      # Web-specific files
+  └── pubspec.yaml             # App dependencies
+
+shared/                        # Data models & config (used by both app & server)
+  ├── lib/
+  │   ├── models/              # Shared data classes (Account, Transaction, Analytics)
+  │   └── config/              # Shared configuration (Stripe keys)
+  └── pubspec.yaml             # Shared package dependencies
+
+server/                        # Dart backend server
+  ├── bin/
+  │   └── server.dart          # Server entry point
+  ├── lib/
+  │   ├── routes/              # REST API endpoints (shelf_router)
   │   ├── services/            # Business logic (Sync, Analytics, Cleaning)
-  │   └── store/               # JSON file I/O operations
-  └── data/                    # Local storage (Gitignored)
+  │   ├── store/               # File-based data storage
+  │   ├── stripe_client.dart   # Stripe API integration
+  │   └── category_rules.dart  # Transaction categorization rules
+  ├── data/                    # Local storage (transactions, accounts - Gitignored)
+  ├── public/                  # Static files (if needed)
+  └── pubspec.yaml             # Server dependencies
+
+docker-compose.yaml           # Docker setup for running the server
+Dockerfile.server             # Docker build instructions for server
 ```
 
 ## 🔒 Security

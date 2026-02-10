@@ -1,9 +1,9 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:minister_shared/models/account.dart';
+import 'package:minister_shared/models/transaction.dart';
+import 'package:minister_shared/models/analytics.dart';
 import '../config.dart';
-import '../models/account.dart';
-import '../models/transaction.dart';
-import '../models/analytics.dart';
 
 class ApiClient {
   final _client = http.Client();
