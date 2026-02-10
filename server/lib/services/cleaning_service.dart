@@ -32,7 +32,15 @@ CleanTransaction cleanTransaction(
     }
   }
 
-  cleaned['category'] = categorize(tx.description, tx.id, overrides);
+  // Normalize description by removing extra spaces
+  if (cleaned['description'] is String) {
+    cleaned['description'] = (cleaned['description'] as String)
+        .replaceAll(RegExp(r'\s+'), ' ')
+        .trim();
+  }
+
+  final cleanedDescription = cleaned['description'] as String? ?? '';
+  cleaned['category'] = categorize(cleanedDescription, tx.id, overrides);
 
   final transactedAt = tx.data['transacted_at'];
   if (transactedAt is int) {
