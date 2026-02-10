@@ -4,16 +4,14 @@ import '../providers/transactions_provider.dart';
 import '../theme.dart';
 import '../widgets/sankey_chart.dart';
 
-enum TimePeriod {
-  week('Last 7 Days', 7),
-  month('Last 30 Days', 30),
-  quarter('Last 90 Days', 90),
-  year('Last Year', 365),
-  allTime('All Time', null);
+enum PeriodUnit {
+  week('Week'),
+  month('Month'),
+  year('Year'),
+  allTime('All Time');
 
   final String label;
-  final int? days;
-  const TimePeriod(this.label, this.days);
+  const PeriodUnit(this.label);
 }
 
 class CashFlowScreen extends ConsumerStatefulWidget {
@@ -24,11 +22,95 @@ class CashFlowScreen extends ConsumerStatefulWidget {
 }
 
 class _CashFlowScreenState extends ConsumerState<CashFlowScreen> {
-  TimePeriod _selectedPeriod = TimePeriod.month;
+  PeriodUnit _periodUnit = PeriodUnit.month;
+  int _periodsAgo = 0; // 0 = this week/month/year, 1 = last week/month/year, etc.
+
+  String _getPeriodLabel() {
+    if (_periodUnit == PeriodUnit.allTime) return 'All Time';
+
+    final (start, end) = _getPeriodRange();
+
+    switch (_periodUnit) {
+      case PeriodUnit.week:
+        // Show week with date range
+        final dateFormat = '${_monthName(start.month)} ${start.day}';
+        final endFormat = ' - ${_monthName(end.month)} ${end.day - 1}';
+        String prefix = _periodsAgo == 0 ? 'This Week' : _periodsAgo == 1 ? 'Last Week' : '$_periodsAgo Weeks Ago';
+        return '$prefix ($dateFormat$endFormat)';
+
+      case PeriodUnit.month:
+        // Show just month name and year
+        if (_periodsAgo == 0) {
+          return '${_monthName(start.month)} ${start.year}';
+        } else {
+          return '${_monthName(start.month)} ${start.year}';
+        }
+
+      case PeriodUnit.year:
+        // Show just year
+        return '${start.year}';
+
+      case PeriodUnit.allTime:
+        return 'All Time';
+    }
+  }
+
+  String _monthName(int month) {
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+                    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    return months[month - 1];
+  }
+
+  (DateTime start, DateTime end) _getPeriodRange() {
+    final now = DateTime.now();
+
+    switch (_periodUnit) {
+      case PeriodUnit.week:
+        // Start of this week (Monday)
+        final thisWeekStart = now.subtract(Duration(days: now.weekday - 1));
+        final startOfThisWeek = DateTime(thisWeekStart.year, thisWeekStart.month, thisWeekStart.day);
+
+        // Go back by _periodsAgo weeks
+        final periodStart = startOfThisWeek.subtract(Duration(days: _periodsAgo * 7));
+        final periodEnd = periodStart.add(const Duration(days: 7));
+
+        return (periodStart, periodEnd);
+
+      case PeriodUnit.month:
+        // Calculate total months from year 0, then subtract periodsAgo
+        final totalMonths = now.year * 12 + now.month - 1; // -1 because months are 1-indexed
+        final targetTotalMonths = totalMonths - _periodsAgo;
+
+        final targetYear = targetTotalMonths ~/ 12;
+        final targetMonth = (targetTotalMonths % 12) + 1; // +1 to get back to 1-indexed
+
+        final periodStart = DateTime(targetYear, targetMonth, 1);
+
+        // End is start of next month
+        final periodEnd = DateTime(
+          targetMonth == 12 ? targetYear + 1 : targetYear,
+          targetMonth == 12 ? 1 : targetMonth + 1,
+          1,
+        );
+
+        return (periodStart, periodEnd);
+
+      case PeriodUnit.year:
+        final targetYear = now.year - _periodsAgo;
+        final periodStart = DateTime(targetYear, 1, 1);
+        final periodEnd = DateTime(targetYear + 1, 1, 1);
+
+        return (periodStart, periodEnd);
+
+      case PeriodUnit.allTime:
+        // Return a very wide range
+        return (DateTime(2000, 1, 1), DateTime(2100, 1, 1));
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    final txPage = ref.watch(transactionsProvider);
+    final txPage = ref.watch(allTransactionsProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -86,16 +168,14 @@ class _CashFlowScreenState extends ConsumerState<CashFlowScreen> {
     }
 
     // Filter transactions by selected time period
-    final now = DateTime.now();
-    final filteredTransactions = _selectedPeriod.days == null
-        ? transactions
-        : transactions.where((tx) {
-            final dateStr = tx.data['date'] as String?;
-            if (dateStr == null) return false;
-            final txDate = DateTime.parse(dateStr);
-            final cutoff = now.subtract(Duration(days: _selectedPeriod.days!));
-            return txDate.isAfter(cutoff);
-          }).toList();
+    final (periodStart, periodEnd) = _getPeriodRange();
+    final filteredTransactions = transactions.where((tx) {
+      final dateStr = tx.data['date'] as String?;
+      if (dateStr == null) return false;
+      final txDate = DateTime.parse(dateStr);
+      return txDate.isAfter(periodStart.subtract(const Duration(days: 1))) &&
+             txDate.isBefore(periodEnd);
+    }).toList();
 
     // Calculate category spending
     int totalSpending = 0;
@@ -116,35 +196,6 @@ class _CashFlowScreenState extends ConsumerState<CashFlowScreen> {
     // Sort categories by spending
     final sortedCategories = categoryTotals.entries.toList()
       ..sort((a, b) => b.value.compareTo(a.value));
-
-    // If no spending data, show empty state
-    if (totalSpending == 0) {
-      return const Center(
-        child: Padding(
-          padding: EdgeInsets.all(40),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(Icons.waterfall_chart_outlined, size: 64, color: AppColors.textTertiary),
-              SizedBox(height: 16),
-              Text(
-                'No spending data',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.textSecondary,
-                ),
-              ),
-              SizedBox(height: 8),
-              Text(
-                'Transaction data needed for visualization',
-                style: TextStyle(fontSize: 13, color: AppColors.textTertiary),
-              ),
-            ],
-          ),
-        ),
-      );
-    }
 
     // Create Sankey data
     final nodes = <SankeyNode>[];
@@ -205,51 +256,7 @@ class _CashFlowScreenState extends ConsumerState<CashFlowScreen> {
     return SingleChildScrollView(
       child: Column(
         children: [
-          // Metric cards
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: const BoxDecoration(
-              color: AppColors.surface,
-              border: Border(bottom: BorderSide(color: AppColors.border)),
-            ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: _buildMetricCard(
-                    'TOTAL SPENDING',
-                    '\$${(totalSpending / 100).toStringAsFixed(2)}',
-                    AppColors.negative,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: _buildMetricCard(
-                    'AVG PER TRANSACTION',
-                    '\$${(avgSpending / 100).toStringAsFixed(2)}',
-                    AppColors.textPrimary,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: _buildMetricCard(
-                    'TOP CATEGORY',
-                    largestCategory?.key ?? 'N/A',
-                    AppColors.accent,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: _buildMetricCard(
-                    'TOP CATEGORY %',
-                    '${topCategoryPercent.toStringAsFixed(1)}%',
-                    AppColors.accent,
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          // Sankey diagram header
+          // Period selector header - ALWAYS VISIBLE
           Padding(
             padding: const EdgeInsets.all(20),
             child: Row(
@@ -278,15 +285,16 @@ class _CashFlowScreenState extends ConsumerState<CashFlowScreen> {
                   ],
                 ),
                 const Spacer(),
-                // Time period dropdown
+                // Period unit selector
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  height: 40,
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
                   decoration: BoxDecoration(
                     border: Border.all(color: AppColors.border),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: DropdownButton<TimePeriod>(
-                    value: _selectedPeriod,
+                  child: DropdownButton<PeriodUnit>(
+                    value: _periodUnit,
                     underline: const SizedBox(),
                     icon: const Icon(Icons.arrow_drop_down, size: 20),
                     style: const TextStyle(
@@ -294,30 +302,128 @@ class _CashFlowScreenState extends ConsumerState<CashFlowScreen> {
                       fontWeight: FontWeight.w500,
                       color: AppColors.textPrimary,
                     ),
-                    items: TimePeriod.values.map((period) {
+                    items: PeriodUnit.values.map((unit) {
                       return DropdownMenuItem(
-                        value: period,
-                        child: Text(period.label),
+                        value: unit,
+                        child: Text(unit.label),
                       );
                     }).toList(),
                     onChanged: (value) {
                       if (value != null) {
                         setState(() {
-                          _selectedPeriod = value;
+                          _periodUnit = value;
+                          _periodsAgo = 0; // Reset to "This" when changing unit
                         });
                       }
                     },
+                  ),
+                ),
+                if (_periodUnit != PeriodUnit.allTime) ...[
+                  const SizedBox(width: 12),
+                  // Navigation arrows
+                  Container(
+                    height: 40,
+                    decoration: BoxDecoration(
+                      border: Border.all(color: AppColors.border),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Row(
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.chevron_left, size: 20),
+                          padding: const EdgeInsets.all(8),
+                          constraints: const BoxConstraints(),
+                          onPressed: () {
+                            setState(() {
+                              _periodsAgo++;
+                            });
+                          },
+                          tooltip: 'Previous ${_periodUnit.label.toLowerCase()}',
+                        ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12),
+                          constraints: const BoxConstraints(minWidth: 120),
+                          child: Text(
+                            _getPeriodLabel(),
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.textPrimary,
+                            ),
+                          ),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.chevron_right, size: 20),
+                          padding: const EdgeInsets.all(8),
+                          constraints: const BoxConstraints(),
+                          onPressed: _periodsAgo > 0
+                              ? () {
+                                  setState(() {
+                                    _periodsAgo--;
+                                  });
+                                }
+                              : null,
+                          tooltip: 'Next ${_periodUnit.label.toLowerCase()}',
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+
+          // Metric cards - ALWAYS SHOW
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: const BoxDecoration(
+              color: AppColors.surface,
+              border: Border(bottom: BorderSide(color: AppColors.border)),
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: _buildMetricCard(
+                    'TOTAL SPENDING',
+                    totalSpending > 0 ? '\$${(totalSpending / 100).toStringAsFixed(2)}' : '...',
+                    AppColors.negative,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: _buildMetricCard(
+                    'AVG PER TRANSACTION',
+                    totalSpending > 0 ? '\$${(avgSpending / 100).toStringAsFixed(2)}' : '...',
+                    AppColors.textPrimary,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: _buildMetricCard(
+                    'TOP CATEGORY',
+                    totalSpending > 0 ? (largestCategory?.key ?? 'N/A') : '...',
+                    AppColors.accent,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: _buildMetricCard(
+                    'TOP CATEGORY %',
+                    totalSpending > 0 ? '${topCategoryPercent.toStringAsFixed(1)}%' : '...',
+                    AppColors.accent,
                   ),
                 ),
               ],
             ),
           ),
 
-          // Sankey diagram
-          if (nodes.isNotEmpty && links.isNotEmpty)
+          // Conditional chart content
+          if (totalSpending > 0)
+            // Sankey diagram
             Container(
               height: 500,
-              margin: const EdgeInsets.symmetric(horizontal: 20),
+              margin: const EdgeInsets.all(20),
               decoration: BoxDecoration(
                 color: AppColors.surface,
                 borderRadius: BorderRadius.circular(12),
@@ -331,11 +437,30 @@ class _CashFlowScreenState extends ConsumerState<CashFlowScreen> {
               ),
             )
           else
-            const Padding(
-              padding: EdgeInsets.all(40),
-              child: Text(
-                'No cash flow data available',
-                style: TextStyle(color: AppColors.textTertiary),
+            // Empty state
+            Padding(
+              padding: const EdgeInsets.all(60),
+              child: Column(
+                children: [
+                  const Icon(Icons.waterfall_chart_outlined, size: 64, color: AppColors.textTertiary),
+                  const SizedBox(height: 16),
+                  const Text(
+                    'No spending data',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    _periodUnit == PeriodUnit.allTime
+                        ? 'No transactions found. Sync your accounts to import data.'
+                        : 'No transactions in ${_getPeriodLabel()}.\nTry clicking ← to view previous periods.',
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(fontSize: 13, color: AppColors.textTertiary),
+                  ),
+                ],
               ),
             ),
 

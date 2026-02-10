@@ -20,7 +20,8 @@ Middleware corsMiddleware() {
       if (request.method == 'OPTIONS') {
         return Response.ok('', headers: {
           'Access-Control-Allow-Origin': '*',
-          'Access-Control-Allow-Methods': 'GET, POST, PUT, PATCH, DELETE, OPTIONS',
+          'Access-Control-Allow-Methods':
+              'GET, POST, PUT, PATCH, DELETE, OPTIONS',
           'Access-Control-Allow-Headers': 'Content-Type, Authorization',
         });
       }
@@ -28,7 +29,8 @@ Middleware corsMiddleware() {
       final response = await handler(request);
       return response.change(headers: {
         'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'GET, POST, PUT, PATCH, DELETE, OPTIONS',
+        'Access-Control-Allow-Methods':
+            'GET, POST, PUT, PATCH, DELETE, OPTIONS',
         'Access-Control-Allow-Headers': 'Content-Type, Authorization',
       });
     };
@@ -71,9 +73,7 @@ void main() async {
 
   // Category management routes - inline handlers
   app.get('/api/categories', (Request request) {
-    final allRules = getCategoryRules();
     final userRules = loadCategoryRules();
-    final userRuleIds = userRules.map((r) => r.id).toSet();
 
     // Convert default rules to JSON format
     final rulesJson = <Map<String, dynamic>>[];
@@ -239,7 +239,8 @@ void main() async {
     }
   });
 
-  app.post('/api/transactions/<id>/categorize', (Request request, String id) async {
+  app.post('/api/transactions/<id>/categorize',
+      (Request request, String id) async {
     try {
       final body = await request.readAsString();
       final json = jsonDecode(body) as Map<String, dynamic>;

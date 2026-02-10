@@ -64,3 +64,13 @@ final transactionsProvider =
     page: filters.page,
   );
 });
+
+// Provider for fetching ALL transactions (for analytics/cash flow)
+final allTransactionsProvider =
+    FutureProvider<TransactionPage>((ref) async {
+  final client = ref.read(apiClientProvider);
+  return client.getTransactions(
+    limit: 10000, // Fetch all transactions
+    sort: 'date_desc',
+  );
+});

@@ -163,6 +163,16 @@ docker-compose.yaml           # Docker setup for running the server
 Dockerfile.server             # Docker build instructions for server
 ```
 
+## 🧹 Linting
+
+Run static analysis across all three packages (shared, server, app) with:
+
+```bash
+./scripts/lint.sh
+```
+
+This runs `dart analyze` on `shared/` and `server/`, and `flutter analyze` on `app/`. The script exits non-zero if any issues are found, making it suitable for CI pipelines.
+
 ## 🔒 Security
 
 - Sensitive keys should be stored in environment variables, never committed to the repository.
