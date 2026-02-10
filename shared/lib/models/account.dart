@@ -13,6 +13,23 @@ class LinkedAccount {
     required this.linkedAt,
   });
 
+  /// Display label for the account (e.g., "Chase Checking ••••1234")
+  String get label {
+    if (displayName != null && displayName!.isNotEmpty) {
+      if (last4 != null && last4!.isNotEmpty) {
+        return '$displayName ••••$last4';
+      }
+      return displayName!;
+    }
+    if (institution != null && institution!.isNotEmpty) {
+      if (last4 != null && last4!.isNotEmpty) {
+        return '$institution ••••$last4';
+      }
+      return institution!;
+    }
+    return 'Bank Account';
+  }
+
   factory LinkedAccount.fromJson(Map<String, dynamic> json) {
     return LinkedAccount(
       id: json['id'] as String,

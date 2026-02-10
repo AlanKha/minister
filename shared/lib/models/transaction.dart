@@ -37,6 +37,14 @@ class CleanTransaction {
   int get month => data['month'] as int? ?? 0;
   String get accountLabel => data['account_label'] as String? ?? '';
 
+  /// Format amount as currency (e.g., "-$42.50" or "$100.00")
+  String get amountFormatted {
+    final cents = amount;
+    final dollars = cents / 100.0;
+    final sign = dollars < 0 ? '' : '';
+    return '$sign\$${dollars.abs().toStringAsFixed(2)}';
+  }
+
   dynamic operator [](String key) => data[key];
   void operator []=(String key, dynamic value) => data[key] = value;
 
@@ -44,5 +52,31 @@ class CleanTransaction {
 
   factory CleanTransaction.fromJson(Map<String, dynamic> json) {
     return CleanTransaction(Map<String, dynamic>.from(json));
+  }
+}
+
+class TransactionPage {
+  final List<CleanTransaction> data;
+  final int page;
+  final int totalPages;
+  final int total;
+
+  TransactionPage({
+    required this.data,
+    required this.page,
+    required this.totalPages,
+    int? total,
+  }) : total = total ?? 0;
+
+  factory TransactionPage.fromJson(Map<String, dynamic> json) {
+    return TransactionPage(
+      data: (json['transactions'] as List<dynamic>?)
+              ?.map((t) => CleanTransaction.fromJson(t as Map<String, dynamic>))
+              .toList() ??
+          [],
+      page: json['page'] as int? ?? 1,
+      totalPages: json['total_pages'] as int? ?? 1,
+      total: json['total'] as int? ?? 0,
+    );
   }
 }
