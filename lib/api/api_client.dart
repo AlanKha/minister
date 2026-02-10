@@ -9,8 +9,9 @@ class ApiClient {
   final _client = http.Client();
 
   Uri _uri(String path, [Map<String, String>? queryParams]) {
-    return Uri.parse('$apiBaseUrl$path')
-        .replace(queryParameters: queryParams?.isNotEmpty == true ? queryParams : null);
+    return Uri.parse('$apiBaseUrl$path').replace(
+      queryParameters: queryParams?.isNotEmpty == true ? queryParams : null,
+    );
   }
 
   // Accounts
@@ -46,11 +47,14 @@ class ApiClient {
 
     final response = await _client.get(_uri('/api/transactions', params));
     return TransactionPage.fromJson(
-        jsonDecode(response.body) as Map<String, dynamic>);
+      jsonDecode(response.body) as Map<String, dynamic>,
+    );
   }
 
   Future<CleanTransaction> updateTransactionCategory(
-      String id, String category) async {
+    String id,
+    String category,
+  ) async {
     final response = await _client.patch(
       _uri('/api/transactions/$id'),
       headers: {'Content-Type': 'application/json'},
@@ -58,7 +62,8 @@ class ApiClient {
     );
     final json = jsonDecode(response.body) as Map<String, dynamic>;
     return CleanTransaction.fromJson(
-        json['transaction'] as Map<String, dynamic>);
+      json['transaction'] as Map<String, dynamic>,
+    );
   }
 
   // Sync
@@ -66,9 +71,7 @@ class ApiClient {
     final response = await _client.post(
       _uri('/api/sync'),
       headers: {'Content-Type': 'application/json'},
-      body: accountIds != null
-          ? jsonEncode({'accountIds': accountIds})
-          : null,
+      body: accountIds != null ? jsonEncode({'accountIds': accountIds}) : null,
     );
     return jsonDecode(response.body) as Map<String, dynamic>;
   }
@@ -77,9 +80,7 @@ class ApiClient {
     final response = await _client.post(
       _uri('/api/sync/fetch'),
       headers: {'Content-Type': 'application/json'},
-      body: accountIds != null
-          ? jsonEncode({'accountIds': accountIds})
-          : null,
+      body: accountIds != null ? jsonEncode({'accountIds': accountIds}) : null,
     );
     return jsonDecode(response.body) as Map<String, dynamic>;
   }
@@ -102,8 +103,9 @@ class ApiClient {
     if (account != null) params['account'] = account;
     if (category != null) params['category'] = category;
 
-    final response =
-        await _client.get(_uri('/api/analytics/categories', params));
+    final response = await _client.get(
+      _uri('/api/analytics/categories', params),
+    );
     return (jsonDecode(response.body) as List<dynamic>)
         .map((e) => CategoryBreakdown.fromJson(e as Map<String, dynamic>))
         .toList();
@@ -121,8 +123,7 @@ class ApiClient {
     if (account != null) params['account'] = account;
     if (category != null) params['category'] = category;
 
-    final response =
-        await _client.get(_uri('/api/analytics/monthly', params));
+    final response = await _client.get(_uri('/api/analytics/monthly', params));
     return (jsonDecode(response.body) as List<dynamic>)
         .map((e) => MonthlyBreakdown.fromJson(e as Map<String, dynamic>))
         .toList();
@@ -140,8 +141,7 @@ class ApiClient {
     if (account != null) params['account'] = account;
     if (category != null) params['category'] = category;
 
-    final response =
-        await _client.get(_uri('/api/analytics/weekly', params));
+    final response = await _client.get(_uri('/api/analytics/weekly', params));
     return (jsonDecode(response.body) as List<dynamic>)
         .map((e) => WeeklyBreakdown.fromJson(e as Map<String, dynamic>))
         .toList();

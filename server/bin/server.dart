@@ -4,12 +4,12 @@ import 'package:shelf/shelf_io.dart' as io;
 import 'package:shelf_router/shelf_router.dart';
 import 'package:shelf_static/shelf_static.dart';
 import 'package:path/path.dart' as p;
-import '../lib/config.dart';
-import '../lib/store/json_store.dart';
-import '../lib/routes/accounts.dart';
-import '../lib/routes/transactions.dart';
-import '../lib/routes/sync.dart';
-import '../lib/routes/analytics.dart';
+import 'package:finance_server/config.dart';
+import 'package:finance_server/store/json_store.dart';
+import 'package:finance_server/routes/accounts.dart';
+import 'package:finance_server/routes/transactions.dart';
+import 'package:finance_server/routes/sync.dart';
+import 'package:finance_server/routes/analytics.dart';
 
 Middleware corsMiddleware() {
   return (Handler handler) {
@@ -68,7 +68,8 @@ void main() async {
 
   // Static file handler for public/
   final publicDir = p.join(serverRoot, 'public');
-  final staticHandler = createStaticHandler(publicDir, defaultDocument: 'index.html');
+  final staticHandler =
+      createStaticHandler(publicDir, defaultDocument: 'index.html');
 
   // Cascade: try API routes first, then static files
   final cascade = Cascade().add(app.call).add(staticHandler);
