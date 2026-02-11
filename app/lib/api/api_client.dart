@@ -170,6 +170,12 @@ class ApiClient {
         'caseSensitive': caseSensitive,
       }),
     );
+
+    if (response.statusCode >= 400) {
+      final errorBody = jsonDecode(response.body) as Map<String, dynamic>;
+      throw Exception(errorBody['error'] ?? 'Failed to create rule');
+    }
+
     return CategoryRule.fromJson(
       jsonDecode(response.body) as Map<String, dynamic>,
     );
@@ -191,19 +197,51 @@ class ApiClient {
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode(body),
     );
+
+    if (response.statusCode >= 400) {
+      final errorBody = jsonDecode(response.body) as Map<String, dynamic>;
+      throw Exception(errorBody['error'] ?? 'Failed to update rule');
+    }
+
     return CategoryRule.fromJson(
       jsonDecode(response.body) as Map<String, dynamic>,
     );
   }
 
   Future<void> deleteCategoryRule(String id) async {
-    await _client.delete(_uri('/api/categories/$id'));
+    final response = await _client.delete(_uri('/api/categories/$id'));
+
+    if (response.statusCode >= 400) {
+      final errorBody = jsonDecode(response.body) as Map<String, dynamic>;
+      throw Exception(errorBody['error'] ?? 'Failed to delete rule');
+    }
   }
 
   Future<List<CleanTransaction>> getUncategorizedTransactions() async {
     final response = await _client.get(_uri('/api/transactions/uncategorized'));
     return (jsonDecode(response.body) as List<dynamic>)
         .map((e) => CleanTransaction.fromJson(e as Map<String, dynamic>))
+        .toList();
+  }
+
+  // Balances
+  Future<List<Map<String, dynamic>>> getBalances() async {
+    final response = await _client.get(_uri('/api/balances'));
+    return (jsonDecode(response.body) as List<dynamic>)
+        .map((e) => e as Map<String, dynamic>)
+        .toList();
+  }
+
+  Future<List<Map<String, dynamic>>> refreshBalances([
+    List<String>? accountIds,
+  ]) async {
+    final response = await _client.post(
+      _uri('/api/balances/refresh'),
+      headers: {'Content-Type': 'application/json'},
+      body: accountIds != null ? jsonEncode({'accountIds': accountIds}) : '{}',
+    );
+    return (jsonDecode(response.body) as List<dynamic>)
+        .map((e) => e as Map<String, dynamic>)
         .toList();
   }
 

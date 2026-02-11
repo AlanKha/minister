@@ -13,10 +13,7 @@ class CategoriesScreen extends ConsumerWidget {
     final rulesAsync = ref.watch(categoryRulesNotifierProvider);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Categorization Rules'),
-        elevation: 0,
-      ),
+      appBar: AppBar(title: const Text('Categorization Rules'), elevation: 0),
       body: rulesAsync.when(
         data: (rules) => _buildContent(context, ref, rules),
         loading: () => const Center(
@@ -33,12 +30,20 @@ class CategoriesScreen extends ConsumerWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.error_outline, size: 48, color: AppColors.negative),
+              const Icon(
+                Icons.error_outline,
+                size: 48,
+                color: AppColors.negative,
+              ),
               const SizedBox(height: 16),
-              Text('Error: $err', style: const TextStyle(color: AppColors.negative)),
+              Text(
+                'Error: $err',
+                style: const TextStyle(color: AppColors.negative),
+              ),
               const SizedBox(height: 16),
               ElevatedButton(
-                onPressed: () => ref.read(categoryRulesNotifierProvider.notifier).refresh(),
+                onPressed: () =>
+                    ref.read(categoryRulesNotifierProvider.notifier).refresh(),
                 child: const Text('Retry'),
               ),
             ],
@@ -56,7 +61,11 @@ class CategoriesScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildContent(BuildContext context, WidgetRef ref, List<CategoryRule> rules) {
+  Widget _buildContent(
+    BuildContext context,
+    WidgetRef ref,
+    List<CategoryRule> rules,
+  ) {
     if (rules.isEmpty) {
       return Center(
         child: Column(
@@ -176,7 +185,11 @@ class CategoriesScreen extends ConsumerWidget {
     );
   }
 
-  void _showAddRuleDialog(BuildContext context, WidgetRef ref, String? category) {
+  void _showAddRuleDialog(
+    BuildContext context,
+    WidgetRef ref,
+    String? category,
+  ) {
     final patternController = TextEditingController();
     final categoryController = TextEditingController(text: category ?? '');
     bool caseSensitive = false;
@@ -200,11 +213,17 @@ class CategoriesScreen extends ConsumerWidget {
                 const SizedBox(height: 8),
                 const Text(
                   'Category',
-                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.textSecondary),
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.textSecondary,
+                  ),
                 ),
                 const SizedBox(height: 8),
                 DropdownButtonFormField<String>(
-                  initialValue: categoryController.text.isEmpty ? null : categoryController.text,
+                  initialValue: categoryController.text.isEmpty
+                      ? null
+                      : categoryController.text,
                   items: allCategories
                       .where((c) => c != 'Uncategorized')
                       .map((c) => DropdownMenuItem(value: c, child: Text(c)))
@@ -212,37 +231,57 @@ class CategoriesScreen extends ConsumerWidget {
                   onChanged: (val) => categoryController.text = val ?? '',
                   decoration: InputDecoration(
                     hintText: 'Select category',
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 10,
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
                       borderSide: const BorderSide(color: AppColors.border),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
-                      borderSide: const BorderSide(color: AppColors.accent, width: 2),
+                      borderSide: const BorderSide(
+                        color: AppColors.accent,
+                        width: 2,
+                      ),
                     ),
                   ),
                 ),
                 const SizedBox(height: 16),
                 const Text(
                   'Regex Pattern',
-                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.textSecondary),
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.textSecondary,
+                  ),
                 ),
                 const SizedBox(height: 8),
                 TextField(
                   controller: patternController,
                   decoration: InputDecoration(
                     hintText: r'e.g., STARBUCKS|COFFEE',
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 10,
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
                       borderSide: const BorderSide(color: AppColors.border),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
-                      borderSide: const BorderSide(color: AppColors.accent, width: 2),
+                      borderSide: const BorderSide(
+                        color: AppColors.accent,
+                        width: 2,
+                      ),
                     ),
                   ),
                   style: const TextStyle(fontFamily: 'monospace', fontSize: 12),
@@ -251,8 +290,12 @@ class CategoriesScreen extends ConsumerWidget {
                 const SizedBox(height: 12),
                 CheckboxListTile(
                   value: caseSensitive,
-                  onChanged: (val) => setState(() => caseSensitive = val ?? false),
-                  title: const Text('Case sensitive', style: TextStyle(fontSize: 13)),
+                  onChanged: (val) =>
+                      setState(() => caseSensitive = val ?? false),
+                  title: const Text(
+                    'Case sensitive',
+                    style: TextStyle(fontSize: 13),
+                  ),
                   contentPadding: EdgeInsets.zero,
                   controlAffinity: ListTileControlAffinity.leading,
                   activeColor: AppColors.accent,
@@ -263,11 +306,17 @@ class CategoriesScreen extends ConsumerWidget {
                   decoration: BoxDecoration(
                     color: AppColors.info.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: AppColors.info.withValues(alpha: 0.3)),
+                    border: Border.all(
+                      color: AppColors.info.withValues(alpha: 0.3),
+                    ),
                   ),
                   child: const Row(
                     children: [
-                      Icon(Icons.lightbulb_outline, size: 16, color: AppColors.info),
+                      Icon(
+                        Icons.lightbulb_outline,
+                        size: 16,
+                        color: AppColors.info,
+                      ),
                       SizedBox(width: 8),
                       Expanded(
                         child: Text(
@@ -282,10 +331,14 @@ class CategoriesScreen extends ConsumerWidget {
             ),
           ),
           actions: [
-            TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text('Cancel'),
+            ),
             ElevatedButton(
               onPressed: () async {
-                if (categoryController.text.isEmpty || patternController.text.isEmpty) {
+                if (categoryController.text.isEmpty ||
+                    patternController.text.isEmpty) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(content: Text('Please fill all fields')),
                   );
@@ -293,7 +346,9 @@ class CategoriesScreen extends ConsumerWidget {
                 }
 
                 try {
-                  await ref.read(categoryRulesNotifierProvider.notifier).createRule(
+                  await ref
+                      .read(categoryRulesNotifierProvider.notifier)
+                      .createRule(
                         category: categoryController.text,
                         pattern: patternController.text,
                         caseSensitive: caseSensitive,
@@ -306,13 +361,15 @@ class CategoriesScreen extends ConsumerWidget {
                   }
                 } catch (e) {
                   if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Error: $e')),
-                    );
+                    ScaffoldMessenger.of(
+                      context,
+                    ).showSnackBar(SnackBar(content: Text('Error: $e')));
                   }
                 }
               },
-              style: ElevatedButton.styleFrom(backgroundColor: AppColors.accent),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.accent,
+              ),
               child: const Text('Create Rule'),
             ),
           ],
@@ -321,7 +378,11 @@ class CategoriesScreen extends ConsumerWidget {
     );
   }
 
-  void _showEditRuleDialog(BuildContext context, WidgetRef ref, CategoryRule rule) {
+  void _showEditRuleDialog(
+    BuildContext context,
+    WidgetRef ref,
+    CategoryRule rule,
+  ) {
     final patternController = TextEditingController(text: rule.pattern);
     final categoryController = TextEditingController(text: rule.category);
     bool caseSensitive = rule.caseSensitive;
@@ -338,7 +399,10 @@ class CategoriesScreen extends ConsumerWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const SizedBox(height: 8),
-                const Text('Category', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
+                const Text(
+                  'Category',
+                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+                ),
                 const SizedBox(height: 8),
                 DropdownButtonFormField<String>(
                   initialValue: categoryController.text,
@@ -348,26 +412,43 @@ class CategoriesScreen extends ConsumerWidget {
                       .toList(),
                   onChanged: (val) => categoryController.text = val ?? '',
                   decoration: InputDecoration(
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 10,
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
                   ),
                 ),
                 const SizedBox(height: 16),
-                const Text('Pattern', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
+                const Text(
+                  'Pattern',
+                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+                ),
                 const SizedBox(height: 8),
                 TextField(
                   controller: patternController,
                   decoration: InputDecoration(
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 10,
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
                   ),
                   style: const TextStyle(fontFamily: 'monospace'),
                 ),
                 const SizedBox(height: 12),
                 CheckboxListTile(
                   value: caseSensitive,
-                  onChanged: (val) => setState(() => caseSensitive = val ?? false),
-                  title: const Text('Case sensitive', style: TextStyle(fontSize: 13)),
+                  onChanged: (val) =>
+                      setState(() => caseSensitive = val ?? false),
+                  title: const Text(
+                    'Case sensitive',
+                    style: TextStyle(fontSize: 13),
+                  ),
                   contentPadding: EdgeInsets.zero,
                   controlAffinity: ListTileControlAffinity.leading,
                   activeColor: AppColors.accent,
@@ -376,10 +457,14 @@ class CategoriesScreen extends ConsumerWidget {
             ),
           ),
           actions: [
-            TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text('Cancel'),
+            ),
             ElevatedButton(
               onPressed: () async {
-                if (categoryController.text.isEmpty || patternController.text.isEmpty) {
+                if (categoryController.text.isEmpty ||
+                    patternController.text.isEmpty) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(content: Text('Please fill all fields')),
                   );
@@ -387,7 +472,9 @@ class CategoriesScreen extends ConsumerWidget {
                 }
 
                 try {
-                  await ref.read(categoryRulesNotifierProvider.notifier).updateRule(
+                  await ref
+                      .read(categoryRulesNotifierProvider.notifier)
+                      .updateRule(
                         id: rule.id,
                         category: categoryController.text,
                         pattern: patternController.text,
@@ -401,13 +488,15 @@ class CategoriesScreen extends ConsumerWidget {
                   }
                 } catch (e) {
                   if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Error: $e')),
-                    );
+                    ScaffoldMessenger.of(
+                      context,
+                    ).showSnackBar(SnackBar(content: Text('Error: $e')));
                   }
                 }
               },
-              style: ElevatedButton.styleFrom(backgroundColor: AppColors.accent),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.accent,
+              ),
               child: const Text('Save'),
             ),
           ],
@@ -416,18 +505,30 @@ class CategoriesScreen extends ConsumerWidget {
     );
   }
 
-  void _showDeleteConfirmation(BuildContext context, WidgetRef ref, CategoryRule rule) {
+  void _showDeleteConfirmation(
+    BuildContext context,
+    WidgetRef ref,
+    CategoryRule rule,
+  ) {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text('Delete Rule'),
-        content: Text('Remove this rule?\n\n"${rule.pattern}"', style: const TextStyle(fontSize: 14)),
+        content: Text(
+          'Remove this rule?\n\n"${rule.pattern}"',
+          style: const TextStyle(fontSize: 14),
+        ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel'),
+          ),
           ElevatedButton(
             onPressed: () async {
               try {
-                await ref.read(categoryRulesNotifierProvider.notifier).deleteRule(rule.id);
+                await ref
+                    .read(categoryRulesNotifierProvider.notifier)
+                    .deleteRule(rule.id);
                 if (context.mounted) {
                   Navigator.pop(ctx);
                   ScaffoldMessenger.of(context).showSnackBar(
@@ -436,13 +537,15 @@ class CategoriesScreen extends ConsumerWidget {
                 }
               } catch (e) {
                 if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Error: $e')),
-                  );
+                  ScaffoldMessenger.of(
+                    context,
+                  ).showSnackBar(SnackBar(content: Text('Error: $e')));
                 }
               }
             },
-            style: ElevatedButton.styleFrom(backgroundColor: AppColors.negative),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.negative,
+            ),
             child: const Text('Delete'),
           ),
         ],
@@ -467,7 +570,8 @@ class _CollapsibleCategoryWidget extends StatefulWidget {
   });
 
   @override
-  State<_CollapsibleCategoryWidget> createState() => _CollapsibleCategoryWidgetState();
+  State<_CollapsibleCategoryWidget> createState() =>
+      _CollapsibleCategoryWidgetState();
 }
 
 class _CollapsibleCategoryWidgetState extends State<_CollapsibleCategoryWidget>
@@ -516,9 +620,14 @@ class _CollapsibleCategoryWidgetState extends State<_CollapsibleCategoryWidget>
             color: Colors.transparent,
             child: InkWell(
               onTap: _toggleExpanded,
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(12),
+              ),
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 14,
+                ),
                 child: Row(
                   children: [
                     Expanded(
@@ -623,7 +732,10 @@ class _CollapsibleCategoryWidgetState extends State<_CollapsibleCategoryWidget>
                     if (rule.caseSensitive) ...[
                       const SizedBox(height: 4),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 6,
+                          vertical: 2,
+                        ),
                         decoration: BoxDecoration(
                           color: AppColors.info.withValues(alpha: 0.12),
                           borderRadius: BorderRadius.circular(3),

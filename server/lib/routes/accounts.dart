@@ -37,7 +37,7 @@ Router accountRoutes() {
       final session = await stripeClient.createFinancialConnectionsSession(
         customerType: 'customer',
         customerId: data.customerId!,
-        permissions: ['transactions'],
+        permissions: ['transactions', 'balances'],
         prefetch: ['transactions'],
       );
 

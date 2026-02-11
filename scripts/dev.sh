@@ -50,7 +50,7 @@ cleanup() {
 }
 trap cleanup EXIT
 
-docker-compose up -d
+docker-compose up --build -d
 
 # Wait for server to be healthy
 echo "⏳ Waiting for server to be ready..."

@@ -16,6 +16,8 @@ String get _txFile => p.join(dataDir, 'transactions.json');
 String get _cleanFile => p.join(dataDir, 'transactions_clean.json');
 String get _overridesFile => p.join(dataDir, 'category_overrides.json');
 String get _categoryRulesFile => p.join(dataDir, 'category_rules.json');
+String get _balancesFile => p.join(dataDir, 'balances.json');
+String get _deletedDefaultsFile => p.join(dataDir, 'deleted_defaults.json');
 
 AccountData readAccountData() {
   try {
@@ -28,8 +30,8 @@ AccountData readAccountData() {
 
 void writeAccountData(AccountData data) {
   Directory(dataDir).createSync(recursive: true);
-  File(_accountFile)
-      .writeAsStringSync(const JsonEncoder.withIndent('  ').convert(data.toJson()));
+  File(_accountFile).writeAsStringSync(
+      const JsonEncoder.withIndent('  ').convert(data.toJson()));
 }
 
 List<StoredTransaction> loadTransactions() {
@@ -87,9 +89,11 @@ void saveOverrides(Map<String, String> overrides) {
 }
 
 String accountLabel(LinkedAccount acct) {
-  return [acct.institution, acct.displayName, acct.last4 != null ? '****${acct.last4}' : null]
-      .where((s) => s != null && s.isNotEmpty)
-      .join(' ');
+  return [
+    acct.institution,
+    acct.displayName,
+    acct.last4 != null ? '****${acct.last4}' : null
+  ].where((s) => s != null && s.isNotEmpty).join(' ');
 }
 
 class CategoryRule {
@@ -136,6 +140,39 @@ List<CategoryRule> loadCategoryRules() {
 void saveCategoryRules(List<CategoryRule> rules) {
   Directory(dataDir).createSync(recursive: true);
   File(_categoryRulesFile).writeAsStringSync(
-    const JsonEncoder.withIndent('  ').convert(rules.map((r) => r.toJson()).toList()),
+    const JsonEncoder.withIndent('  ')
+        .convert(rules.map((r) => r.toJson()).toList()),
+  );
+}
+
+Map<String, dynamic> loadBalances() {
+  try {
+    final content = File(_balancesFile).readAsStringSync();
+    return jsonDecode(content) as Map<String, dynamic>;
+  } catch (_) {
+    return {};
+  }
+}
+
+void saveBalances(Map<String, dynamic> balances) {
+  Directory(dataDir).createSync(recursive: true);
+  File(_balancesFile).writeAsStringSync(
+    const JsonEncoder.withIndent('  ').convert(balances),
+  );
+}
+
+Set<String> loadDeletedDefaults() {
+  try {
+    final content = File(_deletedDefaultsFile).readAsStringSync();
+    return (jsonDecode(content) as List<dynamic>).cast<String>().toSet();
+  } catch (_) {
+    return {};
+  }
+}
+
+void saveDeletedDefaults(Set<String> deletedDefaults) {
+  Directory(dataDir).createSync(recursive: true);
+  File(_deletedDefaultsFile).writeAsStringSync(
+    const JsonEncoder.withIndent('  ').convert(deletedDefaults.toList()),
   );
 }

@@ -10,6 +10,7 @@ import 'screens/accounts_screen.dart';
 import 'screens/categories_screen.dart';
 import 'screens/review_uncategorized_screen.dart';
 import 'screens/connect_account_screen.dart';
+import 'screens/balances_screen.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 
@@ -52,6 +53,11 @@ const _navItems = [
     icon: Icons.account_balance_outlined,
     activeIcon: Icons.account_balance_rounded,
     label: 'Accounts',
+  ),
+  _NavItem(
+    icon: Icons.account_balance_wallet_outlined,
+    activeIcon: Icons.account_balance_wallet_rounded,
+    label: 'Balances',
   ),
   _NavItem(
     icon: Icons.rule_folder_outlined,
@@ -439,6 +445,14 @@ final router = GoRouter(
             GoRoute(
               path: '/accounts',
               builder: (context, state) => const AccountsScreen(),
+            ),
+          ],
+        ),
+        StatefulShellBranch(
+          routes: [
+            GoRoute(
+              path: '/balances',
+              builder: (context, state) => const BalancesScreen(),
             ),
           ],
         ),

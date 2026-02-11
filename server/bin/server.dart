@@ -10,6 +10,7 @@ import 'package:finance_server/routes/accounts.dart';
 import 'package:finance_server/routes/transactions.dart';
 import 'package:finance_server/routes/sync.dart';
 import 'package:finance_server/routes/analytics.dart';
+import 'package:finance_server/routes/balances.dart';
 import 'package:finance_server/services/cleaning_service.dart';
 import 'package:finance_server/category_rules.dart';
 import 'dart:convert';
@@ -50,6 +51,7 @@ void main() async {
   final txns = transactionRoutes();
   final sync = syncRoutes();
   final analytics = analyticsRoutes();
+  final balances = balanceRoutes();
 
   // Account routes
   app.get('/api/accounts', accounts.call);
@@ -71,9 +73,14 @@ void main() async {
   app.get('/api/analytics/monthly', analytics.call);
   app.get('/api/analytics/weekly', analytics.call);
 
+  // Balance routes
+  app.get('/api/balances', balances.call);
+  app.post('/api/balances/refresh', balances.call);
+
   // Category management routes - inline handlers
   app.get('/api/categories', (Request request) {
     final userRules = loadCategoryRules();
+    final deletedDefaults = loadDeletedDefaults();
 
     // Convert default rules to JSON format
     final rulesJson = <Map<String, dynamic>>[];
@@ -83,15 +90,17 @@ void main() async {
       rulesJson.add(rule.toJson());
     }
 
-    // Add default rules (with generated IDs)
+    // Add default rules (with generated IDs), excluding deleted ones
     final seenPatterns = <String>{};
     for (var i = 0; i < defaultCategoryRules.length; i++) {
       final rule = defaultCategoryRules[i];
       final pattern = rule.key.pattern;
-      if (!seenPatterns.contains(pattern)) {
+      final defaultId = 'default_$i';
+      if (!seenPatterns.contains(pattern) &&
+          !deletedDefaults.contains(defaultId)) {
         seenPatterns.add(pattern);
         rulesJson.add({
-          'id': 'default_$i',
+          'id': defaultId,
           'category': rule.value,
           'pattern': pattern,
           'caseSensitive': false,
@@ -177,16 +186,38 @@ void main() async {
       final rules = loadCategoryRules();
       final index = rules.indexWhere((r) => r.id == id);
 
+      final pattern = json['pattern'] as String?;
+      final category = json['category'] as String?;
+      final caseSensitive = json['caseSensitive'] as bool?;
+
+      // If it's a default rule, create a new user rule instead
+      if (id.startsWith('default_')) {
+        final defaultIndex = int.tryParse(id.replaceFirst('default_', ''));
+        if (defaultIndex != null &&
+            defaultIndex < defaultCategoryRules.length) {
+          final defaultRule = defaultCategoryRules[defaultIndex];
+          final newRule = CategoryRule(
+            id: DateTime.now().millisecondsSinceEpoch.toString(),
+            category: category ?? defaultRule.value,
+            pattern: pattern ?? defaultRule.key.pattern,
+            caseSensitive: caseSensitive ?? false,
+          );
+          rules.add(newRule);
+          saveCategoryRules(rules);
+          cleanAllTransactions();
+          return Response.ok(
+            jsonEncode(newRule.toJson()),
+            headers: {'Content-Type': 'application/json'},
+          );
+        }
+      }
+
       if (index == -1) {
         return Response.notFound(
           jsonEncode({'error': 'Category rule not found'}),
           headers: {'Content-Type': 'application/json'},
         );
       }
-
-      final pattern = json['pattern'] as String?;
-      final category = json['category'] as String?;
-      final caseSensitive = json['caseSensitive'] as bool?;
 
       final updatedRule = CategoryRule(
         id: id,
@@ -216,6 +247,18 @@ void main() async {
       final rules = loadCategoryRules();
       final initialLength = rules.length;
       rules.removeWhere((r) => r.id == id);
+
+      // If it was a default rule, add to deleted defaults list
+      if (id.startsWith('default_')) {
+        final deletedDefaults = loadDeletedDefaults();
+        deletedDefaults.add(id);
+        saveDeletedDefaults(deletedDefaults);
+        cleanAllTransactions();
+        return Response.ok(
+          jsonEncode({'success': true}),
+          headers: {'Content-Type': 'application/json'},
+        );
+      }
 
       if (rules.length == initialLength) {
         return Response.notFound(
