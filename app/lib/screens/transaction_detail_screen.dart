@@ -19,6 +19,7 @@ class TransactionDetailScreen extends ConsumerStatefulWidget {
 class _TransactionDetailScreenState
     extends ConsumerState<TransactionDetailScreen> {
   bool _saving = false;
+  CleanTransaction? _cachedTransaction;
 
   @override
   Widget build(BuildContext context) {
@@ -38,7 +39,10 @@ class _TransactionDetailScreenState
           final tx = page.data
               .where((t) => t.id == widget.transactionId)
               .firstOrNull;
-          if (tx == null) {
+          if (tx != null) {
+            _cachedTransaction = tx;
+          }
+          if (_cachedTransaction == null) {
             return Center(
               child: Text(
                 'Transaction not found',
@@ -46,17 +50,24 @@ class _TransactionDetailScreenState
               ),
             );
           }
-          return _buildDetail(context, tx);
+          return _buildDetail(context, _cachedTransaction!);
         },
-        loading: () => const Center(
-          child: CircularProgressIndicator(
-            color: AppColors.accent,
-            strokeWidth: 2,
-          ),
-        ),
+        loading: () {
+          if (_cachedTransaction != null) {
+            return _buildDetail(context, _cachedTransaction!);
+          }
+          return const Center(
+            child: CircularProgressIndicator(
+              color: AppColors.accent,
+              strokeWidth: 2,
+            ),
+          );
+        },
         error: (e, _) => Center(
-          child: Text('Error: $e',
-              style: const TextStyle(color: AppColors.negative)),
+          child: Text(
+            'Error: $e',
+            style: const TextStyle(color: AppColors.negative),
+          ),
         ),
       ),
     );
@@ -74,7 +85,9 @@ class _TransactionDetailScreenState
             style: TextStyle(
               fontSize: 42,
               fontWeight: FontWeight.w700,
-              color: tx.amount >= 0 ? AppColors.positive : AppColors.textPrimary,
+              color: tx.amount >= 0
+                  ? AppColors.positive
+                  : AppColors.textPrimary,
               letterSpacing: -1.5,
             ),
           ),
@@ -131,8 +144,10 @@ class _TransactionDetailScreenState
                       if (!isSelected) _updateCategory(tx.id, cat);
                     },
               child: Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 8,
+                ),
                 decoration: BoxDecoration(
                   color: isSelected
                       ? catColor.withValues(alpha: 0.15)
@@ -148,8 +163,7 @@ class _TransactionDetailScreenState
                   cat,
                   style: TextStyle(
                     fontSize: 13,
-                    fontWeight:
-                        isSelected ? FontWeight.w600 : FontWeight.w500,
+                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
                     color: isSelected ? catColor : AppColors.textSecondary,
                   ),
                 ),
@@ -174,6 +188,10 @@ class _TransactionDetailScreenState
     try {
       final client = ref.read(apiClientProvider);
       await client.updateTransactionCategory(id, category);
+      // Update the cached transaction with the new category
+      if (_cachedTransaction != null) {
+        _cachedTransaction!.category = category;
+      }
       ref.invalidate(transactionsProvider);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -182,9 +200,9 @@ class _TransactionDetailScreenState
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error: $e')));
       }
     } finally {
       if (mounted) setState(() => _saving = false);

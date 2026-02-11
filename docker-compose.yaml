@@ -6,10 +6,8 @@ services:
     container_name: minister-server
     ports:
       - "3000:3000"
-    environment:
-      - stripe_env=sandbox
-      - stripe_sandbox_secret_key=${STRIPE_SECRET_KEY:-sk_test_example}
-      - stripe_sandbox_publishable_key=${STRIPE_PUBLISHABLE_KEY:-pk_test_example}
+    env_file:
+      - .env
     volumes:
       - ./server/data:/app/data
     restart: unless-stopped

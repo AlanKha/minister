@@ -53,7 +53,6 @@ class _ConnectAccountScreenState extends State<ConnectAccountScreen>
 
     controller
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
-      ..setBackgroundColor(AppColors.background)
       ..setNavigationDelegate(
         NavigationDelegate(
           onProgress: (int progress) {
