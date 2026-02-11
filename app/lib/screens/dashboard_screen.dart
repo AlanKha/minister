@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:minister_shared/models/account.dart';
 import 'package:minister_shared/models/analytics.dart';
 import 'package:minister_shared/models/transaction.dart';
+import 'package:shimmer/shimmer.dart';
 import '../providers/accounts_provider.dart';
 import '../providers/transactions_provider.dart';
 import '../providers/analytics_provider.dart';
@@ -34,17 +35,23 @@ class DashboardScreen extends ConsumerWidget {
     final showSidebar = _isDesktop && width > 900;
 
     final mainContent = _buildMainContent(
-        context, ref, accounts, transactions, categories, width);
+      context,
+      ref,
+      accounts,
+      transactions,
+      categories,
+      width,
+    );
 
     if (!showSidebar) return mainContent;
 
     return Scaffold(
-      backgroundColor: AppColors.surface,
+      backgroundColor: AppColors.background,
       body: Row(
         children: [
           Expanded(flex: 3, child: mainContent),
           SizedBox(
-            width: 280,
+            width: 320,
             child: _DesktopSidebar(
               accounts: accounts,
               transactions: transactions,
@@ -64,8 +71,10 @@ class DashboardScreen extends ConsumerWidget {
     AsyncValue<List<CategoryBreakdown>> categories,
     double width,
   ) {
+    final isNarrow = width < 600;
+
     return Scaffold(
-      backgroundColor: AppColors.surface,
+      backgroundColor: AppColors.background,
       body: RefreshIndicator(
         color: AppColors.accent,
         backgroundColor: AppColors.surface,
@@ -76,32 +85,34 @@ class DashboardScreen extends ConsumerWidget {
         },
         child: CustomScrollView(
           slivers: [
-            // Header
+            // Premium Header
             SliverToBoxAdapter(
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(20, 24, 20, 0),
+                padding: const EdgeInsets.fromLTRB(24, 32, 24, 0),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    const Expanded(
+                    Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
+                          const Text(
                             'Overview',
                             style: TextStyle(
-                              fontSize: 26,
+                              fontSize: 32,
                               fontWeight: FontWeight.w700,
                               color: AppColors.textPrimary,
-                              letterSpacing: -0.8,
+                              letterSpacing: -1,
                             ),
                           ),
-                          SizedBox(height: 2),
+                          const SizedBox(height: 4),
                           Text(
                             'Your financial snapshot',
                             style: TextStyle(
-                              fontSize: 14,
-                              color: AppColors.textTertiary,
+                              fontSize: 15,
+                              color: AppColors.textSecondary.withValues(
+                                alpha: 0.8,
+                              ),
                             ),
                           ),
                         ],
@@ -113,71 +124,37 @@ class DashboardScreen extends ConsumerWidget {
               ),
             ),
 
-            const SliverToBoxAdapter(child: SizedBox(height: 24)),
+            const SliverToBoxAdapter(child: SizedBox(height: 28)),
 
-            // 4 Metric cards
+            // Metric Cards - Fixed responsive sizing
             SliverToBoxAdapter(
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
+                padding: const EdgeInsets.symmetric(horizontal: 24),
                 child: _MetricCardsGrid(
                   accounts: accounts,
                   transactions: transactions,
                   categories: categories,
-                  narrow: width < 600,
+                  narrow: isNarrow,
                 ),
               ),
             ),
 
             const SliverToBoxAdapter(child: SizedBox(height: 28)),
 
-            // Spending chart
+            // Spending Chart Card
             SliverToBoxAdapter(
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Container(
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    color: AppColors.surface,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: AppColors.border),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Spending by Category',
-                        style: TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.textPrimary,
-                        ),
-                      ),
-                      const SizedBox(height: 20),
-                      categories.when(
-                        data: (data) => SizedBox(
-                          height: 200,
-                          child: CategoryPieChart(data: data),
-                        ),
-                        loading: () => const SizedBox(
-                          height: 200,
-                          child: Center(
-                            child: CircularProgressIndicator(
-                              color: AppColors.accent,
-                              strokeWidth: 2,
-                            ),
-                          ),
-                        ),
-                        error: (e, _) => SizedBox(
-                          height: 200,
-                          child: Center(
-                            child: Text(
-                              'Failed to load',
-                              style: TextStyle(color: AppColors.textTertiary),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: _PremiumCard(
+                  title: 'Spending by Category',
+                  subtitle: 'Tap sections to see details',
+                  child: SizedBox(
+                    height: 220,
+                    child: categories.when(
+                      data: (data) => CategoryPieChart(data: data),
+                      loading: () => const _ChartLoading(),
+                      error: (e, _) => _ChartError(error: e.toString()),
+                    ),
                   ),
                 ),
               ),
@@ -185,29 +162,50 @@ class DashboardScreen extends ConsumerWidget {
 
             const SliverToBoxAdapter(child: SizedBox(height: 28)),
 
-            // Recent transactions header
+            // Recent Transactions Header
             SliverToBoxAdapter(
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
+                padding: const EdgeInsets.symmetric(horizontal: 24),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     const Text(
                       'Recent Transactions',
                       style: TextStyle(
-                        fontSize: 15,
+                        fontSize: 18,
                         fontWeight: FontWeight.w600,
                         color: AppColors.textPrimary,
                       ),
                     ),
                     GestureDetector(
                       onTap: () => context.go('/transactions'),
-                      child: const Text(
-                        'View all',
-                        style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.accent,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 6,
+                        ),
+                        decoration: BoxDecoration(
+                          color: AppColors.accent.withValues(alpha: 0.08),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: const Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              'View all',
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.accent,
+                              ),
+                            ),
+                            SizedBox(width: 4),
+                            Icon(
+                              Icons.arrow_forward_rounded,
+                              size: 14,
+                              color: AppColors.accent,
+                            ),
+                          ],
                         ),
                       ),
                     ),
@@ -216,70 +214,44 @@ class DashboardScreen extends ConsumerWidget {
               ),
             ),
 
-            const SliverToBoxAdapter(child: SizedBox(height: 8)),
+            const SliverToBoxAdapter(child: SizedBox(height: 16)),
 
-            // Recent transactions list
+            // Recent Transactions List
             SliverToBoxAdapter(
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8),
-                child: transactions.when(
-                  data: (page) {
-                    if (page.data.isEmpty) {
-                      return Padding(
-                        padding: const EdgeInsets.all(32),
-                        child: Center(
-                          child: Text(
-                            'No transactions yet',
-                            style: TextStyle(color: AppColors.textTertiary),
-                          ),
-                        ),
-                      );
-                    }
-                    final items = page.data.take(8).toList();
-                    return Container(
-                      decoration: BoxDecoration(
-                        color: AppColors.surface,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: AppColors.border),
-                      ),
-                      child: ListView.separated(
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        itemCount: items.length,
-                        separatorBuilder: (_, __) => const Divider(
-                          height: 1,
-                          indent: 16,
-                          endIndent: 16,
-                          color: AppColors.border,
-                        ),
-                        itemBuilder: (context, index) {
-                          final tx = items[index];
-                          return TransactionTile(
-                            transaction: tx,
-                            onTap: () =>
-                                context.go('/transactions/${tx.id}'),
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: _PremiumCard(
+                  child: transactions.when(
+                    data: (page) {
+                      if (page.data.isEmpty) {
+                        return const _EmptyTransactionsState();
+                      }
+                      final items = page.data.take(8).toList();
+                      return Column(
+                        children: items.asMap().entries.map((entry) {
+                          final index = entry.key;
+                          final tx = entry.value;
+                          return Column(
+                            children: [
+                              if (index > 0)
+                                const Divider(
+                                  height: 1,
+                                  indent: 16,
+                                  endIndent: 16,
+                                  color: AppColors.border,
+                                ),
+                              TransactionTile(
+                                transaction: tx,
+                                onTap: () =>
+                                    context.go('/transactions/${tx.id}'),
+                              ),
+                            ],
                           );
-                        },
-                      ),
-                    );
-                  },
-                  loading: () => const Padding(
-                    padding: EdgeInsets.all(32),
-                    child: Center(
-                      child: CircularProgressIndicator(
-                        color: AppColors.accent,
-                        strokeWidth: 2,
-                      ),
-                    ),
-                  ),
-                  error: (e, _) => Padding(
-                    padding: const EdgeInsets.all(32),
-                    child: Center(
-                      child: Text(
-                        'Failed to load transactions',
-                        style: TextStyle(color: AppColors.textTertiary),
-                      ),
-                    ),
+                        }).toList(),
+                      );
+                    },
+                    loading: () => const _TransactionsLoading(),
+                    error: (e, _) => _TransactionsError(error: e.toString()),
                   ),
                 ),
               ),
@@ -293,7 +265,76 @@ class DashboardScreen extends ConsumerWidget {
   }
 }
 
-// ── 4 Metric Cards Grid ───────────────────────────────────────
+class _PremiumCard extends StatelessWidget {
+  final String? title;
+  final String? subtitle;
+  final Widget child;
+
+  const _PremiumCard({this.title, this.subtitle, required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: AppColors.border.withValues(alpha: 0.5)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (title != null)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(24, 24, 24, 0),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          title!,
+                          style: const TextStyle(
+                            fontSize: 17,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.textPrimary,
+                          ),
+                        ),
+                        if (subtitle != null) ...[
+                          const SizedBox(height: 4),
+                          Text(
+                            subtitle!,
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: AppColors.textTertiary.withValues(
+                                alpha: 0.8,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          if (title != null) const SizedBox(height: 20),
+          child,
+          if (title != null) const SizedBox(height: 24),
+        ],
+      ),
+    );
+  }
+}
+
+// ── Metric Cards Grid with Fixed Sizing ──────────────────────────
 class _MetricCardsGrid extends StatelessWidget {
   final AsyncValue<List<LinkedAccount>> accounts;
   final AsyncValue<TransactionPage> transactions;
@@ -309,69 +350,88 @@ class _MetricCardsGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final accountsCard = accounts.when(
-      data: (accts) =>
-          _MetricCard(label: 'ACCOUNTS', value: '${accts.length}'),
-      loading: () => const _MetricCardLoading(),
-      error: (e, _) => _MetricCardError(error: e.toString()),
-    );
+    // Use LayoutBuilder for consistent sizing
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final cardWidth = narrow
+            ? (constraints.maxWidth - 12) / 2
+            : (constraints.maxWidth - 36) / 4;
 
-    final txCountCard = transactions.when(
-      data: (page) => _MetricCard(label: 'TRANSACTIONS', value: '${page.total}'),
-      loading: () => const _MetricCardLoading(),
-      error: (e, _) => _MetricCardError(error: e.toString()),
-    );
-
-    final spendingCard = categories.when(
-      data: (cats) {
-        int totalCents = 0;
-        for (final c in cats) {
-          totalCents += c.totalCents.abs();
+        Widget buildCard(Widget child) {
+          return SizedBox(width: cardWidth, child: child);
         }
-        return _MetricCard(
-          label: 'TOTAL SPENDING',
-          value: '\$${(totalCents / 100).toStringAsFixed(0)}',
+
+        final cards = [
+          buildCard(
+            accounts.when(
+              data: (accts) => _MetricCard(
+                label: 'ACCOUNTS',
+                value: '${accts.length}',
+                icon: Icons.account_balance_wallet_outlined,
+                color: AppColors.info,
+              ),
+              loading: () => const _MetricCardLoading(),
+              error: (e, _) => _MetricCardError(error: e.toString()),
+            ),
+          ),
+          buildCard(
+            transactions.when(
+              data: (page) => _MetricCard(
+                label: 'TRANSACTIONS',
+                value: '${page.total}',
+                icon: Icons.receipt_long_outlined,
+                color: AppColors.accent,
+              ),
+              loading: () => const _MetricCardLoading(),
+              error: (e, _) => _MetricCardError(error: e.toString()),
+            ),
+          ),
+          buildCard(
+            categories.when(
+              data: (cats) {
+                int totalCents = 0;
+                for (final c in cats) {
+                  totalCents += c.totalCents.abs();
+                }
+                return _MetricCard(
+                  label: 'TOTAL SPENT',
+                  value: '\$${(totalCents / 100).toStringAsFixed(0)}',
+                  icon: Icons.trending_down_rounded,
+                  color: AppColors.negative,
+                );
+              },
+              loading: () => const _MetricCardLoading(),
+              error: (e, _) => _MetricCardError(error: e.toString()),
+            ),
+          ),
+          buildCard(_buildAvgCard()),
+        ];
+
+        if (narrow) {
+          return Column(
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [cards[0], cards[1]],
+              ),
+              const SizedBox(height: 12),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [cards[2], cards[3]],
+              ),
+            ],
+          );
+        }
+
+        return Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: cards,
         );
       },
-      loading: () => const _MetricCardLoading(),
-      error: (e, _) => _MetricCardError(error: e.toString()),
-    );
-
-    final avgCard = _buildAvgCard();
-
-    if (narrow) {
-      return Column(
-        children: [
-          Row(children: [
-            Expanded(child: accountsCard),
-            const SizedBox(width: 12),
-            Expanded(child: txCountCard),
-          ]),
-          const SizedBox(height: 12),
-          Row(children: [
-            Expanded(child: spendingCard),
-            const SizedBox(width: 12),
-            Expanded(child: avgCard),
-          ]),
-        ],
-      );
-    }
-
-    return Row(
-      children: [
-        Expanded(child: accountsCard),
-        const SizedBox(width: 12),
-        Expanded(child: txCountCard),
-        const SizedBox(width: 12),
-        Expanded(child: spendingCard),
-        const SizedBox(width: 12),
-        Expanded(child: avgCard),
-      ],
     );
   }
 
   Widget _buildAvgCard() {
-    // Need both categories (for total) and transactions (for count)
     return categories.when(
       data: (cats) {
         return transactions.when(
@@ -385,6 +445,8 @@ class _MetricCardsGrid extends StatelessWidget {
             return _MetricCard(
               label: 'AVG TRANSACTION',
               value: '\$${avg.toStringAsFixed(0)}',
+              icon: Icons.calculate_outlined,
+              color: AppColors.positive,
             );
           },
           loading: () => const _MetricCardLoading(),
@@ -397,14 +459,17 @@ class _MetricCardsGrid extends StatelessWidget {
   }
 }
 
-// ── Metric Card ────────────────────────────────────────────────
 class _MetricCard extends StatelessWidget {
   final String label;
   final String value;
+  final IconData icon;
+  final Color color;
 
   const _MetricCard({
     required this.label,
     required this.value,
+    required this.icon,
+    required this.color,
   });
 
   @override
@@ -413,18 +478,42 @@ class _MetricCard extends StatelessWidget {
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: AppColors.surface,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.border),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: AppColors.border.withValues(alpha: 0.5)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.02),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  color.withValues(alpha: 0.15),
+                  color.withValues(alpha: 0.08),
+                ],
+              ),
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: Icon(icon, size: 22, color: color),
+          ),
+          const SizedBox(height: 16),
           Text(
             label,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 11,
-              fontWeight: FontWeight.w600,
-              color: AppColors.textTertiary,
+              fontWeight: FontWeight.w700,
+              color: AppColors.textTertiary.withValues(alpha: 0.8),
               letterSpacing: 1.2,
             ),
           ),
@@ -432,10 +521,10 @@ class _MetricCard extends StatelessWidget {
           Text(
             value,
             style: const TextStyle(
-              fontSize: 28,
+              fontSize: 26,
               fontWeight: FontWeight.w700,
               color: AppColors.textPrimary,
-              letterSpacing: -1.0,
+              letterSpacing: -1,
             ),
           ),
         ],
@@ -449,18 +538,15 @@ class _MetricCardLoading extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      height: 90,
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.border),
-      ),
-      child: const Center(
-        child: CircularProgressIndicator(
-          color: AppColors.accent,
-          strokeWidth: 2,
+    return Shimmer.fromColors(
+      baseColor: AppColors.surfaceContainerHigh,
+      highlightColor: AppColors.surface,
+      child: Container(
+        padding: const EdgeInsets.all(20),
+        height: 140,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
         ),
       ),
     );
@@ -475,16 +561,234 @@ class _MetricCardError extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(20),
+      height: 140,
       decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.negative.withValues(alpha: 0.3)),
+        color: AppColors.negativeLight,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: AppColors.negative.withValues(alpha: 0.2)),
       ),
-      child: Text(
-        error,
-        style: const TextStyle(fontSize: 12, color: AppColors.negative),
-        maxLines: 2,
-        overflow: TextOverflow.ellipsis,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Icon(Icons.error_outline, color: AppColors.negative, size: 22),
+          const SizedBox(height: 12),
+          Text(
+            error,
+            style: const TextStyle(fontSize: 12, color: AppColors.negative),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ChartLoading extends StatelessWidget {
+  const _ChartLoading();
+
+  @override
+  Widget build(BuildContext context) {
+    return Shimmer.fromColors(
+      baseColor: AppColors.surfaceContainerHigh,
+      highlightColor: AppColors.surface,
+      child: Row(
+        children: [
+          Expanded(
+            flex: 5,
+            child: AspectRatio(
+              aspectRatio: 1,
+              child: Container(
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  shape: BoxShape.circle,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(width: 24),
+          Expanded(
+            flex: 6,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: List.generate(
+                6,
+                (index) => Container(
+                  margin: const EdgeInsets.symmetric(vertical: 6),
+                  height: 16,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ChartError extends StatelessWidget {
+  final String error;
+  const _ChartError({required this.error});
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            Icons.pie_chart_outline,
+            size: 48,
+            color: AppColors.textTertiary.withValues(alpha: 0.5),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            'Failed to load chart',
+            style: TextStyle(
+              color: AppColors.textTertiary.withValues(alpha: 0.8),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _EmptyTransactionsState extends StatelessWidget {
+  const _EmptyTransactionsState();
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(40),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 80,
+              height: 80,
+              decoration: BoxDecoration(
+                color: AppColors.surfaceContainerHigh,
+                borderRadius: BorderRadius.circular(24),
+              ),
+              child: Icon(
+                Icons.receipt_long_outlined,
+                size: 36,
+                color: AppColors.textTertiary.withValues(alpha: 0.5),
+              ),
+            ),
+            const SizedBox(height: 20),
+            Text(
+              'No transactions yet',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: AppColors.textSecondary.withValues(alpha: 0.8),
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Sync your accounts to import data',
+              style: TextStyle(
+                fontSize: 13,
+                color: AppColors.textTertiary.withValues(alpha: 0.7),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _TransactionsLoading extends StatelessWidget {
+  const _TransactionsLoading();
+
+  @override
+  Widget build(BuildContext context) {
+    return Shimmer.fromColors(
+      baseColor: AppColors.surfaceContainerHigh,
+      highlightColor: AppColors.surface,
+      child: Column(
+        children: List.generate(
+          5,
+          (index) => Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            child: Row(
+              children: [
+                Container(
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        height: 16,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Container(
+                        height: 12,
+                        width: 100,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _TransactionsError extends StatelessWidget {
+  final String error;
+  const _TransactionsError({required this.error});
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(
+              Icons.error_outline,
+              size: 40,
+              color: AppColors.negative,
+            ),
+            const SizedBox(height: 12),
+            Text(
+              'Failed to load transactions',
+              style: TextStyle(
+                color: AppColors.textSecondary.withValues(alpha: 0.8),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -505,49 +809,73 @@ class _DesktopSidebar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: const BoxDecoration(
-        border: Border(left: BorderSide(color: AppColors.border)),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        border: Border(
+          left: BorderSide(color: AppColors.border.withValues(alpha: 0.5)),
+        ),
       ),
       child: ListView(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(24),
         children: [
           const Text(
             'Summary',
             style: TextStyle(
-              fontSize: 15,
+              fontSize: 20,
               fontWeight: FontWeight.w600,
               color: AppColors.textPrimary,
             ),
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 24),
           Container(
-            padding: const EdgeInsets.all(20),
+            padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              color: AppColors.surface,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: AppColors.border),
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [AppColors.surfaceContainerHigh, AppColors.surface],
+              ),
+              borderRadius: BorderRadius.circular(24),
+              border: Border.all(
+                color: AppColors.border.withValues(alpha: 0.5),
+              ),
             ),
             child: Column(
               children: [
                 accounts.when(
                   data: (accts) => _SummaryRow(
-                      label: 'Total Accounts',
-                      value: '${accts.length}'),
-                  loading: () =>
-                      const _SummaryRow(label: 'Total Accounts', value: '...'),
-                  error: (_, __) =>
-                      const _SummaryRow(label: 'Total Accounts', value: '--'),
+                    label: 'Total Accounts',
+                    value: '${accts.length}',
+                    icon: Icons.account_balance_wallet_outlined,
+                  ),
+                  loading: () => const _SummaryRowLoading(),
+                  error: (_, __) => const _SummaryRow(
+                    label: 'Total Accounts',
+                    value: '--',
+                    icon: Icons.account_balance_wallet_outlined,
+                  ),
                 ),
-                const Divider(color: AppColors.border, height: 20),
+                const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 16),
+                  child: Divider(color: AppColors.border),
+                ),
                 transactions.when(
                   data: (page) => _SummaryRow(
-                      label: 'Total Transactions', value: '${page.total}'),
-                  loading: () => const _SummaryRow(
-                      label: 'Total Transactions', value: '...'),
+                    label: 'Total Transactions',
+                    value: '${page.total}',
+                    icon: Icons.receipt_long_outlined,
+                  ),
+                  loading: () => const _SummaryRowLoading(),
                   error: (_, __) => const _SummaryRow(
-                      label: 'Total Transactions', value: '--'),
+                    label: 'Total Transactions',
+                    value: '--',
+                    icon: Icons.receipt_long_outlined,
+                  ),
                 ),
-                const Divider(color: AppColors.border, height: 20),
+                const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 16),
+                  child: Divider(color: AppColors.border),
+                ),
                 categories.when(
                   data: (cats) {
                     int totalCents = 0;
@@ -556,16 +884,22 @@ class _DesktopSidebar extends StatelessWidget {
                     }
                     return _SummaryRow(
                       label: 'Total Spending',
-                      value:
-                          '\$${(totalCents / 100).toStringAsFixed(2)}',
+                      value: '\$${(totalCents / 100).toStringAsFixed(2)}',
+                      icon: Icons.trending_down_rounded,
+                      valueColor: AppColors.negative,
                     );
                   },
-                  loading: () => const _SummaryRow(
-                      label: 'Total Spending', value: '...'),
+                  loading: () => const _SummaryRowLoading(),
                   error: (_, __) => const _SummaryRow(
-                      label: 'Total Spending', value: '--'),
+                    label: 'Total Spending',
+                    value: '--',
+                    icon: Icons.trending_down_rounded,
+                  ),
                 ),
-                const Divider(color: AppColors.border, height: 20),
+                const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 16),
+                  child: Divider(color: AppColors.border),
+                ),
                 _buildAvgRow(),
               ],
             ),
@@ -589,18 +923,23 @@ class _DesktopSidebar extends StatelessWidget {
             return _SummaryRow(
               label: 'Avg Transaction',
               value: '\$${avg.toStringAsFixed(2)}',
+              icon: Icons.calculate_outlined,
             );
           },
-          loading: () =>
-              const _SummaryRow(label: 'Avg Transaction', value: '...'),
-          error: (_, __) =>
-              const _SummaryRow(label: 'Avg Transaction', value: '--'),
+          loading: () => const _SummaryRowLoading(),
+          error: (_, __) => const _SummaryRow(
+            label: 'Avg Transaction',
+            value: '--',
+            icon: Icons.calculate_outlined,
+          ),
         );
       },
-      loading: () =>
-          const _SummaryRow(label: 'Avg Transaction', value: '...'),
-      error: (_, __) =>
-          const _SummaryRow(label: 'Avg Transaction', value: '--'),
+      loading: () => const _SummaryRowLoading(),
+      error: (_, __) => const _SummaryRow(
+        label: 'Avg Transaction',
+        value: '--',
+        icon: Icons.calculate_outlined,
+      ),
     );
   }
 }
@@ -608,29 +947,92 @@ class _DesktopSidebar extends StatelessWidget {
 class _SummaryRow extends StatelessWidget {
   final String label;
   final String value;
-  const _SummaryRow({required this.label, required this.value});
+  final IconData icon;
+  final Color? valueColor;
+
+  const _SummaryRow({
+    required this.label,
+    required this.value,
+    required this.icon,
+    this.valueColor,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(
-          label,
-          style: const TextStyle(
-            fontSize: 13,
-            color: AppColors.textSecondary,
+        Container(
+          width: 44,
+          height: 44,
+          decoration: BoxDecoration(
+            color: AppColors.accent.withValues(alpha: 0.08),
+            borderRadius: BorderRadius.circular(14),
+          ),
+          child: Icon(icon, size: 22, color: AppColors.accent),
+        ),
+        const SizedBox(width: 16),
+        Expanded(
+          child: Text(
+            label,
+            style: const TextStyle(
+              fontSize: 14,
+              color: AppColors.textSecondary,
+            ),
           ),
         ),
         Text(
           value,
-          style: const TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-            color: AppColors.textPrimary,
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w700,
+            color: valueColor ?? AppColors.textPrimary,
+            letterSpacing: -0.3,
           ),
         ),
       ],
+    );
+  }
+}
+
+class _SummaryRowLoading extends StatelessWidget {
+  const _SummaryRowLoading();
+
+  @override
+  Widget build(BuildContext context) {
+    return Shimmer.fromColors(
+      baseColor: AppColors.surfaceContainerHigh,
+      highlightColor: AppColors.surface,
+      child: Row(
+        children: [
+          Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(14),
+            ),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Container(
+              height: 16,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+          ),
+          const SizedBox(width: 16),
+          Container(
+            width: 60,
+            height: 16,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(8),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
