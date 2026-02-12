@@ -47,6 +47,9 @@ app.*.map.json
 # Data files (contain personal financial data)
 server/data/
 
+# User-customizable default category rules
+server/default_category_rules.json
+
 # Compiled Dart
 *.dill
 

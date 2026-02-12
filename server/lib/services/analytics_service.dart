@@ -14,6 +14,11 @@ List<CleanTransaction> _applyFilters(
     List<CleanTransaction> transactions, Filters filters) {
   var filtered = transactions;
 
+  // Only include expenses (negative amounts) and exclude transfers
+  filtered = filtered
+      .where((tx) => tx.amount < 0 && tx.category != 'Transfer')
+      .toList();
+
   if (filters.startDate != null) {
     filtered = filtered.where((tx) => tx.date.compareTo(filters.startDate!) >= 0).toList();
   }

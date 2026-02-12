@@ -14,6 +14,7 @@ dependencies:
   shelf_static: ^1.1.2
   http: ^1.2.0
   path: ^1.9.0
+  archive: ^3.6.1
 
 dev_dependencies:
   lints: ^4.0.0

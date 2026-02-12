@@ -4,6 +4,7 @@ import 'package:shelf/shelf_io.dart' as io;
 import 'package:shelf_router/shelf_router.dart';
 import 'package:shelf_static/shelf_static.dart';
 import 'package:path/path.dart' as p;
+import 'package:archive/archive_io.dart';
 import 'package:finance_server/config.dart';
 import 'package:finance_server/store/json_store.dart';
 import 'package:finance_server/routes/accounts.dart';
@@ -12,7 +13,7 @@ import 'package:finance_server/routes/sync.dart';
 import 'package:finance_server/routes/analytics.dart';
 import 'package:finance_server/routes/balances.dart';
 import 'package:finance_server/services/cleaning_service.dart';
-import 'package:finance_server/category_rules.dart';
+import 'package:minister_shared/models/account.dart';
 import 'dart:convert';
 
 Middleware corsMiddleware() {
@@ -80,37 +81,8 @@ void main() async {
   // Category management routes - inline handlers
   app.get('/api/categories', (Request request) {
     final userRules = loadCategoryRules();
-    final deletedDefaults = loadDeletedDefaults();
-
-    // Convert default rules to JSON format
-    final rulesJson = <Map<String, dynamic>>[];
-
-    // Add user-defined rules first
-    for (final rule in userRules) {
-      rulesJson.add(rule.toJson());
-    }
-
-    // Add default rules (with generated IDs), excluding deleted ones
-    final seenPatterns = <String>{};
-    for (var i = 0; i < defaultCategoryRules.length; i++) {
-      final rule = defaultCategoryRules[i];
-      final pattern = rule.key.pattern;
-      final defaultId = 'default_$i';
-      if (!seenPatterns.contains(pattern) &&
-          !deletedDefaults.contains(defaultId)) {
-        seenPatterns.add(pattern);
-        rulesJson.add({
-          'id': defaultId,
-          'category': rule.value,
-          'pattern': pattern,
-          'caseSensitive': false,
-          'isDefault': true,
-        });
-      }
-    }
-
     return Response.ok(
-      jsonEncode(rulesJson),
+      jsonEncode(userRules.map((r) => r.toJson()).toList()),
       headers: {'Content-Type': 'application/json'},
     );
   });
@@ -190,28 +162,6 @@ void main() async {
       final category = json['category'] as String?;
       final caseSensitive = json['caseSensitive'] as bool?;
 
-      // If it's a default rule, create a new user rule instead
-      if (id.startsWith('default_')) {
-        final defaultIndex = int.tryParse(id.replaceFirst('default_', ''));
-        if (defaultIndex != null &&
-            defaultIndex < defaultCategoryRules.length) {
-          final defaultRule = defaultCategoryRules[defaultIndex];
-          final newRule = CategoryRule(
-            id: DateTime.now().millisecondsSinceEpoch.toString(),
-            category: category ?? defaultRule.value,
-            pattern: pattern ?? defaultRule.key.pattern,
-            caseSensitive: caseSensitive ?? false,
-          );
-          rules.add(newRule);
-          saveCategoryRules(rules);
-          cleanAllTransactions();
-          return Response.ok(
-            jsonEncode(newRule.toJson()),
-            headers: {'Content-Type': 'application/json'},
-          );
-        }
-      }
-
       if (index == -1) {
         return Response.notFound(
           jsonEncode({'error': 'Category rule not found'}),
@@ -247,18 +197,6 @@ void main() async {
       final rules = loadCategoryRules();
       final initialLength = rules.length;
       rules.removeWhere((r) => r.id == id);
-
-      // If it was a default rule, add to deleted defaults list
-      if (id.startsWith('default_')) {
-        final deletedDefaults = loadDeletedDefaults();
-        deletedDefaults.add(id);
-        saveDeletedDefaults(deletedDefaults);
-        cleanAllTransactions();
-        return Response.ok(
-          jsonEncode({'success': true}),
-          headers: {'Content-Type': 'application/json'},
-        );
-      }
 
       if (rules.length == initialLength) {
         return Response.notFound(
@@ -326,6 +264,268 @@ void main() async {
 
       return Response.ok(
         jsonEncode({'success': true, 'category': category}),
+        headers: {'Content-Type': 'application/json'},
+      );
+    } catch (e) {
+      return Response.internalServerError(
+        body: jsonEncode({'error': e.toString()}),
+        headers: {'Content-Type': 'application/json'},
+      );
+    }
+  });
+
+  // Settings routes
+  app.post('/api/settings/reset-category-rules', (Request request) async {
+    try {
+      final defaultRules = loadDefaultCategoryRules();
+      if (defaultRules.isEmpty) {
+        return Response.badRequest(
+          body: jsonEncode({'error': 'No default rules available'}),
+          headers: {'Content-Type': 'application/json'},
+        );
+      }
+      saveCategoryRules(defaultRules);
+      saveDeletedDefaults({}); // Clear deleted defaults
+      cleanAllTransactions();
+      return Response.ok(
+        jsonEncode({
+          'success': true,
+          'count': defaultRules.length,
+          'message': 'Reset to ${defaultRules.length} default rules'
+        }),
+        headers: {'Content-Type': 'application/json'},
+      );
+    } catch (e) {
+      return Response.internalServerError(
+        body: jsonEncode({'error': e.toString()}),
+        headers: {'Content-Type': 'application/json'},
+      );
+    }
+  });
+
+  app.post('/api/settings/clear-category-rules', (Request request) async {
+    try {
+      saveCategoryRules([]);
+      saveDeletedDefaults({}); // Clear deleted defaults
+      cleanAllTransactions();
+      return Response.ok(
+        jsonEncode({'success': true, 'message': 'Cleared all category rules'}),
+        headers: {'Content-Type': 'application/json'},
+      );
+    } catch (e) {
+      return Response.internalServerError(
+        body: jsonEncode({'error': e.toString()}),
+        headers: {'Content-Type': 'application/json'},
+      );
+    }
+  });
+
+  app.post('/api/settings/recategorize', (Request request) async {
+    try {
+      cleanAllTransactions();
+      return Response.ok(
+        jsonEncode({'success': true, 'message': 'Re-categorization complete'}),
+        headers: {'Content-Type': 'application/json'},
+      );
+    } catch (e) {
+      return Response.internalServerError(
+        body: jsonEncode({'error': e.toString()}),
+        headers: {'Content-Type': 'application/json'},
+      );
+    }
+  });
+
+  app.post('/api/settings/clear-overrides', (Request request) async {
+    try {
+      saveOverrides({});
+      cleanAllTransactions();
+      return Response.ok(
+        jsonEncode({'success': true, 'message': 'Cleared all category overrides'}),
+        headers: {'Content-Type': 'application/json'},
+      );
+    } catch (e) {
+      return Response.internalServerError(
+        body: jsonEncode({'error': e.toString()}),
+        headers: {'Content-Type': 'application/json'},
+      );
+    }
+  });
+
+  app.post('/api/settings/clear-transactions', (Request request) async {
+    try {
+      saveTransactions([]);
+      saveCleanTransactions([]);
+      saveOverrides({});
+      return Response.ok(
+        jsonEncode({'success': true, 'message': 'Cleared all transaction data'}),
+        headers: {'Content-Type': 'application/json'},
+      );
+    } catch (e) {
+      return Response.internalServerError(
+        body: jsonEncode({'error': e.toString()}),
+        headers: {'Content-Type': 'application/json'},
+      );
+    }
+  });
+
+  app.post('/api/settings/unlink-accounts', (Request request) async {
+    try {
+      writeAccountData(AccountData());
+      return Response.ok(
+        jsonEncode({'success': true, 'message': 'Unlinked all accounts'}),
+        headers: {'Content-Type': 'application/json'},
+      );
+    } catch (e) {
+      return Response.internalServerError(
+        body: jsonEncode({'error': e.toString()}),
+        headers: {'Content-Type': 'application/json'},
+      );
+    }
+  });
+
+  app.get('/api/settings/stats', (Request request) {
+    try {
+      final transactions = loadTransactions();
+      final cleanTransactions = loadCleanTransactions();
+      final rules = loadCategoryRules();
+      final defaultRules = loadDefaultCategoryRules();
+      final overrides = loadOverrides();
+      final accounts = readAccountData();
+      return Response.ok(
+        jsonEncode({
+          'transactions': transactions.length,
+          'cleanTransactions': cleanTransactions.length,
+          'categoryRules': rules.length,
+          'defaultRules': defaultRules.length,
+          'overrides': overrides.length,
+          'accounts': accounts.accounts.length,
+        }),
+        headers: {'Content-Type': 'application/json'},
+      );
+    } catch (e) {
+      return Response.internalServerError(
+        body: jsonEncode({'error': e.toString()}),
+        headers: {'Content-Type': 'application/json'},
+      );
+    }
+  });
+
+  app.get('/api/settings/backup', (Request request) {
+    try {
+      final dataDir = Directory(p.join(serverRoot, 'data'));
+      if (!dataDir.existsSync()) {
+        return Response.notFound(
+          jsonEncode({'error': 'Data directory not found'}),
+          headers: {'Content-Type': 'application/json'},
+        );
+      }
+
+      // Create zip archive
+      final encoder = ZipFileEncoder();
+      final timestamp = DateTime.now().toIso8601String().replaceAll(':', '-');
+      final tempZip = File(p.join(Directory.systemTemp.path, 'minister-backup-$timestamp.zip'));
+      encoder.create(tempZip.path);
+      encoder.addDirectory(dataDir);
+      encoder.close();
+
+      // Read zip file
+      final zipBytes = tempZip.readAsBytesSync();
+      tempZip.deleteSync();
+
+      return Response.ok(
+        zipBytes,
+        headers: {
+          'Content-Type': 'application/zip',
+          'Content-Disposition': 'attachment; filename="minister-backup-$timestamp.zip"',
+        },
+      );
+    } catch (e) {
+      return Response.internalServerError(
+        body: jsonEncode({'error': e.toString()}),
+        headers: {'Content-Type': 'application/json'},
+      );
+    }
+  });
+
+  app.post('/api/settings/restore', (Request request) async {
+    try {
+      final bytes = await request.read().expand((chunk) => chunk).toList();
+      if (bytes.isEmpty) {
+        return Response.badRequest(
+          body: jsonEncode({'error': 'No file uploaded'}),
+          headers: {'Content-Type': 'application/json'},
+        );
+      }
+
+      // Save uploaded file temporarily
+      final tempZip = File(p.join(Directory.systemTemp.path, 'minister-restore-${DateTime.now().millisecondsSinceEpoch}.zip'));
+      await tempZip.writeAsBytes(bytes);
+
+      // Extract to data directory
+      final dataDir = Directory(p.join(serverRoot, 'data'));
+      if (dataDir.existsSync()) {
+        // Backup existing data first
+        final backupDir = Directory(p.join(serverRoot, 'data-backup-${DateTime.now().millisecondsSinceEpoch}'));
+        await dataDir.rename(backupDir.path);
+      }
+      dataDir.createSync(recursive: true);
+
+      // Extract zip
+      final archive = ZipDecoder().decodeBytes(tempZip.readAsBytesSync());
+      for (final file in archive) {
+        final filename = file.name;
+        if (file.isFile) {
+          final data = file.content as List<int>;
+          final outFile = File(p.join(dataDir.path, filename));
+          outFile.createSync(recursive: true);
+          await outFile.writeAsBytes(data);
+        }
+      }
+
+      tempZip.deleteSync();
+
+      return Response.ok(
+        jsonEncode({
+          'success': true,
+          'message': 'Data restored successfully',
+          'filesRestored': archive.length,
+        }),
+        headers: {'Content-Type': 'application/json'},
+      );
+    } catch (e) {
+      return Response.internalServerError(
+        body: jsonEncode({'error': e.toString()}),
+        headers: {'Content-Type': 'application/json'},
+      );
+    }
+  });
+
+  app.get('/api/categories/should-import', (Request request) {
+    final rules = loadCategoryRules();
+    final shouldImport = rules.isEmpty;
+    return Response.ok(
+      jsonEncode({'shouldImport': shouldImport, 'count': rules.length}),
+      headers: {'Content-Type': 'application/json'},
+    );
+  });
+
+  app.post('/api/categories/import-defaults', (Request request) async {
+    try {
+      final defaultRules = loadDefaultCategoryRules();
+      if (defaultRules.isEmpty) {
+        return Response.badRequest(
+          body: jsonEncode({'error': 'No default rules available to import'}),
+          headers: {'Content-Type': 'application/json'},
+        );
+      }
+      saveCategoryRules(defaultRules);
+      cleanAllTransactions();
+      return Response.ok(
+        jsonEncode({
+          'success': true,
+          'imported': defaultRules.length,
+          'message': 'Imported ${defaultRules.length} default rules'
+        }),
         headers: {'Content-Type': 'application/json'},
       );
     } catch (e) {

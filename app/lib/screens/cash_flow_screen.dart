@@ -248,7 +248,8 @@ class _CashFlowScreenState extends ConsumerState<CashFlowScreen>
       final amount = (tx.data['amount'] as int?) ?? 0;
       final category = tx.data['category'] as String? ?? 'Uncategorized';
 
-      if (amount < 0) {
+      // Only include expenses (negative amounts) and exclude transfers
+      if (amount < 0 && category != 'Transfer') {
         final absAmount = amount.abs();
         totalSpending += absAmount;
         categoryTotals[category] = (categoryTotals[category] ?? 0) + absAmount;
@@ -314,7 +315,8 @@ class _CashFlowScreenState extends ConsumerState<CashFlowScreen>
         .where(
           (tx) =>
               (tx.data['amount'] as int?) != null &&
-              (tx.data['amount'] as int) < 0,
+              (tx.data['amount'] as int) < 0 &&
+              (tx.data['category'] as String?) != 'Transfer',
         )
         .length;
     final avgSpending = avgPerTransaction > 0

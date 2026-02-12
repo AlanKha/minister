@@ -217,6 +217,22 @@ class ApiClient {
     }
   }
 
+  Future<Map<String, dynamic>> shouldImportDefaults() async {
+    final response = await _client.get(_uri('/api/categories/should-import'));
+    return jsonDecode(response.body) as Map<String, dynamic>;
+  }
+
+  Future<Map<String, dynamic>> importDefaultRules() async {
+    final response = await _client.post(_uri('/api/categories/import-defaults'));
+
+    if (response.statusCode >= 400) {
+      final errorBody = jsonDecode(response.body) as Map<String, dynamic>;
+      throw Exception(errorBody['error'] ?? 'Failed to import defaults');
+    }
+
+    return jsonDecode(response.body) as Map<String, dynamic>;
+  }
+
   Future<List<CleanTransaction>> getUncategorizedTransactions() async {
     final response = await _client.get(_uri('/api/transactions/uncategorized'));
     return (jsonDecode(response.body) as List<dynamic>)
@@ -260,5 +276,84 @@ class ApiClient {
         'rulePattern': rulePattern,
       }),
     );
+  }
+
+  // Settings
+  Future<Map<String, dynamic>> resetCategoryRules() async {
+    final response = await _client.post(_uri('/api/settings/reset-category-rules'));
+    if (response.statusCode >= 400) {
+      final errorBody = jsonDecode(response.body) as Map<String, dynamic>;
+      throw Exception(errorBody['error'] ?? 'Failed to reset rules');
+    }
+    return jsonDecode(response.body) as Map<String, dynamic>;
+  }
+
+  Future<Map<String, dynamic>> clearCategoryRules() async {
+    final response = await _client.post(_uri('/api/settings/clear-category-rules'));
+    if (response.statusCode >= 400) {
+      final errorBody = jsonDecode(response.body) as Map<String, dynamic>;
+      throw Exception(errorBody['error'] ?? 'Failed to clear rules');
+    }
+    return jsonDecode(response.body) as Map<String, dynamic>;
+  }
+
+  Future<Map<String, dynamic>> recategorizeTransactions() async {
+    final response = await _client.post(_uri('/api/settings/recategorize'));
+    if (response.statusCode >= 400) {
+      final errorBody = jsonDecode(response.body) as Map<String, dynamic>;
+      throw Exception(errorBody['error'] ?? 'Failed to recategorize');
+    }
+    return jsonDecode(response.body) as Map<String, dynamic>;
+  }
+
+  Future<Map<String, dynamic>> clearCategoryOverrides() async {
+    final response = await _client.post(_uri('/api/settings/clear-overrides'));
+    if (response.statusCode >= 400) {
+      final errorBody = jsonDecode(response.body) as Map<String, dynamic>;
+      throw Exception(errorBody['error'] ?? 'Failed to clear overrides');
+    }
+    return jsonDecode(response.body) as Map<String, dynamic>;
+  }
+
+  Future<Map<String, dynamic>> clearTransactions() async {
+    final response = await _client.post(_uri('/api/settings/clear-transactions'));
+    if (response.statusCode >= 400) {
+      final errorBody = jsonDecode(response.body) as Map<String, dynamic>;
+      throw Exception(errorBody['error'] ?? 'Failed to clear transactions');
+    }
+    return jsonDecode(response.body) as Map<String, dynamic>;
+  }
+
+  Future<Map<String, dynamic>> unlinkAccounts() async {
+    final response = await _client.post(_uri('/api/settings/unlink-accounts'));
+    if (response.statusCode >= 400) {
+      final errorBody = jsonDecode(response.body) as Map<String, dynamic>;
+      throw Exception(errorBody['error'] ?? 'Failed to unlink accounts');
+    }
+    return jsonDecode(response.body) as Map<String, dynamic>;
+  }
+
+  Future<Map<String, dynamic>> getStats() async {
+    final response = await _client.get(_uri('/api/settings/stats'));
+    return jsonDecode(response.body) as Map<String, dynamic>;
+  }
+
+  String getBackupUrl() {
+    return '$apiBaseUrl/api/settings/backup';
+  }
+
+  Future<Map<String, dynamic>> restoreBackup(List<int> zipBytes) async {
+    final response = await _client.post(
+      _uri('/api/settings/restore'),
+      headers: {'Content-Type': 'application/zip'},
+      body: zipBytes,
+    );
+
+    if (response.statusCode >= 400) {
+      final errorBody = jsonDecode(response.body) as Map<String, dynamic>;
+      throw Exception(errorBody['error'] ?? 'Failed to restore backup');
+    }
+
+    return jsonDecode(response.body) as Map<String, dynamic>;
   }
 }

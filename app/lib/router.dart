@@ -11,6 +11,7 @@ import 'screens/categories_screen.dart';
 import 'screens/review_uncategorized_screen.dart';
 import 'screens/connect_account_screen.dart';
 import 'screens/balances_screen.dart';
+import 'screens/settings_screen.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 
@@ -63,6 +64,11 @@ const _navItems = [
     icon: Icons.rule_folder_outlined,
     activeIcon: Icons.rule_folder_rounded,
     label: 'Categories',
+  ),
+  _NavItem(
+    icon: Icons.settings_outlined,
+    activeIcon: Icons.settings,
+    label: 'Settings',
   ),
 ];
 
@@ -461,6 +467,14 @@ final router = GoRouter(
             GoRoute(
               path: '/categories',
               builder: (context, state) => const CategoriesScreen(),
+            ),
+          ],
+        ),
+        StatefulShellBranch(
+          routes: [
+            GoRoute(
+              path: '/settings',
+              builder: (context, state) => const SettingsScreen(),
             ),
           ],
         ),

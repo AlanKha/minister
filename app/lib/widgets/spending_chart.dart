@@ -49,7 +49,7 @@ class _CategoryPieChartState extends State<CategoryPieChart>
       (sum, e) => sum + e.totalCents.abs(),
     );
 
-    // Separate categories into main (>=3%) and small (<3%)
+    // Separate categories into main (>=1%) and small (<1%)
     final mainCategories = <CategoryBreakdown>[];
     final smallCategories = <CategoryBreakdown>[];
 
@@ -57,7 +57,7 @@ class _CategoryPieChartState extends State<CategoryPieChart>
       final pct = grandTotal > 0
           ? (item.totalCents.abs() / grandTotal * 100)
           : 0.0;
-      if (pct >= 3.0) {
+      if (pct >= 1.0) {
         mainCategories.add(item);
       } else {
         smallCategories.add(item);
@@ -91,29 +91,31 @@ class _CategoryPieChartState extends State<CategoryPieChart>
         touchedIndex! >= 0 &&
         touchedIndex! < displayData.length;
 
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
-      child: Stack(
-        clipBehavior: Clip.none,
-        children: [
-          Row(
-            children: [
-              // Interactive Chart
-              Expanded(
-                flex: 7,
-                child: AspectRatio(
-                  aspectRatio: 1,
-                  child: MouseRegion(
-                    onHover: (event) {
-                      setState(() {
-                        mousePosition = event.localPosition;
-                      });
-                    },
-                    onExit: (_) {
-                      setState(() {
-                        mousePosition = null;
-                      });
-                    },
+    return MouseRegion(
+      onHover: (event) {
+        setState(() {
+          mousePosition = event.localPosition;
+        });
+      },
+      onExit: (_) {
+        setState(() {
+          mousePosition = null;
+          touchedIndex = null;
+        });
+      },
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(48, 24, 48, 24),
+        child: Stack(
+          clipBehavior: Clip.none,
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                // Interactive Chart
+                Expanded(
+                  flex: 5,
+                  child: AspectRatio(
+                    aspectRatio: 1,
                     child: AnimatedBuilder(
                       animation: _animationController,
                       builder: (context, child) {
@@ -131,7 +133,7 @@ class _CategoryPieChartState extends State<CategoryPieChart>
                                       colors[item.category] ??
                                       AppColors.textTertiary;
                                   final isTouched = touchedIndex == index;
-                                  final radius = isTouched ? 70.0 : 62.0;
+                                  final radius = isTouched ? 76.0 : 68.0;
 
                                   return PieChartSectionData(
                                     value: item.totalCents.abs().toDouble(),
@@ -142,8 +144,8 @@ class _CategoryPieChartState extends State<CategoryPieChart>
                                         (1 - _animationController.value) * 20,
                                   );
                                 }).toList(),
-                                sectionsSpace: 2,
-                                centerSpaceRadius: 65,
+                                sectionsSpace: 3,
+                                centerSpaceRadius: 100,
                                 pieTouchData: PieTouchData(
                                   touchCallback:
                                       (FlTouchEvent event, pieTouchResponse) {
@@ -175,126 +177,166 @@ class _CategoryPieChartState extends State<CategoryPieChart>
                     ),
                   ),
                 ),
+                const SizedBox(width: 40),
+                // Legend - Multi-column grid
+                Expanded(
+                  flex: 7,
+                  child: Padding(
+                    padding: const EdgeInsets.only(right: 16),
+                    child: _buildLegendGrid(displayData, grandTotal, colors),
+                  ),
+                ),
+              ],
+            ),
+            // Floating tooltip at the top level to render above everything
+            if (isTouched && mousePosition != null)
+              Positioned(
+                left: mousePosition!.dx + 12,
+                top: mousePosition!.dy - 40,
+                child: _buildTooltip(
+                  displayData[touchedIndex!],
+                  grandTotal,
+                  smallCategories,
+                ),
               ),
-              const SizedBox(width: 16),
-              // Legend
-              Expanded(
-                flex: 5,
-                child: SingleChildScrollView(
-                  primary: false,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: displayData.take(8).toList().asMap().entries.map((
-                      entry,
-                    ) {
-                      final index = entry.key;
-                      final item = entry.value;
-                      final color =
-                          colors[item.category] ?? AppColors.textTertiary;
-                      final pct = grandTotal > 0
-                          ? (item.totalCents.abs() / grandTotal * 100)
-                                .toStringAsFixed(1)
-                          : '0.0';
-                      final isHovered = touchedIndex == index;
+          ],
+        ),
+      ),
+    );
+  }
 
-                      return GestureDetector(
-                        onTap: () {
-                          setState(() {
-                            touchedIndex = index;
-                            HapticFeedback.lightImpact();
-                          });
-                        },
-                        child: AnimatedContainer(
-                          duration: const Duration(milliseconds: 200),
-                          margin: const EdgeInsets.symmetric(vertical: 3),
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 10,
-                            vertical: 6,
-                          ),
-                          decoration: BoxDecoration(
-                            color: isHovered
-                                ? AppColors.accent.withValues(alpha: 0.06)
-                                : Colors.transparent,
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: Row(
+  Widget _buildLegendGrid(
+    List<CategoryBreakdown> displayData,
+    int grandTotal,
+    Map<String, Color> colors,
+  ) {
+    // Split into columns
+    final itemsPerColumn = (displayData.length / 3).ceil();
+    final columns = <List<CategoryBreakdown>>[];
+
+    for (var i = 0; i < displayData.length; i += itemsPerColumn) {
+      final end = (i + itemsPerColumn < displayData.length)
+          ? i + itemsPerColumn
+          : displayData.length;
+      columns.add(displayData.sublist(i, end));
+    }
+
+    return SingleChildScrollView(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: columns.map((columnData) {
+          return Expanded(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: columnData.map((item) {
+                final index = displayData.indexOf(item);
+                final color = colors[item.category] ?? AppColors.textTertiary;
+                final pct = grandTotal > 0
+                    ? (item.totalCents.abs() / grandTotal * 100)
+                        .toStringAsFixed(1)
+                    : '0.0';
+                final isHovered = touchedIndex == index;
+
+                return MouseRegion(
+                  onEnter: (_) {
+                    setState(() {
+                      touchedIndex = index;
+                    });
+                  },
+                  child: GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        touchedIndex = index;
+                        HapticFeedback.lightImpact();
+                      });
+                    },
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 150),
+                      margin: const EdgeInsets.only(bottom: 12, right: 12),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 8,
+                      ),
+                      decoration: BoxDecoration(
+                        color: isHovered
+                            ? AppColors.accent.withValues(alpha: 0.08)
+                            : Colors.transparent,
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Row(
                             children: [
                               AnimatedContainer(
-                                duration: const Duration(milliseconds: 200),
-                                width: isHovered ? 12 : 8,
-                                height: isHovered ? 12 : 8,
+                                duration: const Duration(milliseconds: 150),
+                                width: isHovered ? 9 : 7,
+                                height: isHovered ? 9 : 7,
                                 decoration: BoxDecoration(
                                   color: color,
-                                  borderRadius: BorderRadius.circular(
-                                    isHovered ? 6 : 4,
-                                  ),
+                                  shape: BoxShape.circle,
                                 ),
                               ),
-                              const SizedBox(width: 10),
+                              const SizedBox(width: 6),
                               Expanded(
                                 child: Text(
                                   item.category,
                                   style: TextStyle(
-                                    fontSize: 13,
+                                    fontSize: 12,
                                     fontWeight: isHovered
                                         ? FontWeight.w600
                                         : FontWeight.w500,
-                                    color: isHovered
-                                        ? AppColors.textPrimary
-                                        : AppColors.textSecondary,
+                                    color: AppColors.textPrimary,
                                   ),
                                   overflow: TextOverflow.ellipsis,
                                 ),
                               ),
-                              Text(
-                                '$pct%',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: isHovered
-                                      ? FontWeight.w600
-                                      : FontWeight.w500,
-                                  color: isHovered
-                                      ? AppColors.accent
-                                      : AppColors.textTertiary,
-                                ),
-                              ),
-                              const SizedBox(width: 10),
-                              Text(
-                                item.total,
-                                style: TextStyle(
-                                  fontSize: 13,
-                                  fontWeight: isHovered
-                                      ? FontWeight.w700
-                                      : FontWeight.w600,
-                                  color: isHovered
-                                      ? AppColors.textPrimary
-                                      : AppColors.textPrimary,
-                                  letterSpacing: -0.3,
-                                ),
-                              ),
                             ],
                           ),
-                        ),
-                      );
-                    }).toList(),
+                          const SizedBox(height: 1),
+                          Padding(
+                            padding: const EdgeInsets.only(left: 13),
+                            child: Row(
+                              children: [
+                                Flexible(
+                                  child: Text(
+                                    item.total,
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      fontWeight: isHovered
+                                          ? FontWeight.w700
+                                          : FontWeight.w600,
+                                      color: AppColors.textPrimary,
+                                      letterSpacing: -0.2,
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                                const SizedBox(width: 6),
+                                Text(
+                                  '($pct%)',
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    color: AppColors.textTertiary,
+                                    fontWeight: isHovered
+                                        ? FontWeight.w500
+                                        : FontWeight.w400,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
-                ),
-              ),
-            ],
-          ),
-          // Floating tooltip at the top level to render above everything
-          if (isTouched && mousePosition != null)
-            Positioned(
-              left: mousePosition!.dx + 12,
-              top: mousePosition!.dy - 40,
-              child: _buildTooltip(
-                displayData[touchedIndex!],
-                grandTotal,
-                smallCategories,
-              ),
+                );
+              }).toList(),
             ),
-        ],
+          );
+        }).toList(),
       ),
     );
   }
@@ -306,15 +348,20 @@ class _CategoryPieChartState extends State<CategoryPieChart>
         Text(
           '\$${(grandTotal / 100).toStringAsFixed(0)}',
           style: const TextStyle(
-            fontSize: 22,
+            fontSize: 26,
             fontWeight: FontWeight.w700,
             color: AppColors.textPrimary,
-            letterSpacing: -0.5,
+            letterSpacing: -0.8,
           ),
         ),
+        const SizedBox(height: 4),
         const Text(
           'Total',
-          style: TextStyle(fontSize: 12, color: AppColors.textTertiary),
+          style: TextStyle(
+            fontSize: 13,
+            color: AppColors.textTertiary,
+            fontWeight: FontWeight.w500,
+          ),
         ),
       ],
     );
@@ -332,16 +379,16 @@ class _CategoryPieChartState extends State<CategoryPieChart>
     // If this is the "Other" category, show expanded list
     if (item.category == 'Other' && smallCategories.isNotEmpty) {
       return Material(
-        elevation: 8,
+        elevation: 12,
         borderRadius: BorderRadius.circular(8),
-        color: Colors.white,
+        color: const Color(0xFF2D2D2D),
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: const Color(0xFF2D2D2D),
             borderRadius: BorderRadius.circular(8),
           ),
-          constraints: const BoxConstraints(maxWidth: 220),
+          constraints: const BoxConstraints(maxWidth: 200),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -349,25 +396,36 @@ class _CategoryPieChartState extends State<CategoryPieChart>
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text(
-                    item.total,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.accent,
+                  Container(
+                    width: 8,
+                    height: 8,
+                    decoration: const BoxDecoration(
+                      color: AppColors.textTertiary,
+                      shape: BoxShape.circle,
                     ),
                   ),
                   const SizedBox(width: 8),
-                  Text(
-                    '($pct%)',
-                    style: const TextStyle(
-                      fontSize: 12,
-                      color: AppColors.textTertiary,
+                  const Text(
+                    'Other',
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white,
                     ),
                   ),
                 ],
               ),
-              const Divider(height: 8),
+              const SizedBox(height: 6),
+              Text(
+                '${item.total} ($pct%)',
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
+                  color: Colors.white,
+                  letterSpacing: -0.2,
+                ),
+              ),
+              const Divider(height: 16, color: Colors.white24),
               ...smallCategories.map((cat) {
                 final catPct = grandTotal > 0
                     ? (cat.totalCents.abs() / grandTotal * 100).toStringAsFixed(
@@ -375,7 +433,7 @@ class _CategoryPieChartState extends State<CategoryPieChart>
                       )
                     : '0.0';
                 return Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 2),
+                  padding: const EdgeInsets.symmetric(vertical: 3),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
@@ -386,7 +444,7 @@ class _CategoryPieChartState extends State<CategoryPieChart>
                           color:
                               AppColors.categoryColors[cat.category] ??
                               AppColors.textTertiary,
-                          borderRadius: BorderRadius.circular(3),
+                          shape: BoxShape.circle,
                         ),
                       ),
                       const SizedBox(width: 6),
@@ -395,7 +453,7 @@ class _CategoryPieChartState extends State<CategoryPieChart>
                           '${cat.category} ($catPct%)',
                           style: const TextStyle(
                             fontSize: 11,
-                            color: AppColors.textPrimary,
+                            color: Colors.white70,
                           ),
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -412,13 +470,13 @@ class _CategoryPieChartState extends State<CategoryPieChart>
 
     // Regular category tooltip
     return Material(
-      elevation: 8,
+      elevation: 12,
       borderRadius: BorderRadius.circular(8),
-      color: Colors.white,
+      color: const Color(0xFF2D2D2D),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: const Color(0xFF2D2D2D),
           borderRadius: BorderRadius.circular(8),
         ),
         child: Column(
@@ -429,32 +487,34 @@ class _CategoryPieChartState extends State<CategoryPieChart>
               mainAxisSize: MainAxisSize.min,
               children: [
                 Container(
-                  width: 8,
-                  height: 8,
+                  width: 10,
+                  height: 10,
                   decoration: BoxDecoration(
                     color:
                         AppColors.categoryColors[item.category] ??
                         AppColors.textTertiary,
-                    borderRadius: BorderRadius.circular(4),
+                    shape: BoxShape.circle,
                   ),
                 ),
-                const SizedBox(width: 8),
+                const SizedBox(width: 10),
                 Text(
                   item.category,
                   style: const TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
-                    color: AppColors.textPrimary,
+                    color: Colors.white,
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: 6),
             Text(
               '${item.total} ($pct%)',
               style: const TextStyle(
-                fontSize: 12,
-                color: AppColors.textSecondary,
+                fontSize: 14,
+                fontWeight: FontWeight.w700,
+                color: Colors.white,
+                letterSpacing: -0.2,
               ),
             ),
           ],

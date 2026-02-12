@@ -74,7 +74,6 @@ List<CleanTransaction> cleanAllTransactions() {
   final overrides = loadOverrides();
 
   final cleaned = transactions
-      .where((tx) => tx.amount < 0)
       .map((tx) => cleanTransaction(tx, overrides))
       .toList();
 

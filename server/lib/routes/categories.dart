@@ -16,6 +16,50 @@ Router categoryRoutes() {
     );
   });
 
+  // GET /api/categories/should-import - Check if defaults should be imported
+  router.get('/api/categories/should-import', (Request request) {
+    final rules = loadCategoryRules();
+    final shouldImport = rules.isEmpty;
+    return Response.ok(
+      jsonEncode({'shouldImport': shouldImport, 'count': rules.length}),
+      headers: {'Content-Type': 'application/json'},
+    );
+  });
+
+  // POST /api/categories/import-defaults - Import default rules to user rules
+  router.post('/api/categories/import-defaults', (Request request) async {
+    try {
+      final defaultRules = loadDefaultCategoryRules();
+
+      if (defaultRules.isEmpty) {
+        return Response.badRequest(
+          body: jsonEncode({'error': 'No default rules available to import'}),
+          headers: {'Content-Type': 'application/json'},
+        );
+      }
+
+      // Save default rules as user rules
+      saveCategoryRules(defaultRules);
+
+      // Trigger re-categorization
+      cleanAllTransactions();
+
+      return Response.ok(
+        jsonEncode({
+          'success': true,
+          'imported': defaultRules.length,
+          'message': 'Imported ${defaultRules.length} default rules'
+        }),
+        headers: {'Content-Type': 'application/json'},
+      );
+    } catch (e) {
+      return Response.internalServerError(
+        body: jsonEncode({'error': e.toString()}),
+        headers: {'Content-Type': 'application/json'},
+      );
+    }
+  });
+
   // POST /api/categories - Add new regex pattern
   router.post('/api/categories', (Request request) async {
     try {

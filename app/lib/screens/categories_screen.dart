@@ -13,7 +13,10 @@ class CategoriesScreen extends ConsumerWidget {
     final rulesAsync = ref.watch(categoryRulesNotifierProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Categorization Rules'), elevation: 0),
+      appBar: AppBar(
+        title: const Text('Categorization Rules'),
+        elevation: 0,
+      ),
       body: rulesAsync.when(
         data: (rules) => _buildContent(context, ref, rules),
         loading: () => const Center(
@@ -98,6 +101,17 @@ class CategoriesScreen extends ConsumerWidget {
               'Create custom rules to auto-categorize transactions',
               style: TextStyle(fontSize: 13, color: AppColors.textTertiary),
             ),
+            const SizedBox(height: 24),
+            OutlinedButton.icon(
+              onPressed: () => _showImportDefaultsDialog(context, ref),
+              icon: const Icon(Icons.download),
+              label: const Text('Import Default Rules'),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: AppColors.accent,
+                side: const BorderSide(color: AppColors.accent),
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              ),
+            ),
           ],
         ),
       );
@@ -181,6 +195,98 @@ class CategoriesScreen extends ConsumerWidget {
         onAddRule: () => _showAddRuleDialog(context, ref, category),
         onEditRule: (rule) => _showEditRuleDialog(context, ref, rule),
         onDeleteRule: (rule) => _showDeleteConfirmation(context, ref, rule),
+      ),
+    );
+  }
+
+  void _showImportDefaultsDialog(BuildContext context, WidgetRef ref) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Import Default Rules'),
+        titleTextStyle: const TextStyle(
+          fontSize: 18,
+          fontWeight: FontWeight.w600,
+          color: AppColors.textPrimary,
+        ),
+        content: const Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Import a starter set of categorization rules?',
+              style: TextStyle(fontSize: 14, color: AppColors.textSecondary),
+            ),
+            SizedBox(height: 12),
+            Text(
+              'This will add rules for common merchants and categories like:',
+              style: TextStyle(fontSize: 13, color: AppColors.textTertiary),
+            ),
+            SizedBox(height: 8),
+            Text(
+              '• Grocery stores (Whole Foods, Trader Joe\'s, etc.)',
+              style: TextStyle(fontSize: 13, color: AppColors.textTertiary),
+            ),
+            Text(
+              '• Restaurants and dining',
+              style: TextStyle(fontSize: 13, color: AppColors.textTertiary),
+            ),
+            Text(
+              '• Gas stations and transit',
+              style: TextStyle(fontSize: 13, color: AppColors.textTertiary),
+            ),
+            Text(
+              '• Shopping, utilities, and more',
+              style: TextStyle(fontSize: 13, color: AppColors.textTertiary),
+            ),
+            SizedBox(height: 12),
+            Text(
+              'You can edit or delete any rules after importing.',
+              style: TextStyle(
+                fontSize: 13,
+                color: AppColors.textTertiary,
+                fontStyle: FontStyle.italic,
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () async {
+              Navigator.of(ctx).pop();
+              try {
+                final notifier = ref.read(categoryRulesNotifierProvider.notifier);
+                final count = await notifier.importDefaults();
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Imported $count default rules'),
+                      backgroundColor: AppColors.positive,
+                    ),
+                  );
+                }
+              } catch (e) {
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Error importing rules: $e'),
+                      backgroundColor: AppColors.negative,
+                    ),
+                  );
+                }
+              }
+            },
+            style: FilledButton.styleFrom(
+              backgroundColor: AppColors.accent,
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('Import'),
+          ),
+        ],
       ),
     );
   }

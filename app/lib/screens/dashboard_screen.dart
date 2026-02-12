@@ -149,7 +149,7 @@ class DashboardScreen extends ConsumerWidget {
                   title: 'Spending by Category',
                   subtitle: 'Tap sections to see details',
                   child: SizedBox(
-                    height: 220,
+                    height: 340,
                     child: categories.when(
                       data: (data) => CategoryPieChart(data: data),
                       loading: () => const _ChartLoading(),

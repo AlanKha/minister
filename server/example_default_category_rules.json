@@ -1,0 +1,807 @@
+[
+  {
+    "category": "Grocery",
+    "pattern": "TRADER JOE",
+    "caseSensitive": false
+  },
+  {
+    "category": "Grocery",
+    "pattern": "WHOLE FOODS",
+    "caseSensitive": false
+  },
+  {
+    "category": "Grocery",
+    "pattern": "SAFEWAY",
+    "caseSensitive": false
+  },
+  {
+    "category": "Grocery",
+    "pattern": "KROGER",
+    "caseSensitive": false
+  },
+  {
+    "category": "Grocery",
+    "pattern": "ALDI",
+    "caseSensitive": false
+  },
+  {
+    "category": "Grocery",
+    "pattern": "PUBLIX",
+    "caseSensitive": false
+  },
+  {
+    "category": "Grocery",
+    "pattern": "SPROUTS",
+    "caseSensitive": false
+  },
+  {
+    "category": "Grocery",
+    "pattern": "H-E-B",
+    "caseSensitive": false
+  },
+  {
+    "category": "Grocery",
+    "pattern": "WEGMANS",
+    "caseSensitive": false
+  },
+  {
+    "category": "Grocery",
+    "pattern": "FOOD LION",
+    "caseSensitive": false
+  },
+  {
+    "category": "Grocery",
+    "pattern": "PIGGLY WIGGLY",
+    "caseSensitive": false
+  },
+  {
+    "category": "Superstore",
+    "pattern": "WAL-?MART",
+    "caseSensitive": false
+  },
+  {
+    "category": "Superstore",
+    "pattern": "SUPERCENTER",
+    "caseSensitive": false
+  },
+  {
+    "category": "Superstore",
+    "pattern": "FRED-?MEYER",
+    "caseSensitive": false
+  },
+  {
+    "category": "Superstore",
+    "pattern": "TARGET",
+    "caseSensitive": false
+  },
+  {
+    "category": "Superstore",
+    "pattern": "COSTCO",
+    "caseSensitive": false
+  },
+  {
+    "category": "Superstore",
+    "pattern": "SAM'?S CLUB",
+    "caseSensitive": false
+  },
+  {
+    "category": "Dining",
+    "pattern": "MCDONALD",
+    "caseSensitive": false
+  },
+  {
+    "category": "Dining",
+    "pattern": "COFFEE",
+    "caseSensitive": false
+  },
+  {
+    "category": "Dining",
+    "pattern": "CAFE",
+    "caseSensitive": false
+  },
+  {
+    "category": "Dining",
+    "pattern": "CHIPOTLE",
+    "caseSensitive": false
+  },
+  {
+    "category": "Dining",
+    "pattern": "CHICK-FIL-A",
+    "caseSensitive": false
+  },
+  {
+    "category": "Dining",
+    "pattern": "DUNKIN",
+    "caseSensitive": false
+  },
+  {
+    "category": "Dining",
+    "pattern": "SUBWAY",
+    "caseSensitive": false
+  },
+  {
+    "category": "Dining",
+    "pattern": "PANERA",
+    "caseSensitive": false
+  },
+  {
+    "category": "Dining",
+    "pattern": "TACO BELL",
+    "caseSensitive": false
+  },
+  {
+    "category": "Dining",
+    "pattern": "WENDY'?S",
+    "caseSensitive": false
+  },
+  {
+    "category": "Dining",
+    "pattern": "BURGER KING",
+    "caseSensitive": false
+  },
+  {
+    "category": "Dining",
+    "pattern": "DOORDASH",
+    "caseSensitive": false
+  },
+  {
+    "category": "Dining",
+    "pattern": "UBER EATS",
+    "caseSensitive": false
+  },
+  {
+    "category": "Dining",
+    "pattern": "GRUBHUB",
+    "caseSensitive": false
+  },
+  {
+    "category": "Dining",
+    "pattern": "^TST\\*",
+    "caseSensitive": false
+  },
+  {
+    "category": "Dining",
+    "pattern": "^SNACK\\*",
+    "caseSensitive": false
+  },
+  {
+    "category": "Dining",
+    "pattern": "STARBUCKS",
+    "caseSensitive": false
+  },
+  {
+    "category": "Dining",
+    "pattern": "RAISING CANE",
+    "caseSensitive": false
+  },
+  {
+    "category": "Dining",
+    "pattern": "DAVE'?S?\\s*HOT\\s*CHICKEN",
+    "caseSensitive": false
+  },
+  {
+    "category": "Dining",
+    "pattern": "PIZZA",
+    "caseSensitive": false
+  },
+  {
+    "category": "Dining",
+    "pattern": "TAQUERIA",
+    "caseSensitive": false
+  },
+  {
+    "category": "Dining",
+    "pattern": "SUSHI",
+    "caseSensitive": false
+  },
+  {
+    "category": "Dining",
+    "pattern": "\\bTHAI\\b",
+    "caseSensitive": false
+  },
+  {
+    "category": "Dining",
+    "pattern": "\\bDELI\\b",
+    "caseSensitive": false
+  },
+  {
+    "category": "Dining",
+    "pattern": "BAGEL",
+    "caseSensitive": false
+  },
+  {
+    "category": "Dining",
+    "pattern": "ICE CREAM",
+    "caseSensitive": false
+  },
+  {
+    "category": "Dining",
+    "pattern": "GELATO",
+    "caseSensitive": false
+  },
+  {
+    "category": "Dining",
+    "pattern": "NOODLE",
+    "caseSensitive": false
+  },
+  {
+    "category": "Dining",
+    "pattern": "WAFFLE",
+    "caseSensitive": false
+  },
+  {
+    "category": "Dining",
+    "pattern": "KITCHEN",
+    "caseSensitive": false
+  },
+  {
+    "category": "Dining",
+    "pattern": "BAR & GRILL",
+    "caseSensitive": false
+  },
+  {
+    "category": "Dining",
+    "pattern": "ROASTER",
+    "caseSensitive": false
+  },
+  {
+    "category": "Dining",
+    "pattern": "\\bMATCHA\\b",
+    "caseSensitive": false
+  },
+  {
+    "category": "Dining",
+    "pattern": "JAMBA JUICE",
+    "caseSensitive": false
+  },
+  {
+    "category": "Dining",
+    "pattern": "\\bBOBA\\b",
+    "caseSensitive": false
+  },
+  {
+    "category": "Dining",
+    "pattern": "DONUT",
+    "caseSensitive": false
+  },
+  {
+    "category": "Dining",
+    "pattern": "ARAMARK",
+    "caseSensitive": false
+  },
+  {
+    "category": "Dining",
+    "pattern": "CHICKEN",
+    "caseSensitive": false
+  },
+  {
+    "category": "Dining",
+    "pattern": "MONTY'?S RED SAUCE",
+    "caseSensitive": false
+  },
+  {
+    "category": "Dining",
+    "pattern": "PHIN CAPH",
+    "caseSensitive": false
+  },
+  {
+    "category": "Dining",
+    "pattern": "FLEMINGS?\\d",
+    "caseSensitive": false
+  },
+  {
+    "category": "Dining",
+    "pattern": "A DOPO",
+    "caseSensitive": false
+  },
+  {
+    "category": "Dining",
+    "pattern": "COOL BEANS",
+    "caseSensitive": false
+  },
+  {
+    "category": "Dining",
+    "pattern": "OLD CITY JAVA",
+    "caseSensitive": false
+  },
+  {
+    "category": "Dining",
+    "pattern": "WATCHHOUSE",
+    "caseSensitive": false
+  },
+  {
+    "category": "Dining",
+    "pattern": "JIANG NAN",
+    "caseSensitive": false
+  },
+  {
+    "category": "Dining",
+    "pattern": "LA CABRA",
+    "caseSensitive": false
+  },
+  {
+    "category": "Dining",
+    "pattern": "VAN LEEUWEN",
+    "caseSensitive": false
+  },
+  {
+    "category": "Dining",
+    "pattern": "VINNIE'?S",
+    "caseSensitive": false
+  },
+  {
+    "category": "Dining",
+    "pattern": "LOS TACOS",
+    "caseSensitive": false
+  },
+  {
+    "category": "Dining",
+    "pattern": "OOH LALA",
+    "caseSensitive": false
+  },
+  {
+    "category": "Dining",
+    "pattern": "YUM TRA",
+    "caseSensitive": false
+  },
+  {
+    "category": "Dining",
+    "pattern": "CHICHA SAN CHEN",
+    "caseSensitive": false
+  },
+  {
+    "category": "Dining",
+    "pattern": "SUPER TASTE",
+    "caseSensitive": false
+  },
+  {
+    "category": "Dining",
+    "pattern": "BRENZ",
+    "caseSensitive": false
+  },
+  {
+    "category": "Dining",
+    "pattern": "AROMA INDIAN",
+    "caseSensitive": false
+  },
+  {
+    "category": "Dining",
+    "pattern": "SQ \\*REGULAR NYC",
+    "caseSensitive": false
+  },
+  {
+    "category": "Dining",
+    "pattern": "SQ \\*NO PREFERENCE",
+    "caseSensitive": false
+  },
+  {
+    "category": "Dining",
+    "pattern": "SQ \\*JACKS\\b",
+    "caseSensitive": false
+  },
+  {
+    "category": "Dining",
+    "pattern": "RUBYS EAST VILLAGE",
+    "caseSensitive": false
+  },
+  {
+    "category": "Dining",
+    "pattern": "LIBERTY BAGELS",
+    "caseSensitive": false
+  },
+  {
+    "category": "Dining",
+    "pattern": "PIZZER",
+    "caseSensitive": false
+  },
+  {
+    "category": "Gas",
+    "pattern": "SHELL OIL",
+    "caseSensitive": false
+  },
+  {
+    "category": "Gas",
+    "pattern": "CHEVRON",
+    "caseSensitive": false
+  },
+  {
+    "category": "Gas",
+    "pattern": "EXXONMOBIL",
+    "caseSensitive": false
+  },
+  {
+    "category": "Gas",
+    "pattern": "BP #",
+    "caseSensitive": false
+  },
+  {
+    "category": "Gas",
+    "pattern": "CIRCLE K",
+    "caseSensitive": false
+  },
+  {
+    "category": "Gas",
+    "pattern": "WAWA",
+    "caseSensitive": false
+  },
+  {
+    "category": "Gas",
+    "pattern": "SPEEDWAY",
+    "caseSensitive": false
+  },
+  {
+    "category": "Gas",
+    "pattern": "7-ELEVEN",
+    "caseSensitive": false
+  },
+  {
+    "category": "Gas",
+    "pattern": "BUC-?EE",
+    "caseSensitive": false
+  },
+  {
+    "category": "Transit",
+    "pattern": "UBER(?! EATS)",
+    "caseSensitive": false
+  },
+  {
+    "category": "Transit",
+    "pattern": "LYFT",
+    "caseSensitive": false
+  },
+  {
+    "category": "Transit",
+    "pattern": "PARKING",
+    "caseSensitive": false
+  },
+  {
+    "category": "Subscription",
+    "pattern": "NETFLIX",
+    "caseSensitive": false
+  },
+  {
+    "category": "Subscription",
+    "pattern": "GYM",
+    "caseSensitive": false
+  },
+  {
+    "category": "Subscription",
+    "pattern": "SPOTIFY",
+    "caseSensitive": false
+  },
+  {
+    "category": "Subscription",
+    "pattern": "HULU",
+    "caseSensitive": false
+  },
+  {
+    "category": "Subscription",
+    "pattern": "DISNEY\\+",
+    "caseSensitive": false
+  },
+  {
+    "category": "Subscription",
+    "pattern": "APPLE\\.COM",
+    "caseSensitive": false
+  },
+  {
+    "category": "Subscription",
+    "pattern": "AMAZON PRIME",
+    "caseSensitive": false
+  },
+  {
+    "category": "Subscription",
+    "pattern": "HBO MAX",
+    "caseSensitive": false
+  },
+  {
+    "category": "Subscription",
+    "pattern": "YOUTUBE PREMIUM",
+    "caseSensitive": false
+  },
+  {
+    "category": "Subscription",
+    "pattern": "CLAUDE\\.AI",
+    "caseSensitive": false
+  },
+  {
+    "category": "Subscription",
+    "pattern": "WMT PLUS",
+    "caseSensitive": false
+  },
+  {
+    "category": "Shopping",
+    "pattern": "AMAZON\\.COM",
+    "caseSensitive": false
+  },
+  {
+    "category": "Shopping",
+    "pattern": "AMZN",
+    "caseSensitive": false
+  },
+  {
+    "category": "Shopping",
+    "pattern": "BEST BUY",
+    "caseSensitive": false
+  },
+  {
+    "category": "Shopping",
+    "pattern": "HOME DEPOT",
+    "caseSensitive": false
+  },
+  {
+    "category": "Shopping",
+    "pattern": "LOWE'?S",
+    "caseSensitive": false
+  },
+  {
+    "category": "Shopping",
+    "pattern": "IKEA",
+    "caseSensitive": false
+  },
+  {
+    "category": "Shopping",
+    "pattern": "VOLSHOP",
+    "caseSensitive": false
+  },
+  {
+    "category": "Shopping",
+    "pattern": "GOODWILL",
+    "caseSensitive": false
+  },
+  {
+    "category": "Shopping",
+    "pattern": "OFFICE DEPOT",
+    "caseSensitive": false
+  },
+  {
+    "category": "Shopping",
+    "pattern": "NORDSTROM",
+    "caseSensitive": false
+  },
+  {
+    "category": "Shopping",
+    "pattern": "SAMS PARTY",
+    "caseSensitive": false
+  },
+  {
+    "category": "Utilities",
+    "pattern": "COMCAST",
+    "caseSensitive": false
+  },
+  {
+    "category": "Utilities",
+    "pattern": "XFINITY",
+    "caseSensitive": false
+  },
+  {
+    "category": "Utilities",
+    "pattern": "AT&?T",
+    "caseSensitive": false
+  },
+  {
+    "category": "Utilities",
+    "pattern": "VERIZON",
+    "caseSensitive": false
+  },
+  {
+    "category": "Utilities",
+    "pattern": "T-MOBILE",
+    "caseSensitive": false
+  },
+  {
+    "category": "Utilities",
+    "pattern": "ELECTRIC",
+    "caseSensitive": false
+  },
+  {
+    "category": "Utilities",
+    "pattern": "WATER BILL",
+    "caseSensitive": false
+  },
+  {
+    "category": "Utilities",
+    "pattern": "GAS BILL",
+    "caseSensitive": false
+  },
+  {
+    "category": "Medical",
+    "pattern": "CVS",
+    "caseSensitive": false
+  },
+  {
+    "category": "Medical",
+    "pattern": "WALGREENS",
+    "caseSensitive": false
+  },
+  {
+    "category": "Medical",
+    "pattern": "PHARMACY",
+    "caseSensitive": false
+  },
+  {
+    "category": "Medical",
+    "pattern": "DOCTOR",
+    "caseSensitive": false
+  },
+  {
+    "category": "Medical",
+    "pattern": "DENTIST",
+    "caseSensitive": false
+  },
+  {
+    "category": "Medical",
+    "pattern": "HOSPITAL",
+    "caseSensitive": false
+  },
+  {
+    "category": "Medical",
+    "pattern": "URGENT CARE",
+    "caseSensitive": false
+  },
+  {
+    "category": "Medical",
+    "pattern": "OPTOMETRY",
+    "caseSensitive": false
+  },
+  {
+    "category": "Loan",
+    "pattern": "LOAN PAYMENT",
+    "caseSensitive": false
+  },
+  {
+    "category": "Loan",
+    "pattern": "MORTGAGE",
+    "caseSensitive": false
+  },
+  {
+    "category": "Loan",
+    "pattern": "AUTO LOAN",
+    "caseSensitive": false
+  },
+  {
+    "category": "Loan",
+    "pattern": "STUDENT LOAN",
+    "caseSensitive": false
+  },
+  {
+    "category": "Travel",
+    "pattern": "AIRLINE",
+    "caseSensitive": false
+  },
+  {
+    "category": "Travel",
+    "pattern": "DELTA AIR",
+    "caseSensitive": false
+  },
+  {
+    "category": "Travel",
+    "pattern": "UNITED AIR",
+    "caseSensitive": false
+  },
+  {
+    "category": "Travel",
+    "pattern": "SOUTHWEST",
+    "caseSensitive": false
+  },
+  {
+    "category": "Travel",
+    "pattern": "AIRBNB",
+    "caseSensitive": false
+  },
+  {
+    "category": "Travel",
+    "pattern": "HOTEL",
+    "caseSensitive": false
+  },
+  {
+    "category": "Travel",
+    "pattern": "MARRIOTT",
+    "caseSensitive": false
+  },
+  {
+    "category": "Travel",
+    "pattern": "HILTON",
+    "caseSensitive": false
+  },
+  {
+    "category": "Travel",
+    "pattern": "AMERICAN 00\\d",
+    "caseSensitive": false
+  },
+  {
+    "category": "Travel",
+    "pattern": "ALLEGIANT|ALLEGNT",
+    "caseSensitive": false
+  },
+  {
+    "category": "Travel",
+    "pattern": "\\bAA KIOSK",
+    "caseSensitive": false
+  },
+  {
+    "category": "Travel",
+    "pattern": "HOMEWOOD SUITES",
+    "caseSensitive": false
+  },
+  {
+    "category": "Transfer",
+    "pattern": "VENMO",
+    "caseSensitive": false
+  },
+  {
+    "category": "Transfer",
+    "pattern": "ONLINE ACH PAYMENT",
+    "caseSensitive": false
+  },
+  {
+    "category": "Transfer",
+    "pattern": "REWARD",
+    "caseSensitive": false
+  },
+  {
+    "category": "Transfer",
+    "pattern": "PYMT",
+    "caseSensitive": false
+  },
+  {
+    "category": "Transfer",
+    "pattern": "ZELLE",
+    "caseSensitive": false
+  },
+  {
+    "category": "Transfer",
+    "pattern": "PAYPAL",
+    "caseSensitive": false
+  },
+  {
+    "category": "Transfer",
+    "pattern": "CASH APP",
+    "caseSensitive": false
+  },
+  {
+    "category": "Entertainment",
+    "pattern": "TEBEX",
+    "caseSensitive": false
+  },
+  {
+    "category": "Entertainment",
+    "pattern": "MODERN WARRIORS",
+    "caseSensitive": false
+  },
+  {
+    "category": "Entertainment",
+    "pattern": "CLIMBING",
+    "caseSensitive": false
+  },
+  {
+    "category": "Entertainment",
+    "pattern": "PORTLANDROCK",
+    "caseSensitive": false
+  },
+  {
+    "category": "Entertainment",
+    "pattern": "MUSEUM",
+    "caseSensitive": false
+  },
+  {
+    "category": "Entertainment",
+    "pattern": "UTKATHLETICS",
+    "caseSensitive": false
+  },
+  {
+    "category": "Rent",
+    "pattern": "BILT.*RENT",
+    "caseSensitive": false
+  },
+  {
+    "category": "Rent",
+    "pattern": "BILTPROTECT",
+    "caseSensitive": false
+  },
+  {
+    "category": "Fee",
+    "pattern": "LATE FEE",
+    "caseSensitive": false
+  }
+]

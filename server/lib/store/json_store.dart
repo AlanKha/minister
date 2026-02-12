@@ -5,8 +5,10 @@ import 'package:minister_shared/models/account.dart';
 import 'package:minister_shared/models/transaction.dart';
 
 late final String dataDir;
+late final String serverRoot;
 
-void initStore(String serverRoot) {
+void initStore(String root) {
+  serverRoot = root;
   dataDir = p.join(serverRoot, 'data');
   Directory(dataDir).createSync(recursive: true);
 }
@@ -18,6 +20,8 @@ String get _overridesFile => p.join(dataDir, 'category_overrides.json');
 String get _categoryRulesFile => p.join(dataDir, 'category_rules.json');
 String get _balancesFile => p.join(dataDir, 'balances.json');
 String get _deletedDefaultsFile => p.join(dataDir, 'deleted_defaults.json');
+String get _defaultCategoryRulesFile => p.join(serverRoot, 'default_category_rules.json');
+String get _exampleDefaultCategoryRulesFile => p.join(serverRoot, 'example_default_category_rules.json');
 
 AccountData readAccountData() {
   try {
@@ -117,7 +121,7 @@ class CategoryRule {
       };
 
   factory CategoryRule.fromJson(Map<String, dynamic> json) => CategoryRule(
-        id: json['id'] as String,
+        id: json['id'] as String? ?? DateTime.now().millisecondsSinceEpoch.toString(),
         category: json['category'] as String,
         pattern: json['pattern'] as String,
         caseSensitive: json['caseSensitive'] as bool? ?? false,
@@ -175,4 +179,27 @@ void saveDeletedDefaults(Set<String> deletedDefaults) {
   File(_deletedDefaultsFile).writeAsStringSync(
     const JsonEncoder.withIndent('  ').convert(deletedDefaults.toList()),
   );
+}
+
+List<CategoryRule> loadDefaultCategoryRules() {
+  // Initialize default_category_rules.json from example if it doesn't exist
+  final defaultFile = File(_defaultCategoryRulesFile);
+  if (!defaultFile.existsSync()) {
+    final exampleFile = File(_exampleDefaultCategoryRulesFile);
+    if (exampleFile.existsSync()) {
+      defaultFile.writeAsStringSync(exampleFile.readAsStringSync());
+    } else {
+      // If example doesn't exist, return empty list
+      return [];
+    }
+  }
+
+  try {
+    final content = defaultFile.readAsStringSync();
+    return (jsonDecode(content) as List<dynamic>)
+        .map((e) => CategoryRule.fromJson(e as Map<String, dynamic>))
+        .toList();
+  } catch (_) {
+    return [];
+  }
 }

@@ -15,6 +15,13 @@ final uncategorizedTransactionsProvider =
   return client.getUncategorizedTransactions();
 });
 
+final shouldImportDefaultsProvider =
+    FutureProvider<bool>((ref) async {
+  final client = ref.read(apiClientProvider);
+  final result = await client.shouldImportDefaults();
+  return result['shouldImport'] as bool? ?? false;
+});
+
 // Notifier for managing category rules
 class CategoryRulesNotifier extends StateNotifier<AsyncValue<List<CategoryRule>>> {
   CategoryRulesNotifier(this.ref) : super(const AsyncValue.loading()) {
@@ -87,6 +94,20 @@ class CategoryRulesNotifier extends StateNotifier<AsyncValue<List<CategoryRule>>
 
   Future<void> refresh() async {
     await _loadRules();
+  }
+
+  Future<int> importDefaults() async {
+    try {
+      final client = ref.read(apiClientProvider);
+      final result = await client.importDefaultRules();
+      await _loadRules();
+      // Invalidate the import check provider
+      ref.invalidate(shouldImportDefaultsProvider);
+      return result['imported'] as int? ?? 0;
+    } catch (e, st) {
+      state = AsyncValue.error(e, st);
+      rethrow;
+    }
   }
 }
 
