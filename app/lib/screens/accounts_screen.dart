@@ -182,12 +182,20 @@ class _AccountCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppColors.border.withValues(alpha: 0.5)),
+        border: Border.all(
+          color: AppColors.border.withValues(alpha: 0.4),
+          width: 1,
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
-            blurRadius: 12,
+            color: AppColors.shadowColor,
+            blurRadius: 16,
             offset: const Offset(0, 4),
+          ),
+          BoxShadow(
+            color: AppColors.shadowColorStrong,
+            blurRadius: 32,
+            offset: const Offset(0, 8),
           ),
         ],
       ),
@@ -211,11 +219,15 @@ class _AccountCard extends StatelessWidget {
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                         colors: [
-                          AppColors.info.withValues(alpha: 0.15),
-                          AppColors.info.withValues(alpha: 0.08),
+                          AppColors.info.withValues(alpha: 0.1),
+                          AppColors.info.withValues(alpha: 0.04),
                         ],
                       ),
                       borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: AppColors.info.withValues(alpha: 0.15),
+                        width: 1,
+                      ),
                     ),
                     child: const Icon(
                       Icons.account_balance_outlined,
@@ -269,6 +281,10 @@ class _AccountCard extends StatelessWidget {
                     decoration: BoxDecoration(
                       color: AppColors.positiveLight,
                       borderRadius: BorderRadius.circular(20),
+                      border: Border.all(
+                        color: AppColors.positive.withValues(alpha: 0.15),
+                        width: 1,
+                      ),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
@@ -404,9 +420,14 @@ class _LinkAccountButton extends StatelessWidget {
           borderRadius: BorderRadius.circular(isLarge ? 18 : 14),
           boxShadow: [
             BoxShadow(
-              color: AppColors.accent.withValues(alpha: 0.3),
-              blurRadius: 16,
+              color: AppColors.accent.withValues(alpha: 0.25),
+              blurRadius: 20,
               offset: const Offset(0, 6),
+            ),
+            BoxShadow(
+              color: AppColors.accent.withValues(alpha: 0.1),
+              blurRadius: 40,
+              offset: const Offset(0, 12),
             ),
           ],
         ),
@@ -560,8 +581,18 @@ class _AccountsSidebar extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.surface,
         border: Border(
-          left: BorderSide(color: AppColors.border.withValues(alpha: 0.5)),
+          left: BorderSide(
+            color: AppColors.border.withValues(alpha: 0.4),
+            width: 1,
+          ),
         ),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.shadowColor,
+            blurRadius: 20,
+            offset: const Offset(0, 0),
+          ),
+        ],
       ),
       child: ListView(
         padding: const EdgeInsets.all(24),
@@ -572,6 +603,7 @@ class _AccountsSidebar extends StatelessWidget {
               fontSize: 18,
               fontWeight: FontWeight.w600,
               color: AppColors.textPrimary,
+              letterSpacing: -0.2,
             ),
           ),
           const SizedBox(height: 20),
@@ -587,12 +619,20 @@ class _AccountsSidebar extends StatelessWidget {
                   gradient: LinearGradient(
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
-                    colors: [AppColors.surfaceContainerHigh, AppColors.surface],
+                    colors: [AppColors.surfaceContainer, AppColors.surface],
                   ),
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(
-                    color: AppColors.border.withValues(alpha: 0.5),
+                    color: AppColors.border.withValues(alpha: 0.4),
+                    width: 1,
                   ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.shadowColor,
+                      blurRadius: 12,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -643,6 +683,10 @@ class _AccountsSidebar extends StatelessWidget {
               decoration: BoxDecoration(
                 color: AppColors.negativeLight,
                 borderRadius: BorderRadius.circular(20),
+                border: Border.all(
+                  color: AppColors.negative.withValues(alpha: 0.15),
+                  width: 1,
+                ),
               ),
               child: const Text(
                 'Failed to load summary',

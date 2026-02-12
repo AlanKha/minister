@@ -7,98 +7,112 @@ class TransactionTile extends StatelessWidget {
   final CleanTransaction transaction;
   final VoidCallback? onTap;
 
-  const TransactionTile({
-    super.key,
-    required this.transaction,
-    this.onTap,
-  });
+  const TransactionTile({super.key, required this.transaction, this.onTap});
 
   @override
   Widget build(BuildContext context) {
-    final catColor = AppColors.categoryColors[transaction.category] ??
+    final catColor =
+        AppColors.categoryColors[transaction.category] ??
         AppColors.textTertiary;
-    final amountColor =
-        transaction.amount >= 0 ? AppColors.positive : AppColors.textPrimary;
+    final amountColor = transaction.amount >= 0
+        ? AppColors.positive
+        : AppColors.textPrimary;
 
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(12),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        child: Row(
-          children: [
-            // Category indicator dot
-            Container(
-              width: 36,
-              height: 36,
-              decoration: BoxDecoration(
-                color: catColor.withValues(alpha: 0.12),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Icon(
-                _categoryIcon(transaction.category),
-                size: 18,
-                color: catColor,
-              ),
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(14),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(
+              color: AppColors.border.withValues(alpha: 0.3),
+              width: 1,
             ),
-            const SizedBox(width: 14),
-            // Description & meta
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    transaction.description,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                      color: AppColors.textPrimary,
-                    ),
+          ),
+          child: Row(
+            children: [
+              // Category indicator dot
+              Container(
+                width: 42,
+                height: 42,
+                decoration: BoxDecoration(
+                  color: catColor.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: catColor.withValues(alpha: 0.15),
+                    width: 1,
                   ),
-                  const SizedBox(height: 3),
-                  Row(
-                    children: [
+                ),
+                child: Icon(
+                  _categoryIcon(transaction.category),
+                  size: 20,
+                  color: catColor,
+                ),
+              ),
+              const SizedBox(width: 14),
+              // Description & meta
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      transaction.description,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Row(
+                      children: [
+                        Text(
+                          transaction.date,
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: AppColors.textTertiary,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        CategoryChip(
+                          category: transaction.category,
+                          dense: true,
+                        ),
+                      ],
+                    ),
+                    if (transaction.accountLabel.isNotEmpty) ...[
+                      const SizedBox(height: 2),
                       Text(
-                        transaction.date,
+                        transaction.accountLabel,
                         style: const TextStyle(
                           fontSize: 12,
                           color: AppColors.textTertiary,
                         ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                      const SizedBox(width: 8),
-                      CategoryChip(
-                          category: transaction.category, dense: true),
                     ],
-                  ),
-                  if (transaction.accountLabel.isNotEmpty) ...[
-                    const SizedBox(height: 2),
-                    Text(
-                      transaction.accountLabel,
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: AppColors.textTertiary,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
                   ],
-                ],
+                ),
               ),
-            ),
-            const SizedBox(width: 12),
-            // Amount
-            Text(
-              transaction.amountFormatted,
-              style: TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.w600,
-                color: amountColor,
-                letterSpacing: -0.3,
+              const SizedBox(width: 12),
+              // Amount
+              Text(
+                transaction.amountFormatted,
+                style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600,
+                  color: amountColor,
+                  letterSpacing: -0.3,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

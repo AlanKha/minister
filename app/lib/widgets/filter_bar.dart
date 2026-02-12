@@ -27,27 +27,28 @@ class _FilterBarState extends ConsumerState<FilterBar> {
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
       decoration: const BoxDecoration(
-        border: Border(
-          bottom: BorderSide(color: AppColors.border),
-        ),
+        border: Border(bottom: BorderSide(color: AppColors.border)),
       ),
       child: Column(
         children: [
           // Search
           TextField(
             controller: _searchController,
-            style: const TextStyle(
-              fontSize: 14,
-              color: AppColors.textPrimary,
-            ),
+            style: const TextStyle(fontSize: 14, color: AppColors.textPrimary),
             decoration: InputDecoration(
               hintText: 'Search transactions...',
-              prefixIcon: const Icon(Icons.search_rounded,
-                  size: 20, color: AppColors.textTertiary),
+              prefixIcon: const Icon(
+                Icons.search_rounded,
+                size: 20,
+                color: AppColors.textTertiary,
+              ),
               suffixIcon: filters.search != null
                   ? IconButton(
-                      icon: const Icon(Icons.close_rounded,
-                          size: 18, color: AppColors.textTertiary),
+                      icon: const Icon(
+                        Icons.close_rounded,
+                        size: 18,
+                        color: AppColors.textTertiary,
+                      ),
                       onPressed: () {
                         _searchController.clear();
                         ref.read(transactionFiltersProvider.notifier).state =
@@ -58,11 +59,11 @@ class _FilterBarState extends ConsumerState<FilterBar> {
             ),
             onSubmitted: (value) {
               if (value.isEmpty) {
-                ref.read(transactionFiltersProvider.notifier).state =
-                    filters.copyWith(clearSearch: true, page: 1);
+                ref.read(transactionFiltersProvider.notifier).state = filters
+                    .copyWith(clearSearch: true, page: 1);
               } else {
-                ref.read(transactionFiltersProvider.notifier).state =
-                    filters.copyWith(search: value, page: 1);
+                ref.read(transactionFiltersProvider.notifier).state = filters
+                    .copyWith(search: value, page: 1);
               }
             },
           ),
@@ -78,9 +79,7 @@ class _FilterBarState extends ConsumerState<FilterBar> {
                   onTap: () => _showCategorySheet(context, filters),
                   onClear: filters.category != null
                       ? () {
-                          ref
-                              .read(transactionFiltersProvider.notifier)
-                              .state =
+                          ref.read(transactionFiltersProvider.notifier).state =
                               filters.copyWith(clearCategory: true, page: 1);
                         }
                       : null,
@@ -111,19 +110,23 @@ class _FilterBarState extends ConsumerState<FilterBar> {
               title: const Text('Clear filter'),
               leading: const Icon(Icons.close_rounded, size: 20),
               onTap: () {
-                ref.read(transactionFiltersProvider.notifier).state =
-                    filters.copyWith(clearCategory: true, page: 1);
+                ref.read(transactionFiltersProvider.notifier).state = filters
+                    .copyWith(clearCategory: true, page: 1);
                 Navigator.pop(ctx);
               },
             ),
-          ...allCategories.where((c) => c != 'Uncategorized').map((c) => ListTile(
-                title: Text(c),
-                onTap: () {
-                  ref.read(transactionFiltersProvider.notifier).state =
-                      filters.copyWith(category: c, page: 1);
-                  Navigator.pop(ctx);
-                },
-              )),
+          ...allCategories
+              .where((c) => c != 'Uncategorized')
+              .map(
+                (c) => ListTile(
+                  title: Text(c),
+                  onTap: () {
+                    ref.read(transactionFiltersProvider.notifier).state =
+                        filters.copyWith(category: c, page: 1);
+                    Navigator.pop(ctx);
+                  },
+                ),
+              ),
         ],
       ),
     );
@@ -143,18 +146,23 @@ class _FilterBarState extends ConsumerState<FilterBar> {
         shrinkWrap: true,
         padding: const EdgeInsets.symmetric(vertical: 8),
         children: options.entries
-            .map((e) => ListTile(
-                  title: Text(e.value),
-                  trailing: e.key == filters.sort
-                      ? const Icon(Icons.check_rounded,
-                          color: AppColors.accent, size: 20)
-                      : null,
-                  onTap: () {
-                    ref.read(transactionFiltersProvider.notifier).state =
-                        filters.copyWith(sort: e.key, page: 1);
-                    Navigator.pop(ctx);
-                  },
-                ))
+            .map(
+              (e) => ListTile(
+                title: Text(e.value),
+                trailing: e.key == filters.sort
+                    ? const Icon(
+                        Icons.check_rounded,
+                        color: AppColors.accent,
+                        size: 20,
+                      )
+                    : null,
+                onTap: () {
+                  ref.read(transactionFiltersProvider.notifier).state = filters
+                      .copyWith(sort: e.key, page: 1);
+                  Navigator.pop(ctx);
+                },
+              ),
+            )
             .toList(),
       ),
     );
@@ -185,51 +193,56 @@ class _FilterPill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(20),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-        decoration: BoxDecoration(
-          color: isActive
-              ? AppColors.accentSurface
-              : AppColors.surfaceContainerHigh,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: isActive ? AppColors.accent.withValues(alpha: 0.3) : AppColors.border,
-          ),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w500,
-                color:
-                    isActive ? AppColors.accent : AppColors.textSecondary,
-              ),
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(20),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+          decoration: BoxDecoration(
+            color: isActive
+                ? AppColors.accentSurface
+                : AppColors.surfaceContainer,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: isActive
+                  ? AppColors.accent.withValues(alpha: 0.25)
+                  : AppColors.border.withValues(alpha: 0.5),
+              width: 1,
             ),
-            if (onClear != null) ...[
-              const SizedBox(width: 6),
-              GestureDetector(
-                onTap: onClear,
-                child: Icon(
-                  Icons.close_rounded,
-                  size: 16,
-                  color: isActive ? AppColors.accent : AppColors.textTertiary,
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w500,
+                  color: isActive ? AppColors.accent : AppColors.textSecondary,
                 ),
               ),
-            ] else ...[
-              const SizedBox(width: 4),
-              Icon(
-                Icons.keyboard_arrow_down_rounded,
-                size: 18,
-                color: isActive ? AppColors.accent : AppColors.textTertiary,
-              ),
+              if (onClear != null) ...[
+                const SizedBox(width: 6),
+                GestureDetector(
+                  onTap: onClear,
+                  child: Icon(
+                    Icons.close_rounded,
+                    size: 16,
+                    color: isActive ? AppColors.accent : AppColors.textTertiary,
+                  ),
+                ),
+              ] else ...[
+                const SizedBox(width: 4),
+                Icon(
+                  Icons.keyboard_arrow_down_rounded,
+                  size: 18,
+                  color: isActive ? AppColors.accent : AppColors.textTertiary,
+                ),
+              ],
             ],
-          ],
+          ),
         ),
       ),
     );

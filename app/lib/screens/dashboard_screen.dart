@@ -278,12 +278,20 @@ class _PremiumCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: AppColors.border.withValues(alpha: 0.5)),
+        border: Border.all(
+          color: AppColors.border.withValues(alpha: 0.4),
+          width: 1,
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
+            color: AppColors.shadowColor,
             blurRadius: 20,
-            offset: const Offset(0, 8),
+            offset: const Offset(0, 4),
+          ),
+          BoxShadow(
+            color: AppColors.shadowColorStrong,
+            blurRadius: 40,
+            offset: const Offset(0, 12),
           ),
         ],
       ),
@@ -479,12 +487,20 @@ class _MetricCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppColors.border.withValues(alpha: 0.5)),
+        border: Border.all(
+          color: AppColors.border.withValues(alpha: 0.4),
+          width: 1,
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.02),
-            blurRadius: 12,
+            color: AppColors.shadowColor,
+            blurRadius: 16,
             offset: const Offset(0, 4),
+          ),
+          BoxShadow(
+            color: color.withValues(alpha: 0.06),
+            blurRadius: 24,
+            offset: const Offset(0, 8),
           ),
         ],
       ),
@@ -499,8 +515,8 @@ class _MetricCard extends StatelessWidget {
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
                 colors: [
-                  color.withValues(alpha: 0.15),
-                  color.withValues(alpha: 0.08),
+                  color.withValues(alpha: 0.12),
+                  color.withValues(alpha: 0.04),
                 ],
               ),
               borderRadius: BorderRadius.circular(14),
@@ -513,7 +529,7 @@ class _MetricCard extends StatelessWidget {
             style: TextStyle(
               fontSize: 11,
               fontWeight: FontWeight.w700,
-              color: AppColors.textTertiary.withValues(alpha: 0.8),
+              color: AppColors.textTertiary.withValues(alpha: 0.9),
               letterSpacing: 1.2,
             ),
           ),
@@ -812,8 +828,18 @@ class _DesktopSidebar extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.surface,
         border: Border(
-          left: BorderSide(color: AppColors.border.withValues(alpha: 0.5)),
+          left: BorderSide(
+            color: AppColors.border.withValues(alpha: 0.4),
+            width: 1,
+          ),
         ),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.shadowColor,
+            blurRadius: 20,
+            offset: const Offset(0, 0),
+          ),
+        ],
       ),
       child: ListView(
         padding: const EdgeInsets.all(24),
@@ -824,6 +850,7 @@ class _DesktopSidebar extends StatelessWidget {
               fontSize: 20,
               fontWeight: FontWeight.w600,
               color: AppColors.textPrimary,
+              letterSpacing: -0.3,
             ),
           ),
           const SizedBox(height: 24),
@@ -833,12 +860,20 @@ class _DesktopSidebar extends StatelessWidget {
               gradient: LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
-                colors: [AppColors.surfaceContainerHigh, AppColors.surface],
+                colors: [AppColors.surfaceContainer, AppColors.surface],
               ),
               borderRadius: BorderRadius.circular(24),
               border: Border.all(
-                color: AppColors.border.withValues(alpha: 0.5),
+                color: AppColors.border.withValues(alpha: 0.4),
+                width: 1,
               ),
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.shadowColor,
+                  blurRadius: 16,
+                  offset: const Offset(0, 4),
+                ),
+              ],
             ),
             child: Column(
               children: [
@@ -966,7 +1001,11 @@ class _SummaryRow extends StatelessWidget {
           height: 44,
           decoration: BoxDecoration(
             color: AppColors.accent.withValues(alpha: 0.08),
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: AppColors.accent.withValues(alpha: 0.1),
+              width: 1,
+            ),
           ),
           child: Icon(icon, size: 22, color: AppColors.accent),
         ),

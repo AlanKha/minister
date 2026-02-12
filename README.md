@@ -96,9 +96,9 @@ flutter pub get
 Launch the application:
 
 ```bash
-flutter run -d chrome    # Web
-flutter run -d macos     # macOS (requires Xcode)
-flutter run -d ios       # iOS Simulator/Device
+cd app && flutter run -d chrome    # Web
+cd app && flutter run -d macos     # macOS (requires Xcode)
+cd app && flutter run -d ios       # iOS Simulator/Device
 ```
 
 ## 📡 API Endpoints

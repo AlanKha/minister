@@ -4,40 +4,45 @@ import 'package:google_fonts/google_fonts.dart';
 // ── Premium Color Palette ─────────────────────────────────────────
 class AppColors {
   // Backgrounds - Premium gradient base
-  static const background = Color(0xFFFAFAFA);
+  static const background = Color(0xFFF8F9FA);
   static const surface = Color(0xFFFFFFFF);
-  static const surfaceContainer = Color(0xFFF8F8F8);
-  static const surfaceContainerHigh = Color(0xFFF0F0F0);
-  static const surfaceContainerHighest = Color(0xFFE8E8E8);
+  static const surfaceContainer = Color(0xFFF3F4F6);
+  static const surfaceContainerHigh = Color(0xFFE8EAED);
+  static const surfaceContainerHighest = Color(0xFFDDE1E5);
 
   // Sidebar
   static const sidebarBg = Color(0xFFFFFFFF);
-  static const sidebarHover = Color(0xFFF5F5F5);
+  static const sidebarHover = Color(0xFFF5F7FA);
 
-  // Accent — Premium coral/orange gradient
-  static const accent = Color(0xFFE8642C);
-  static const accentLight = Color(0xFFF07A4A);
-  static const accentMuted = Color(0xFFD4551F);
-  static const accentSurface = Color(0x14E8642C);
+  // Accent — Premium coral/orange gradient (enhanced)
+  static const accent = Color(0xFFE85D3A);
+  static const accentLight = Color(0xFFF06B4A);
+  static const accentMuted = Color(0xFFD64F28);
+  static const accentSurface = Color(0x12E85D3A);
+  static const accentGlow = Color(0x08E85D3A);
 
   // Text - High contrast
-  static const textPrimary = Color(0xFF0F0F0F);
-  static const textSecondary = Color(0xFF525252);
-  static const textTertiary = Color(0xFF8A8A8A);
+  static const textPrimary = Color(0xFF1A1A2E);
+  static const textSecondary = Color(0xFF4A4A5A);
+  static const textTertiary = Color(0xFF8E8E9A);
 
   // Semantic
-  static const positive = Color(0xFF16A34A);
-  static const positiveLight = Color(0xFFDCFCE7);
-  static const negative = Color(0xFFDC2626);
+  static const positive = Color(0xFF10B981);
+  static const positiveLight = Color(0xFFD1FAE5);
+  static const negative = Color(0xFFEF4444);
   static const negativeLight = Color(0xFFFEE2E2);
-  static const info = Color(0xFF2563EB);
+  static const info = Color(0xFF3B82F6);
   static const infoLight = Color(0xFFDBEAFE);
-  static const warning = Color(0xFFD97706);
+  static const warning = Color(0xFFF59E0B);
   static const warningLight = Color(0xFFFEF3C7);
 
   // Borders & dividers
-  static const border = Color(0xFFE5E5E5);
-  static const borderSubtle = Color(0xFFF0F0F0);
+  static const border = Color(0xFFE5E7EB);
+  static const borderSubtle = Color(0xFFF0F2F5);
+
+  // Shadows
+  static const shadowColor = Color(0x0A000000);
+  static const shadowColorStrong = Color(0x14000000);
 
   // Category palette — Premium refined colors
   static const categoryColors = <String, Color>{
@@ -206,7 +211,7 @@ ThemeData buildAppTheme() {
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20),
-        side: const BorderSide(color: AppColors.border, width: 1),
+        side: BorderSide(color: AppColors.border.withValues(alpha: 0.5)),
       ),
       margin: EdgeInsets.zero,
     ),
@@ -218,45 +223,58 @@ ThemeData buildAppTheme() {
     chipTheme: ChipThemeData(
       backgroundColor: AppColors.surfaceContainerHigh,
       selectedColor: AppColors.accentSurface,
-      side: const BorderSide(color: AppColors.border),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      side: BorderSide(color: AppColors.border.withValues(alpha: 0.5)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       labelStyle: GoogleFonts.dmSans(
-        fontSize: 13,
+        fontSize: 12,
         fontWeight: FontWeight.w500,
         color: AppColors.textPrimary,
       ),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
     ),
     inputDecorationTheme: InputDecorationTheme(
       filled: true,
-      fillColor: AppColors.surfaceContainerHigh,
+      fillColor: AppColors.surfaceContainer,
       border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(14),
-        borderSide: const BorderSide(color: AppColors.border),
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: AppColors.border.withValues(alpha: 0.5)),
       ),
       enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(14),
-        borderSide: const BorderSide(color: AppColors.border),
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: AppColors.border.withValues(alpha: 0.5)),
       ),
       focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(12),
         borderSide: const BorderSide(color: AppColors.accent, width: 1.5),
       ),
       hintStyle: GoogleFonts.dmSans(
         fontSize: 14,
         color: AppColors.textTertiary,
       ),
-      contentPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
     ),
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
         backgroundColor: AppColors.accent,
         foregroundColor: Colors.white,
         elevation: 0,
-        padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 16),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         textStyle: GoogleFonts.dmSans(
-          fontSize: 15,
+          fontSize: 14,
           fontWeight: FontWeight.w600,
+        ),
+      ),
+    ),
+    outlinedButtonTheme: OutlinedButtonThemeData(
+      style: OutlinedButton.styleFrom(
+        foregroundColor: AppColors.textPrimary,
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        side: BorderSide(color: AppColors.border.withValues(alpha: 0.6)),
+        textStyle: GoogleFonts.dmSans(
+          fontSize: 14,
+          fontWeight: FontWeight.w500,
         ),
       ),
     ),
