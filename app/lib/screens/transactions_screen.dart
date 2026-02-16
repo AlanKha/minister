@@ -32,7 +32,7 @@ class TransactionsScreen extends ConsumerWidget {
     if (!showSidebar) return mainContent;
 
     return Scaffold(
-      backgroundColor: AppColors.surface,
+      backgroundColor: AppColors.background,
       body: Row(
         children: [
           Expanded(flex: 3, child: mainContent),
@@ -48,7 +48,7 @@ class TransactionsScreen extends ConsumerWidget {
   Widget _buildMain(BuildContext context, WidgetRef ref, AsyncValue<TransactionPage> page,
       TransactionFilters filters) {
     return Scaffold(
-      backgroundColor: AppColors.surface,
+      backgroundColor: AppColors.background,
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

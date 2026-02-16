@@ -112,90 +112,92 @@ class _ConnectAccountScreenState extends State<ConnectAccountScreen>
             box-sizing: border-box;
             -webkit-tap-highlight-color: transparent;
         }
-        
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #FAFAFA 0%, #F0F0F0 100%);
+            background: #0d1117;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             padding: 24px;
-            color: #0F0F0F;
+            color: #E6EDF3;
         }
-        
+
         .container {
             width: 100%;
             max-width: 400px;
-            background: white;
+            background: #161B22;
             border-radius: 24px;
             padding: 40px 32px;
-            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
             text-align: center;
+            border: 1px solid rgba(255,255,255,0.04);
         }
-        
+
         .icon-wrapper {
             width: 72px;
             height: 72px;
-            background: linear-gradient(135deg, #E8642C 0%, #F07A4A 100%);
+            background: linear-gradient(135deg, #58A6FF 0%, #79B8FF 100%);
             border-radius: 20px;
             display: flex;
             align-items: center;
             justify-content: center;
             margin: 0 auto 24px;
-            box-shadow: 0 8px 24px rgba(232, 100, 44, 0.25);
+            box-shadow: 0 8px 24px rgba(88, 166, 255, 0.3);
         }
-        
+
         .icon-wrapper svg {
             width: 36px;
             height: 36px;
             fill: white;
         }
-        
+
         h1 {
             font-size: 26px;
             font-weight: 700;
             margin-bottom: 8px;
             letter-spacing: -0.5px;
+            color: #E6EDF3;
         }
-        
+
         .subtitle {
-            color: #8A8A8A;
+            color: #8B949E;
             font-size: 15px;
             line-height: 1.5;
             margin-bottom: 32px;
         }
-        
+
         #connect-btn {
             width: 100%;
             padding: 18px 24px;
             font-size: 16px;
             font-weight: 600;
             color: white;
-            background: linear-gradient(135deg, #E8642C 0%, #F07A4A 100%);
+            background: linear-gradient(135deg, #58A6FF 0%, #79B8FF 100%);
             border: none;
             border-radius: 16px;
             cursor: pointer;
             transition: all 0.3s ease;
-            box-shadow: 0 4px 16px rgba(232, 100, 44, 0.3);
+            box-shadow: 0 4px 16px rgba(88, 166, 255, 0.3);
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 10px;
         }
-        
+
         #connect-btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 8px 24px rgba(232, 100, 44, 0.4);
+            box-shadow: 0 8px 24px rgba(88, 166, 255, 0.4);
         }
-        
+
         #connect-btn:disabled {
             opacity: 0.6;
             cursor: not-allowed;
             transform: none;
         }
-        
+
         #connect-btn .spinner {
             width: 20px;
             height: 20px;
@@ -204,11 +206,11 @@ class _ConnectAccountScreenState extends State<ConnectAccountScreen>
             border-radius: 50%;
             animation: spin 0.8s linear infinite;
         }
-        
+
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
-        
+
         .security-note {
             display: flex;
             align-items: center;
@@ -216,16 +218,16 @@ class _ConnectAccountScreenState extends State<ConnectAccountScreen>
             gap: 8px;
             margin-top: 24px;
             padding-top: 24px;
-            border-top: 1px solid #F0F0F0;
+            border-top: 1px solid rgba(255,255,255,0.04);
             font-size: 13px;
-            color: #8A8A8A;
+            color: #6E7681;
         }
-        
+
         .security-note svg {
             width: 16px;
             height: 16px;
         }
-        
+
         #status {
             margin-top: 20px;
             padding: 16px;
@@ -234,34 +236,36 @@ class _ConnectAccountScreenState extends State<ConnectAccountScreen>
             font-size: 14px;
             line-height: 1.5;
         }
-        
+
         #status.success {
             display: block;
-            background: #DCFCE7;
-            color: #166534;
+            background: rgba(34, 197, 94, 0.1);
+            color: #22C55E;
+            border: 1px solid rgba(34, 197, 94, 0.2);
         }
-        
+
         #status.error {
             display: block;
-            background: #FEE2E2;
-            color: #991B1B;
+            background: rgba(244, 63, 94, 0.1);
+            color: #F43F5E;
+            border: 1px solid rgba(244, 63, 94, 0.2);
         }
-        
+
         .features {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 16px;
             margin: 32px 0;
         }
-        
+
         .feature {
             text-align: center;
         }
-        
+
         .feature-icon {
             width: 44px;
             height: 44px;
-            background: #F8F8F8;
+            background: #21262D;
             border-radius: 12px;
             display: flex;
             align-items: center;
@@ -269,11 +273,11 @@ class _ConnectAccountScreenState extends State<ConnectAccountScreen>
             margin: 0 auto 8px;
             font-size: 20px;
         }
-        
+
         .feature-label {
             font-size: 12px;
             font-weight: 500;
-            color: #525252;
+            color: #8B949E;
         }
     </style>
 </head>

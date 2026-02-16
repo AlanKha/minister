@@ -26,27 +26,28 @@ class _FilterBarState extends ConsumerState<FilterBar> {
 
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-      decoration: const BoxDecoration(
-        border: Border(bottom: BorderSide(color: AppColors.border)),
+      decoration: BoxDecoration(
+        border: Border(
+          bottom: BorderSide(color: Colors.white.withValues(alpha: 0.04)),
+        ),
       ),
       child: Column(
         children: [
-          // Search
           TextField(
             controller: _searchController,
-            style: const TextStyle(fontSize: 14, color: AppColors.textPrimary),
+            style: const TextStyle(fontSize: 13, color: AppColors.textPrimary),
             decoration: InputDecoration(
               hintText: 'Search transactions...',
               prefixIcon: const Icon(
                 Icons.search_rounded,
-                size: 20,
+                size: 18,
                 color: AppColors.textTertiary,
               ),
               suffixIcon: filters.search != null
                   ? IconButton(
                       icon: const Icon(
                         Icons.close_rounded,
-                        size: 18,
+                        size: 16,
                         color: AppColors.textTertiary,
                       ),
                       onPressed: () {
@@ -68,7 +69,6 @@ class _FilterBarState extends ConsumerState<FilterBar> {
             },
           ),
           const SizedBox(height: 10),
-          // Filter chips
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: Row(
@@ -101,6 +101,7 @@ class _FilterBarState extends ConsumerState<FilterBar> {
   void _showCategorySheet(BuildContext context, TransactionFilters filters) {
     showModalBottomSheet(
       context: context,
+      backgroundColor: AppColors.surface,
       builder: (ctx) => ListView(
         shrinkWrap: true,
         padding: const EdgeInsets.symmetric(vertical: 8),
@@ -142,6 +143,7 @@ class _FilterBarState extends ConsumerState<FilterBar> {
 
     showModalBottomSheet(
       context: context,
+      backgroundColor: AppColors.surface,
       builder: (ctx) => ListView(
         shrinkWrap: true,
         padding: const EdgeInsets.symmetric(vertical: 8),
@@ -153,7 +155,7 @@ class _FilterBarState extends ConsumerState<FilterBar> {
                     ? const Icon(
                         Icons.check_rounded,
                         color: AppColors.accent,
-                        size: 20,
+                        size: 18,
                       )
                     : null,
                 onTap: () {
@@ -207,8 +209,8 @@ class _FilterPill extends StatelessWidget {
             borderRadius: BorderRadius.circular(20),
             border: Border.all(
               color: isActive
-                  ? AppColors.accent.withValues(alpha: 0.25)
-                  : AppColors.border.withValues(alpha: 0.5),
+                  ? AppColors.accent.withValues(alpha: 0.2)
+                  : Colors.white.withValues(alpha: 0.04),
               width: 1,
             ),
           ),
@@ -218,7 +220,7 @@ class _FilterPill extends StatelessWidget {
               Text(
                 label,
                 style: TextStyle(
-                  fontSize: 13,
+                  fontSize: 12,
                   fontWeight: FontWeight.w500,
                   color: isActive ? AppColors.accent : AppColors.textSecondary,
                 ),
@@ -229,7 +231,7 @@ class _FilterPill extends StatelessWidget {
                   onTap: onClear,
                   child: Icon(
                     Icons.close_rounded,
-                    size: 16,
+                    size: 14,
                     color: isActive ? AppColors.accent : AppColors.textTertiary,
                   ),
                 ),
@@ -237,7 +239,7 @@ class _FilterPill extends StatelessWidget {
                 const SizedBox(width: 4),
                 Icon(
                   Icons.keyboard_arrow_down_rounded,
-                  size: 18,
+                  size: 16,
                   color: isActive ? AppColors.accent : AppColors.textTertiary,
                 ),
               ],

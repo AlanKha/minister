@@ -22,38 +22,25 @@ class TransactionTile extends StatelessWidget {
       color: Colors.transparent,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(12),
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(14),
-            border: Border.all(
-              color: AppColors.border.withValues(alpha: 0.3),
-              width: 1,
-            ),
-          ),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           child: Row(
             children: [
-              // Category indicator dot
               Container(
-                width: 42,
-                height: 42,
+                width: 40,
+                height: 40,
                 decoration: BoxDecoration(
-                  color: catColor.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: catColor.withValues(alpha: 0.15),
-                    width: 1,
-                  ),
+                  color: catColor.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(10),
                 ),
                 child: Icon(
                   _categoryIcon(transaction.category),
-                  size: 20,
+                  size: 18,
                   color: catColor,
                 ),
               ),
-              const SizedBox(width: 14),
-              // Description & meta
+              const SizedBox(width: 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -63,18 +50,18 @@ class TransactionTile extends StatelessWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
-                        fontSize: 14,
+                        fontSize: 13,
                         fontWeight: FontWeight.w500,
                         color: AppColors.textPrimary,
                       ),
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: 3),
                     Row(
                       children: [
                         Text(
                           transaction.date,
                           style: const TextStyle(
-                            fontSize: 12,
+                            fontSize: 11,
                             color: AppColors.textTertiary,
                           ),
                         ),
@@ -85,27 +72,14 @@ class TransactionTile extends StatelessWidget {
                         ),
                       ],
                     ),
-                    if (transaction.accountLabel.isNotEmpty) ...[
-                      const SizedBox(height: 2),
-                      Text(
-                        transaction.accountLabel,
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: AppColors.textTertiary,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
                   ],
                 ),
               ),
               const SizedBox(width: 12),
-              // Amount
               Text(
                 transaction.amountFormatted,
                 style: TextStyle(
-                  fontSize: 15,
+                  fontSize: 14,
                   fontWeight: FontWeight.w600,
                   color: amountColor,
                   letterSpacing: -0.3,

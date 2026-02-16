@@ -381,11 +381,11 @@ class _CategoryPieChartState extends State<CategoryPieChart>
       return Material(
         elevation: 12,
         borderRadius: BorderRadius.circular(8),
-        color: const Color(0xFF2D2D2D),
+        color: AppColors.surfaceContainerHighest,
         child: Container(
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: const Color(0xFF2D2D2D),
+            color: AppColors.surfaceContainerHighest,
             borderRadius: BorderRadius.circular(8),
           ),
           constraints: const BoxConstraints(maxWidth: 200),
@@ -472,11 +472,11 @@ class _CategoryPieChartState extends State<CategoryPieChart>
     return Material(
       elevation: 12,
       borderRadius: BorderRadius.circular(8),
-      color: const Color(0xFF2D2D2D),
+      color: AppColors.surfaceContainerHighest,
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
         decoration: BoxDecoration(
-          color: const Color(0xFF2D2D2D),
+          color: AppColors.surfaceContainerHighest,
           borderRadius: BorderRadius.circular(8),
         ),
         child: Column(
@@ -621,7 +621,7 @@ class MonthlyBarChart extends StatelessWidget {
           borderData: FlBorderData(show: false),
           barTouchData: BarTouchData(
             touchTooltipData: BarTouchTooltipData(
-              getTooltipColor: (group) => AppColors.textPrimary,
+              getTooltipColor: (group) => AppColors.surfaceContainerHighest,
               tooltipRoundedRadius: 12,
               tooltipPadding: const EdgeInsets.symmetric(
                 horizontal: 16,
@@ -632,7 +632,7 @@ class MonthlyBarChart extends StatelessWidget {
                 return BarTooltipItem(
                   '${item.month}\n',
                   const TextStyle(
-                    color: Colors.white,
+                    color: AppColors.textSecondary,
                     fontSize: 12,
                     fontWeight: FontWeight.w500,
                   ),
@@ -640,7 +640,7 @@ class MonthlyBarChart extends StatelessWidget {
                     TextSpan(
                       text: item.total,
                       style: const TextStyle(
-                        color: Colors.white,
+                        color: AppColors.textPrimary,
                         fontSize: 16,
                         fontWeight: FontWeight.w700,
                       ),
@@ -753,7 +753,7 @@ class WeeklyBarChart extends StatelessWidget {
           borderData: FlBorderData(show: false),
           barTouchData: BarTouchData(
             touchTooltipData: BarTouchTooltipData(
-              getTooltipColor: (group) => AppColors.textPrimary,
+              getTooltipColor: (group) => AppColors.surfaceContainerHighest,
               tooltipRoundedRadius: 12,
               tooltipPadding: const EdgeInsets.symmetric(
                 horizontal: 16,
@@ -764,7 +764,7 @@ class WeeklyBarChart extends StatelessWidget {
                 return BarTooltipItem(
                   'Week of ${item.weekStart}\n',
                   const TextStyle(
-                    color: Colors.white,
+                    color: AppColors.textSecondary,
                     fontSize: 12,
                     fontWeight: FontWeight.w500,
                   ),
@@ -772,7 +772,7 @@ class WeeklyBarChart extends StatelessWidget {
                     TextSpan(
                       text: item.total,
                       style: const TextStyle(
-                        color: Colors.white,
+                        color: AppColors.textPrimary,
                         fontSize: 16,
                         fontWeight: FontWeight.w700,
                       ),

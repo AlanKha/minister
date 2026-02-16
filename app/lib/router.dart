@@ -86,7 +86,7 @@ class AdaptiveShell extends StatelessWidget {
   }
 }
 
-// ── Desktop: wide sidebar ──────────────────────────────────────
+// ── Desktop: premium dark sidebar ──────────────────────────────
 class _DesktopShell extends StatelessWidget {
   final StatefulNavigationShell navigationShell;
   const _DesktopShell({required this.navigationShell});
@@ -101,45 +101,38 @@ class _DesktopShell extends StatelessWidget {
         children: [
           // Sidebar
           Container(
-            width: 240,
+            width: 220,
             decoration: BoxDecoration(
-              color: AppColors.surface,
+              color: AppColors.sidebarBg,
               border: Border(
                 right: BorderSide(
-                  color: AppColors.border.withValues(alpha: 0.5),
+                  color: Colors.white.withValues(alpha: 0.04),
                   width: 1,
                 ),
               ),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.03),
-                  blurRadius: 20,
-                  offset: const Offset(2, 0),
-                ),
-              ],
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Logo
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(24, 32, 24, 0),
+                  padding: const EdgeInsets.fromLTRB(20, 28, 20, 0),
                   child: Row(
                     children: [
                       Container(
-                        width: 44,
-                        height: 44,
+                        width: 38,
+                        height: 38,
                         decoration: BoxDecoration(
                           gradient: const LinearGradient(
                             begin: Alignment.topLeft,
                             end: Alignment.bottomRight,
                             colors: [AppColors.accent, AppColors.accentLight],
                           ),
-                          borderRadius: BorderRadius.circular(12),
+                          borderRadius: BorderRadius.circular(10),
                           boxShadow: [
                             BoxShadow(
-                              color: AppColors.accent.withValues(alpha: 0.3),
-                              blurRadius: 12,
+                              color: AppColors.accent.withValues(alpha: 0.35),
+                              blurRadius: 16,
                               offset: const Offset(0, 4),
                             ),
                           ],
@@ -147,63 +140,39 @@ class _DesktopShell extends StatelessWidget {
                         child: const Icon(
                           Icons.monetization_on_rounded,
                           color: Colors.white,
-                          size: 24,
+                          size: 20,
                         ),
                       ),
-                      const SizedBox(width: 14),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            'Minister',
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.w700,
-                              color: AppColors.textPrimary,
-                              letterSpacing: -0.5,
-                            ),
-                          ),
-                          Text(
-                            'Finance',
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w500,
-                              color: AppColors.textSecondary.withValues(
-                                alpha: 0.7,
-                              ),
-                              letterSpacing: 0.5,
-                            ),
-                          ),
-                        ],
+                      const SizedBox(width: 12),
+                      const Text(
+                        'Minister',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.textPrimary,
+                          letterSpacing: -0.5,
+                        ),
                       ),
                     ],
                   ),
                 ),
-                const SizedBox(height: 40),
+                const SizedBox(height: 32),
                 // Nav items
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Text(
-                    'MENU',
-                    style: TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.textTertiary.withValues(alpha: 0.8),
-                      letterSpacing: 1.5,
-                    ),
+                Expanded(
+                  child: ListView(
+                    padding: const EdgeInsets.symmetric(horizontal: 10),
+                    children: List.generate(_navItems.length, (i) {
+                      final item = _navItems[i];
+                      final isActive = currentIndex == i;
+                      return _SidebarItem(
+                        icon: isActive ? item.activeIcon : item.icon,
+                        label: item.label,
+                        isActive: isActive,
+                        onTap: () => navigationShell.goBranch(i),
+                      );
+                    }),
                   ),
                 ),
-                const SizedBox(height: 12),
-                ...List.generate(_navItems.length, (i) {
-                  final item = _navItems[i];
-                  final isActive = currentIndex == i;
-                  return _SidebarItem(
-                    icon: isActive ? item.activeIcon : item.icon,
-                    label: item.label,
-                    isActive: isActive,
-                    onTap: () => navigationShell.goBranch(i),
-                  );
-                }),
               ],
             ),
           ),
@@ -215,7 +184,7 @@ class _DesktopShell extends StatelessWidget {
   }
 }
 
-class _SidebarItem extends StatelessWidget {
+class _SidebarItem extends StatefulWidget {
   final IconData icon;
   final String label;
   final bool isActive;
@@ -229,67 +198,86 @@ class _SidebarItem extends StatelessWidget {
   });
 
   @override
+  State<_SidebarItem> createState() => _SidebarItemState();
+}
+
+class _SidebarItemState extends State<_SidebarItem> {
+  bool _hovered = false;
+
+  @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 3),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        curve: Curves.easeOutCubic,
-        child: Material(
-          color: Colors.transparent,
-          child: InkWell(
-            onTap: onTap,
-            borderRadius: BorderRadius.circular(12),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              decoration: BoxDecoration(
-                color: isActive
-                    ? AppColors.accent.withValues(alpha: 0.08)
-                    : Colors.transparent,
-                borderRadius: BorderRadius.circular(12),
-                border: isActive
-                    ? Border.all(
-                        color: AppColors.accent.withValues(alpha: 0.15),
-                        width: 1,
-                      )
-                    : null,
-              ),
-              child: Row(
-                children: [
-                  AnimatedContainer(
-                    duration: const Duration(milliseconds: 200),
-                    child: Icon(
-                      icon,
-                      size: 22,
-                      color: isActive
-                          ? AppColors.accent
-                          : AppColors.textSecondary,
-                    ),
+      padding: const EdgeInsets.symmetric(vertical: 2),
+      child: MouseRegion(
+        onEnter: (_) => setState(() => _hovered = true),
+        onExit: (_) => setState(() => _hovered = false),
+        child: GestureDetector(
+          onTap: widget.onTap,
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 180),
+            curve: Curves.easeOutCubic,
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+            decoration: BoxDecoration(
+              color: widget.isActive
+                  ? AppColors.accent.withValues(alpha: 0.1)
+                  : _hovered
+                      ? AppColors.sidebarHover
+                      : Colors.transparent,
+              borderRadius: BorderRadius.circular(10),
+              border: widget.isActive
+                  ? Border.all(
+                      color: AppColors.accent.withValues(alpha: 0.15),
+                      width: 1,
+                    )
+                  : null,
+            ),
+            child: Row(
+              children: [
+                // Accent bar indicator
+                AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  width: 3,
+                  height: widget.isActive ? 20 : 0,
+                  margin: const EdgeInsets.only(right: 12),
+                  decoration: BoxDecoration(
+                    color: widget.isActive
+                        ? AppColors.accent
+                        : Colors.transparent,
+                    borderRadius: BorderRadius.circular(2),
+                    boxShadow: widget.isActive
+                        ? [
+                            BoxShadow(
+                              color: AppColors.accent.withValues(alpha: 0.5),
+                              blurRadius: 8,
+                            ),
+                          ]
+                        : null,
                   ),
-                  const SizedBox(width: 14),
-                  Text(
-                    label,
-                    style: TextStyle(
-                      fontSize: 15,
-                      fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
-                      color: isActive
-                          ? AppColors.accent
+                ),
+                Icon(
+                  widget.icon,
+                  size: 20,
+                  color: widget.isActive
+                      ? AppColors.accent
+                      : _hovered
+                          ? AppColors.textPrimary
                           : AppColors.textSecondary,
-                    ),
+                ),
+                const SizedBox(width: 12),
+                Text(
+                  widget.label,
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight:
+                        widget.isActive ? FontWeight.w600 : FontWeight.w500,
+                    color: widget.isActive
+                        ? AppColors.accent
+                        : _hovered
+                            ? AppColors.textPrimary
+                            : AppColors.textSecondary,
                   ),
-                  if (isActive) ...[
-                    const Spacer(),
-                    Container(
-                      width: 6,
-                      height: 6,
-                      decoration: BoxDecoration(
-                        color: AppColors.accent,
-                        borderRadius: BorderRadius.circular(3),
-                      ),
-                    ),
-                  ],
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         ),
@@ -315,21 +303,14 @@ class _MobileShell extends StatelessWidget {
           color: AppColors.surface,
           border: Border(
             top: BorderSide(
-              color: AppColors.border.withValues(alpha: 0.5),
+              color: Colors.white.withValues(alpha: 0.04),
               width: 1,
             ),
           ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.04),
-              blurRadius: 20,
-              offset: const Offset(0, -4),
-            ),
-          ],
         ),
         child: SafeArea(
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: List.generate(_navItems.length, (i) {
@@ -370,29 +351,26 @@ class _BottomNavItem extends StatelessWidget {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         curve: Curves.easeOutCubic,
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         decoration: BoxDecoration(
           color: isActive
-              ? AppColors.accent.withValues(alpha: 0.08)
+              ? AppColors.accent.withValues(alpha: 0.1)
               : Colors.transparent,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(12),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
-              child: Icon(
-                icon,
-                size: 24,
-                color: isActive ? AppColors.accent : AppColors.textTertiary,
-              ),
+            Icon(
+              icon,
+              size: 22,
+              color: isActive ? AppColors.accent : AppColors.textTertiary,
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: 3),
             Text(
               label,
               style: TextStyle(
-                fontSize: 11,
+                fontSize: 10,
                 fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
                 color: isActive ? AppColors.accent : AppColors.textTertiary,
               ),

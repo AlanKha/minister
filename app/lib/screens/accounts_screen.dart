@@ -462,7 +462,7 @@ class _AccountsLoading extends StatelessWidget {
   Widget build(BuildContext context) {
     return Shimmer.fromColors(
       baseColor: AppColors.surfaceContainerHigh,
-      highlightColor: AppColors.surface,
+      highlightColor: AppColors.surfaceContainer,
       child: CustomScrollView(
         slivers: [
           SliverToBoxAdapter(
@@ -475,7 +475,7 @@ class _AccountsLoading extends StatelessWidget {
                     width: 140,
                     height: 40,
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: AppColors.surfaceContainerHigh,
                       borderRadius: BorderRadius.circular(8),
                     ),
                   ),
@@ -484,7 +484,7 @@ class _AccountsLoading extends StatelessWidget {
                     width: 200,
                     height: 20,
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: AppColors.surfaceContainerHigh,
                       borderRadius: BorderRadius.circular(6),
                     ),
                   ),
@@ -501,7 +501,7 @@ class _AccountsLoading extends StatelessWidget {
                   child: Container(
                     height: 92,
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: AppColors.surfaceContainerHigh,
                       borderRadius: BorderRadius.circular(20),
                     ),
                   ),
@@ -669,11 +669,11 @@ class _AccountsSidebar extends StatelessWidget {
             },
             loading: () => Shimmer.fromColors(
               baseColor: AppColors.surfaceContainerHigh,
-              highlightColor: AppColors.surface,
+              highlightColor: AppColors.surfaceContainer,
               child: Container(
                 height: 200,
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: AppColors.surfaceContainerHigh,
                   borderRadius: BorderRadius.circular(20),
                 ),
               ),

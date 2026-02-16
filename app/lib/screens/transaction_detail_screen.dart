@@ -26,9 +26,9 @@ class _TransactionDetailScreenState
     final txPage = ref.watch(transactionsProvider);
 
     return Scaffold(
-      backgroundColor: AppColors.surface,
+      backgroundColor: AppColors.background,
       appBar: AppBar(
-        backgroundColor: AppColors.surface,
+        backgroundColor: AppColors.background,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_rounded, size: 22),
           onPressed: () => Navigator.of(context).pop(),

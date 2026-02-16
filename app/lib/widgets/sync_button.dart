@@ -11,11 +11,10 @@ class SyncButton extends ConsumerWidget {
     final syncState = ref.watch(syncProvider);
 
     return Container(
-      margin: const EdgeInsets.only(right: 8),
       decoration: BoxDecoration(
-        color: AppColors.surfaceContainerHigh,
+        color: AppColors.surfaceContainer,
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: AppColors.border),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.04)),
       ),
       child: IconButton(
         onPressed: syncState.isSyncing
@@ -34,15 +33,15 @@ class SyncButton extends ConsumerWidget {
               },
         icon: syncState.isSyncing
             ? const SizedBox(
-                width: 18,
-                height: 18,
+                width: 16,
+                height: 16,
                 child: CircularProgressIndicator(
                   strokeWidth: 2,
                   color: AppColors.accent,
                 ),
               )
-            : const Icon(Icons.sync_rounded, size: 20),
-        iconSize: 20,
+            : const Icon(Icons.sync_rounded, size: 18),
+        iconSize: 18,
         constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
         padding: EdgeInsets.zero,
         color: AppColors.textSecondary,

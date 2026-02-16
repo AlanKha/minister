@@ -556,12 +556,12 @@ class _MetricCardLoading extends StatelessWidget {
   Widget build(BuildContext context) {
     return Shimmer.fromColors(
       baseColor: AppColors.surfaceContainerHigh,
-      highlightColor: AppColors.surface,
+      highlightColor: AppColors.surfaceContainer,
       child: Container(
         padding: const EdgeInsets.all(20),
         height: 140,
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.surfaceContainerHigh,
           borderRadius: BorderRadius.circular(20),
         ),
       ),
@@ -607,7 +607,7 @@ class _ChartLoading extends StatelessWidget {
   Widget build(BuildContext context) {
     return Shimmer.fromColors(
       baseColor: AppColors.surfaceContainerHigh,
-      highlightColor: AppColors.surface,
+      highlightColor: AppColors.surfaceContainer,
       child: Row(
         children: [
           Expanded(
@@ -616,7 +616,7 @@ class _ChartLoading extends StatelessWidget {
               aspectRatio: 1,
               child: Container(
                 decoration: const BoxDecoration(
-                  color: Colors.white,
+                  color: AppColors.surfaceContainerHigh,
                   shape: BoxShape.circle,
                 ),
               ),
@@ -634,7 +634,7 @@ class _ChartLoading extends StatelessWidget {
                   margin: const EdgeInsets.symmetric(vertical: 6),
                   height: 16,
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: AppColors.surfaceContainerHigh,
                     borderRadius: BorderRadius.circular(8),
                   ),
                 ),
@@ -730,7 +730,7 @@ class _TransactionsLoading extends StatelessWidget {
   Widget build(BuildContext context) {
     return Shimmer.fromColors(
       baseColor: AppColors.surfaceContainerHigh,
-      highlightColor: AppColors.surface,
+      highlightColor: AppColors.surfaceContainer,
       child: Column(
         children: List.generate(
           5,
@@ -742,7 +742,7 @@ class _TransactionsLoading extends StatelessWidget {
                   width: 44,
                   height: 44,
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: AppColors.surfaceContainerHigh,
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
@@ -754,7 +754,7 @@ class _TransactionsLoading extends StatelessWidget {
                       Container(
                         height: 16,
                         decoration: BoxDecoration(
-                          color: Colors.white,
+                          color: AppColors.surfaceContainerHigh,
                           borderRadius: BorderRadius.circular(8),
                         ),
                       ),
@@ -763,7 +763,7 @@ class _TransactionsLoading extends StatelessWidget {
                         height: 12,
                         width: 100,
                         decoration: BoxDecoration(
-                          color: Colors.white,
+                          color: AppColors.surfaceContainerHigh,
                           borderRadius: BorderRadius.circular(6),
                         ),
                       ),
@@ -1040,14 +1040,14 @@ class _SummaryRowLoading extends StatelessWidget {
   Widget build(BuildContext context) {
     return Shimmer.fromColors(
       baseColor: AppColors.surfaceContainerHigh,
-      highlightColor: AppColors.surface,
+      highlightColor: AppColors.surfaceContainer,
       child: Row(
         children: [
           Container(
             width: 44,
             height: 44,
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: AppColors.surfaceContainerHigh,
               borderRadius: BorderRadius.circular(14),
             ),
           ),
@@ -1056,7 +1056,7 @@ class _SummaryRowLoading extends StatelessWidget {
             child: Container(
               height: 16,
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: AppColors.surfaceContainerHigh,
                 borderRadius: BorderRadius.circular(8),
               ),
             ),
@@ -1066,7 +1066,7 @@ class _SummaryRowLoading extends StatelessWidget {
             width: 60,
             height: 16,
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: AppColors.surfaceContainerHigh,
               borderRadius: BorderRadius.circular(8),
             ),
           ),

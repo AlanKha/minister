@@ -598,7 +598,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
         border: Border.all(color: AppColors.border),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.02),
+            color: AppColors.shadowColor,
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),

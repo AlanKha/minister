@@ -363,7 +363,7 @@ class _BalanceCard extends StatelessWidget {
         border: Border.all(color: AppColors.border.withValues(alpha: 0.5)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
+            color: AppColors.shadowColor,
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -692,14 +692,14 @@ class _BalancesLoading extends StatelessWidget {
   Widget build(BuildContext context) {
     return Shimmer.fromColors(
       baseColor: AppColors.surfaceContainerHigh,
-      highlightColor: AppColors.surface,
+      highlightColor: AppColors.surfaceContainer,
       child: ListView(
         padding: const EdgeInsets.all(24),
         children: [
           Container(
             height: 160,
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: AppColors.surfaceContainerHigh,
               borderRadius: BorderRadius.circular(24),
             ),
           ),
@@ -707,7 +707,7 @@ class _BalancesLoading extends StatelessWidget {
           Container(
             height: 80,
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: AppColors.surfaceContainerHigh,
               borderRadius: BorderRadius.circular(20),
             ),
           ),
@@ -719,7 +719,7 @@ class _BalancesLoading extends StatelessWidget {
               child: Container(
                 height: 140,
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: AppColors.surfaceContainerHigh,
                   borderRadius: BorderRadius.circular(20),
                 ),
               ),

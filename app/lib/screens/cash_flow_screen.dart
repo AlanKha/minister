@@ -358,7 +358,7 @@ class _CashFlowScreenState extends ConsumerState<CashFlowScreen>
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.03),
+                    color: AppColors.shadowColor,
                     blurRadius: 20,
                     offset: const Offset(0, 8),
                   ),
@@ -527,7 +527,7 @@ class _CashFlowScreenState extends ConsumerState<CashFlowScreen>
               ),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.02),
+                  color: AppColors.shadowColor,
                   blurRadius: 12,
                   offset: const Offset(0, 4),
                 ),
@@ -693,7 +693,7 @@ class _CashFlowScreenState extends ConsumerState<CashFlowScreen>
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.03),
+                    color: AppColors.shadowColor,
                     blurRadius: 20,
                     offset: const Offset(0, 8),
                   ),
@@ -758,7 +758,7 @@ class _CashFlowScreenState extends ConsumerState<CashFlowScreen>
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.03),
+                    color: AppColors.shadowColor,
                     blurRadius: 20,
                     offset: const Offset(0, 8),
                   ),
@@ -813,7 +813,7 @@ class _CashFlowScreenState extends ConsumerState<CashFlowScreen>
         border: Border.all(color: AppColors.border.withValues(alpha: 0.5)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
+            color: AppColors.shadowColor,
             blurRadius: 20,
             offset: const Offset(0, 8),
           ),
@@ -905,7 +905,7 @@ class _OverviewLoading extends StatelessWidget {
   Widget build(BuildContext context) {
     return Shimmer.fromColors(
       baseColor: AppColors.surfaceContainerHigh,
-      highlightColor: AppColors.surface,
+      highlightColor: AppColors.surfaceContainer,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 24),
         child: Column(
@@ -913,7 +913,7 @@ class _OverviewLoading extends StatelessWidget {
             Container(
               height: 140,
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: AppColors.surfaceContainerHigh,
                 borderRadius: BorderRadius.circular(20),
               ),
             ),
@@ -924,7 +924,7 @@ class _OverviewLoading extends StatelessWidget {
                   child: Container(
                     height: 120,
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: AppColors.surfaceContainerHigh,
                       borderRadius: BorderRadius.circular(20),
                     ),
                   ),
@@ -934,7 +934,7 @@ class _OverviewLoading extends StatelessWidget {
                   child: Container(
                     height: 120,
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: AppColors.surfaceContainerHigh,
                       borderRadius: BorderRadius.circular(20),
                     ),
                   ),
@@ -948,7 +948,7 @@ class _OverviewLoading extends StatelessWidget {
                   child: Container(
                     height: 120,
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: AppColors.surfaceContainerHigh,
                       borderRadius: BorderRadius.circular(20),
                     ),
                   ),
@@ -958,7 +958,7 @@ class _OverviewLoading extends StatelessWidget {
                   child: Container(
                     height: 120,
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: AppColors.surfaceContainerHigh,
                       borderRadius: BorderRadius.circular(20),
                     ),
                   ),
@@ -979,7 +979,7 @@ class _ChartsLoading extends StatelessWidget {
   Widget build(BuildContext context) {
     return Shimmer.fromColors(
       baseColor: AppColors.surfaceContainerHigh,
-      highlightColor: AppColors.surface,
+      highlightColor: AppColors.surfaceContainer,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 24),
         child: Column(
@@ -987,7 +987,7 @@ class _ChartsLoading extends StatelessWidget {
             Container(
               height: 350,
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: AppColors.surfaceContainerHigh,
                 borderRadius: BorderRadius.circular(24),
               ),
             ),
@@ -995,7 +995,7 @@ class _ChartsLoading extends StatelessWidget {
             Container(
               height: 400,
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: AppColors.surfaceContainerHigh,
                 borderRadius: BorderRadius.circular(24),
               ),
             ),

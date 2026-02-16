@@ -84,96 +84,97 @@ class AppColors {
     'Uncategorized': Color(0xFF9B9B9B),
   };
 }
-
-// ── Premium Theme Builder ─────────────────────────────────────────
+// ── Theme Builder ────────────────────────────────────────────────
 ThemeData buildAppTheme() {
   final base = ThemeData.light(useMaterial3: true);
 
-  final textTheme = GoogleFonts.dmSansTextTheme(base.textTheme).copyWith(
-    displayLarge: GoogleFonts.dmSans(
+  final textTheme = GoogleFonts.soraTextTheme(base.textTheme).copyWith(
+    displayLarge: GoogleFonts.sora(
       fontSize: 48,
       fontWeight: FontWeight.w700,
       color: AppColors.textPrimary,
-      letterSpacing: -1.5,
+      letterSpacing: -2.0,
       height: 1.1,
     ),
-    displayMedium: GoogleFonts.dmSans(
+    displayMedium: GoogleFonts.sora(
       fontSize: 36,
       fontWeight: FontWeight.w700,
       color: AppColors.textPrimary,
-      letterSpacing: -1.0,
+      letterSpacing: -1.5,
       height: 1.15,
     ),
-    displaySmall: GoogleFonts.dmSans(
+    displaySmall: GoogleFonts.sora(
       fontSize: 30,
+      fontWeight: FontWeight.w600,
+      color: AppColors.textPrimary,
+      letterSpacing: -1.0,
+    ),
+    headlineLarge: GoogleFonts.sora(
+      fontSize: 26,
+      fontWeight: FontWeight.w600,
+      color: AppColors.textPrimary,
+      letterSpacing: -0.8,
+    ),
+    headlineMedium: GoogleFonts.sora(
+      fontSize: 22,
       fontWeight: FontWeight.w600,
       color: AppColors.textPrimary,
       letterSpacing: -0.5,
     ),
-    headlineLarge: GoogleFonts.dmSans(
-      fontSize: 26,
-      fontWeight: FontWeight.w600,
-      color: AppColors.textPrimary,
-      letterSpacing: -0.3,
-    ),
-    headlineMedium: GoogleFonts.dmSans(
-      fontSize: 22,
-      fontWeight: FontWeight.w600,
-      color: AppColors.textPrimary,
-    ),
-    headlineSmall: GoogleFonts.dmSans(
+    headlineSmall: GoogleFonts.sora(
       fontSize: 20,
       fontWeight: FontWeight.w500,
       color: AppColors.textPrimary,
+      letterSpacing: -0.3,
     ),
-    titleLarge: GoogleFonts.dmSans(
+    titleLarge: GoogleFonts.sora(
       fontSize: 17,
       fontWeight: FontWeight.w600,
       color: AppColors.textPrimary,
-      letterSpacing: 0.1,
+      letterSpacing: -0.2,
     ),
-    titleMedium: GoogleFonts.dmSans(
+    titleMedium: GoogleFonts.sora(
       fontSize: 15,
       fontWeight: FontWeight.w600,
       color: AppColors.textPrimary,
     ),
-    titleSmall: GoogleFonts.dmSans(
+    titleSmall: GoogleFonts.sora(
       fontSize: 14,
       fontWeight: FontWeight.w500,
       color: AppColors.textSecondary,
     ),
-    bodyLarge: GoogleFonts.dmSans(
-      fontSize: 16,
+    bodyLarge: GoogleFonts.sora(
+      fontSize: 15,
       fontWeight: FontWeight.w400,
       color: AppColors.textPrimary,
     ),
-    bodyMedium: GoogleFonts.dmSans(
-      fontSize: 14,
-      fontWeight: FontWeight.w400,
-      color: AppColors.textSecondary,
-    ),
-    bodySmall: GoogleFonts.dmSans(
+    bodyMedium: GoogleFonts.sora(
       fontSize: 13,
       fontWeight: FontWeight.w400,
+      color: AppColors.textSecondary,
+    ),
+    bodySmall: GoogleFonts.sora(
+      fontSize: 12,
+      fontWeight: FontWeight.w400,
       color: AppColors.textTertiary,
     ),
-    labelLarge: GoogleFonts.dmSans(
-      fontSize: 14,
+    labelLarge: GoogleFonts.sora(
+      fontSize: 13,
       fontWeight: FontWeight.w600,
       color: AppColors.textPrimary,
-      letterSpacing: 0.5,
+      letterSpacing: 0.3,
     ),
-    labelMedium: GoogleFonts.dmSans(
-      fontSize: 12,
-      fontWeight: FontWeight.w500,
-      color: AppColors.textSecondary,
-      letterSpacing: 0.8,
-    ),
-    labelSmall: GoogleFonts.dmSans(
+    labelMedium: GoogleFonts.sora(
       fontSize: 11,
       fontWeight: FontWeight.w500,
+      color: AppColors.textSecondary,
+      letterSpacing: 0.5,
+    ),
+    labelSmall: GoogleFonts.sora(
+      fontSize: 10,
+      fontWeight: FontWeight.w500,
       color: AppColors.textTertiary,
-      letterSpacing: 1.0,
+      letterSpacing: 0.8,
     ),
   );
 
@@ -199,19 +200,19 @@ ThemeData buildAppTheme() {
       elevation: 0,
       scrolledUnderElevation: 0,
       centerTitle: false,
-      titleTextStyle: GoogleFonts.dmSans(
-        fontSize: 20,
+      titleTextStyle: GoogleFonts.sora(
+        fontSize: 18,
         fontWeight: FontWeight.w600,
         color: AppColors.textPrimary,
         letterSpacing: -0.3,
       ),
     ),
     cardTheme: CardThemeData(
-      color: AppColors.surface,
+      color: AppColors.surfaceContainer,
       elevation: 0,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-        side: BorderSide(color: AppColors.border.withValues(alpha: 0.5)),
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(color: Colors.white.withValues(alpha: 0.04)),
       ),
       margin: EdgeInsets.zero,
     ),
@@ -223,10 +224,10 @@ ThemeData buildAppTheme() {
     chipTheme: ChipThemeData(
       backgroundColor: AppColors.surfaceContainerHigh,
       selectedColor: AppColors.accentSurface,
-      side: BorderSide(color: AppColors.border.withValues(alpha: 0.5)),
+      side: BorderSide(color: Colors.white.withValues(alpha: 0.04)),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-      labelStyle: GoogleFonts.dmSans(
-        fontSize: 12,
+      labelStyle: GoogleFonts.sora(
+        fontSize: 11,
         fontWeight: FontWeight.w500,
         color: AppColors.textPrimary,
       ),
@@ -237,18 +238,18 @@ ThemeData buildAppTheme() {
       fillColor: AppColors.surfaceContainer,
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: AppColors.border.withValues(alpha: 0.5)),
+        borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.06)),
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: AppColors.border.withValues(alpha: 0.5)),
+        borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.06)),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
         borderSide: const BorderSide(color: AppColors.accent, width: 1.5),
       ),
-      hintStyle: GoogleFonts.dmSans(
-        fontSize: 14,
+      hintStyle: GoogleFonts.sora(
+        fontSize: 13,
         color: AppColors.textTertiary,
       ),
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
@@ -260,8 +261,8 @@ ThemeData buildAppTheme() {
         elevation: 0,
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        textStyle: GoogleFonts.dmSans(
-          fontSize: 14,
+        textStyle: GoogleFonts.sora(
+          fontSize: 13,
           fontWeight: FontWeight.w600,
         ),
       ),
@@ -271,9 +272,9 @@ ThemeData buildAppTheme() {
         foregroundColor: AppColors.textPrimary,
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        side: BorderSide(color: AppColors.border.withValues(alpha: 0.6)),
-        textStyle: GoogleFonts.dmSans(
-          fontSize: 14,
+        side: BorderSide(color: Colors.white.withValues(alpha: 0.08)),
+        textStyle: GoogleFonts.sora(
+          fontSize: 13,
           fontWeight: FontWeight.w500,
         ),
       ),
@@ -281,8 +282,8 @@ ThemeData buildAppTheme() {
     textButtonTheme: TextButtonThemeData(
       style: TextButton.styleFrom(
         foregroundColor: AppColors.accent,
-        textStyle: GoogleFonts.dmSans(
-          fontSize: 14,
+        textStyle: GoogleFonts.sora(
+          fontSize: 13,
           fontWeight: FontWeight.w600,
         ),
       ),
@@ -293,29 +294,54 @@ ThemeData buildAppTheme() {
       indicatorColor: AppColors.accent,
       indicatorSize: TabBarIndicatorSize.label,
       indicator: const UnderlineTabIndicator(
-        borderSide: BorderSide(color: AppColors.accent, width: 2.5),
+        borderSide: BorderSide(color: AppColors.accent, width: 2),
       ),
-      labelStyle: GoogleFonts.dmSans(fontSize: 14, fontWeight: FontWeight.w600),
-      unselectedLabelStyle: GoogleFonts.dmSans(
-        fontSize: 14,
+      labelStyle: GoogleFonts.sora(fontSize: 13, fontWeight: FontWeight.w600),
+      unselectedLabelStyle: GoogleFonts.sora(
+        fontSize: 13,
         fontWeight: FontWeight.w500,
       ),
     ),
     bottomSheetTheme: const BottomSheetThemeData(
       backgroundColor: AppColors.surface,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
     ),
     snackBarTheme: SnackBarThemeData(
-      backgroundColor: AppColors.textPrimary,
-      contentTextStyle: GoogleFonts.dmSans(fontSize: 14, color: Colors.white),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+      backgroundColor: AppColors.surfaceContainerHighest,
+      contentTextStyle: GoogleFonts.sora(fontSize: 13, color: AppColors.textPrimary),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       behavior: SnackBarBehavior.floating,
     ),
     listTileTheme: const ListTileThemeData(
       contentPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 6),
     ),
-    iconTheme: const IconThemeData(color: AppColors.textSecondary, size: 22),
+    iconTheme: const IconThemeData(color: AppColors.textSecondary, size: 20),
+    dialogTheme: DialogThemeData(
+      backgroundColor: AppColors.surface,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      titleTextStyle: GoogleFonts.sora(
+        fontSize: 17,
+        fontWeight: FontWeight.w600,
+        color: AppColors.textPrimary,
+      ),
+      contentTextStyle: GoogleFonts.sora(
+        fontSize: 14,
+        color: AppColors.textSecondary,
+      ),
+    ),
+    dropdownMenuTheme: DropdownMenuThemeData(
+      menuStyle: MenuStyle(
+        backgroundColor: WidgetStatePropertyAll(AppColors.surfaceContainer),
+        shape: WidgetStatePropertyAll(
+          RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        ),
+      ),
+    ),
+    popupMenuTheme: PopupMenuThemeData(
+      color: AppColors.surfaceContainer,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+    ),
   );
 }
