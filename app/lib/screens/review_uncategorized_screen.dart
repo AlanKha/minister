@@ -311,7 +311,7 @@ class ReviewUncategorizedScreen extends ConsumerWidget {
                 ),
                 const SizedBox(height: 8),
                 DropdownButtonFormField<String>(
-                  value: selectedCategory,
+                  initialValue: selectedCategory,
                   items: (allCategories
                           .where((c) => c != 'Uncategorized')
                           .toList()

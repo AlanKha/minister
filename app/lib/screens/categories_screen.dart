@@ -318,7 +318,7 @@ class CategoriesScreen extends ConsumerWidget {
                 ),
                 const SizedBox(height: 8),
                 DropdownButtonFormField<String>(
-                  value: categoryController.text.isEmpty
+                  initialValue: categoryController.text.isEmpty
                       ? null
                       : categoryController.text,
                   items: (allCategories
@@ -498,7 +498,7 @@ class CategoriesScreen extends ConsumerWidget {
                 ),
                 const SizedBox(height: 8),
                 DropdownButtonFormField<String>(
-                  value: categoryController.text,
+                  initialValue: categoryController.text,
                   items: (allCategories
                           .where((c) => c != 'Uncategorized')
                           .toList()
