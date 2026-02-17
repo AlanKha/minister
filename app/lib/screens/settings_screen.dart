@@ -4,7 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../providers/accounts_provider.dart';
-import '../providers/categories_provider.dart';
+import '../providers/refresh_helpers.dart';
+import '../utils/snackbar_helpers.dart';
 import '../theme.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
@@ -54,21 +55,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
     } catch (e) {
       setState(() => _loadingStats = false);
       if (mounted) {
-        _showSnackbar('Error loading stats: $e', isError: true);
+        showErrorSnackbar(context, 'Error loading stats: $e');
       }
     }
-  }
-
-  void _showSnackbar(String message, {bool isError = false}) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: isError ? AppColors.negative : AppColors.positive,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-        margin: const EdgeInsets.all(16),
-      ),
-    );
   }
 
   @override
@@ -77,7 +66,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
       backgroundColor: AppColors.background,
       body: CustomScrollView(
         slivers: [
-          // Premium App Bar with gradient
+          //  App Bar with gradient
           SliverAppBar(
             expandedHeight: 140,
             pinned: true,
@@ -109,14 +98,19 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
                               height: 48,
                               decoration: BoxDecoration(
                                 gradient: const LinearGradient(
-                                  colors: [AppColors.accent, AppColors.accentLight],
+                                  colors: [
+                                    AppColors.accent,
+                                    AppColors.accentLight,
+                                  ],
                                   begin: Alignment.topLeft,
                                   end: Alignment.bottomRight,
                                 ),
                                 borderRadius: BorderRadius.circular(12),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: AppColors.accent.withValues(alpha: 0.3),
+                                    color: AppColors.accent.withValues(
+                                      alpha: 0.3,
+                                    ),
                                     blurRadius: 12,
                                     offset: const Offset(0, 4),
                                   ),
@@ -203,10 +197,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildSectionHeader(
-          'Database Overview',
-          Icons.analytics_outlined,
-        ),
+        _buildSectionHeader('Database Overview', Icons.analytics_outlined),
         const SizedBox(height: 16),
         if (_loadingStats)
           const Center(
@@ -228,28 +219,45 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
                     _stats!['transactions'],
                     Icons.receipt_long_rounded,
                     [const Color(0xFFE8642C), const Color(0xFFF07A4A)],
-                    isWide ? constraints.maxWidth / 2 - 6 : constraints.maxWidth,
+                    isWide
+                        ? constraints.maxWidth / 2 - 6
+                        : constraints.maxWidth,
                   ),
                   _buildStatCard(
                     'Category Rules',
                     _stats!['categoryRules'],
                     Icons.rule_rounded,
                     [const Color(0xFF2563EB), const Color(0xFF60A5FA)],
-                    isWide ? constraints.maxWidth / 2 - 6 : constraints.maxWidth,
+                    isWide
+                        ? constraints.maxWidth / 2 - 6
+                        : constraints.maxWidth,
                   ),
                   _buildStatCard(
                     'Overrides',
                     _stats!['overrides'],
                     Icons.edit_note_rounded,
                     [const Color(0xFFD97706), const Color(0xFFFBBF24)],
-                    isWide ? constraints.maxWidth / 2 - 6 : constraints.maxWidth,
+                    isWide
+                        ? constraints.maxWidth / 2 - 6
+                        : constraints.maxWidth,
+                  ),
+                  _buildStatCard(
+                    'Pinned',
+                    _stats!['pinned'] ?? 0,
+                    Icons.push_pin_rounded,
+                    [const Color(0xFF9333EA), const Color(0xFFC084FC)],
+                    isWide
+                        ? constraints.maxWidth / 2 - 6
+                        : constraints.maxWidth,
                   ),
                   _buildStatCard(
                     'Linked Accounts',
                     _stats!['accounts'],
                     Icons.account_balance_rounded,
                     [const Color(0xFF16A34A), const Color(0xFF4ADE80)],
-                    isWide ? constraints.maxWidth / 2 - 6 : constraints.maxWidth,
+                    isWide
+                        ? constraints.maxWidth / 2 - 6
+                        : constraints.maxWidth,
                   ),
                 ],
               );
@@ -434,9 +442,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
   Widget _buildBackupButton(
     String label,
     IconData icon,
-    VoidCallback onPressed,
-    {required bool isPrimary}
-  ) {
+    VoidCallback onPressed, {
+    required bool isPrimary,
+  }) {
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -522,6 +530,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
           icon: Icons.clear_all_rounded,
           iconColor: AppColors.textSecondary,
           onTap: _showClearOverridesDialog,
+        ),
+        _ActionItem(
+          title: 'Clear Manual Tags',
+          subtitle: 'Allow re-categorization of all pinned transactions',
+          icon: Icons.push_pin_outlined,
+          iconColor: const Color(0xFFD97706),
+          onTap: _showClearPinsDialog,
         ),
       ],
     );
@@ -733,12 +748,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
 
       if (await canLaunchUrl(uri)) {
         await launchUrl(uri, mode: LaunchMode.externalApplication);
-        _showSnackbar('Backup download started');
+        showSuccessSnackbar(context, 'Backup download started');
       } else {
-        _showSnackbar('Could not open download link', isError: true);
+        showErrorSnackbar(context, 'Could not open download link');
       }
     } catch (e) {
-      _showSnackbar('Failed to download backup: $e', isError: true);
+      showErrorSnackbar(context, 'Failed to download backup: $e');
     }
   }
 
@@ -783,17 +798,16 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
           if (confirmed == true) {
             final client = ref.read(apiClientProvider);
             await client.restoreBackup(bytes);
+            invalidateAllWidget(ref);
             await _loadStats();
-            ref.invalidate(categoryRulesNotifierProvider);
-            ref.invalidate(accountsProvider);
             if (mounted) {
-              _showSnackbar('Backup restored successfully');
+              showSuccessSnackbar(context, 'Backup restored successfully');
             }
           }
         }
       }
     } catch (e) {
-      _showSnackbar('Failed to restore backup: $e', isError: true);
+      showErrorSnackbar(context, 'Failed to restore backup: $e');
     }
   }
 
@@ -804,7 +818,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
       builder: (ctx) => _buildConfirmDialog(
         dialogContext: ctx,
         title: 'Reset Category Rules?',
-        content: 'This will replace all your category rules with the default '
+        content:
+            'This will replace all your category rules with the default '
             'patterns. Any custom rules you created will be lost. '
             'All transactions will be re-categorized.\n\n'
             'This action cannot be undone.',
@@ -814,6 +829,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
             action: () => ref.read(apiClientProvider).resetCategoryRules(),
             successMessage: 'Category rules reset to defaults',
             errorPrefix: 'Failed to reset rules',
+            refresh: () {
+              invalidateCategoryRulesWidget(ref);
+              invalidateTransactionsAndAnalyticsWidget(ref);
+            },
           );
         },
       ),
@@ -826,7 +845,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
       builder: (ctx) => _buildConfirmDialog(
         dialogContext: ctx,
         title: 'Clear All Rules?',
-        content: 'This will delete all category rules. '
+        content:
+            'This will delete all category rules. '
             'All transactions will become "Uncategorized".\n\n'
             'This action cannot be undone.',
         confirmText: 'Clear',
@@ -836,6 +856,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
             action: () => ref.read(apiClientProvider).clearCategoryRules(),
             successMessage: 'All category rules cleared',
             errorPrefix: 'Failed to clear rules',
+            refresh: () {
+              invalidateCategoryRulesWidget(ref);
+              invalidateTransactionsAndAnalyticsWidget(ref);
+            },
           );
         },
       ),
@@ -848,7 +872,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
       builder: (ctx) => _buildConfirmDialog(
         dialogContext: ctx,
         title: 'Clear Manual Overrides?',
-        content: 'This will remove all manually assigned categories. '
+        content:
+            'This will remove all manually assigned categories. '
             'Category rules will be reapplied to affected transactions.',
         confirmText: 'Clear',
         onConfirm: () async {
@@ -856,6 +881,29 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
             action: () => ref.read(apiClientProvider).clearCategoryOverrides(),
             successMessage: 'Manual overrides cleared',
             errorPrefix: 'Failed to clear overrides',
+            refresh: () => invalidateTransactionsAndAnalyticsWidget(ref),
+          );
+        },
+      ),
+    );
+  }
+
+  void _showClearPinsDialog() {
+    showDialog(
+      context: context,
+      builder: (ctx) => _buildConfirmDialog(
+        dialogContext: ctx,
+        title: 'Clear Manual Tags?',
+        content:
+            'This will unpin all manually tagged transactions. '
+            'They will be subject to re-categorization when rules change.',
+        confirmText: 'Clear',
+        onConfirm: () async {
+          await _performAction(
+            action: () => ref.read(apiClientProvider).clearPins(),
+            successMessage: 'Manual tags cleared',
+            errorPrefix: 'Failed to clear manual tags',
+            refresh: () {},
           );
         },
       ),
@@ -868,7 +916,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
       builder: (ctx) => _buildConfirmDialog(
         dialogContext: ctx,
         title: 'Clear Transaction Data?',
-        content: 'This will permanently delete all transaction history. '
+        content:
+            'This will permanently delete all transaction history. '
             'Category rules and account connections will be preserved.\n\n'
             'This action cannot be undone.',
         confirmText: 'Delete All',
@@ -878,6 +927,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
             action: () => ref.read(apiClientProvider).clearTransactions(),
             successMessage: 'Transaction data cleared',
             errorPrefix: 'Failed to clear transactions',
+            refresh: () => invalidateTransactionsAndAnalyticsWidget(ref),
           );
         },
       ),
@@ -890,7 +940,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
       builder: (ctx) => _buildConfirmDialog(
         dialogContext: ctx,
         title: 'Unlink All Accounts?',
-        content: 'This will remove all Plaid account connections. '
+        content:
+            'This will remove all Plaid account connections. '
             'Your transaction history will be preserved, but you will need to '
             're-link accounts to sync new transactions.\n\n'
             'You can re-link accounts at any time.',
@@ -901,6 +952,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
             action: () => ref.read(apiClientProvider).unlinkAccounts(),
             successMessage: 'All accounts unlinked',
             errorPrefix: 'Failed to unlink accounts',
+            refresh: () => invalidateAccountsWidget(ref),
           );
         },
       ),
@@ -929,7 +981,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
             onConfirm();
           },
           style: FilledButton.styleFrom(
-            backgroundColor: isDangerous ? AppColors.negative : AppColors.accent,
+            backgroundColor: isDangerous
+                ? AppColors.negative
+                : AppColors.accent,
           ),
           child: Text(confirmText),
         ),
@@ -942,6 +996,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
       action: () => ref.read(apiClientProvider).recategorizeTransactions(),
       successMessage: 'Transactions re-categorized',
       errorPrefix: 'Failed to re-categorize',
+      refresh: () => invalidateTransactionsAndAnalyticsWidget(ref),
     );
   }
 
@@ -949,18 +1004,18 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
     required Future<Map<String, dynamic>> Function() action,
     required String successMessage,
     required String errorPrefix,
+    required VoidCallback refresh,
   }) async {
     try {
       await action();
-      if (mounted) {
-        _showSnackbar(successMessage);
-      }
+      refresh();
       await _loadStats();
-      ref.invalidate(categoryRulesNotifierProvider);
-      ref.invalidate(accountsProvider);
+      if (mounted) {
+        showSuccessSnackbar(context, successMessage);
+      }
     } catch (e) {
       if (mounted) {
-        _showSnackbar('$errorPrefix: $e', isError: true);
+        showErrorSnackbar(context, '$errorPrefix: $e');
       }
     }
   }

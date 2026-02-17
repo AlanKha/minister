@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-// ── Premium Color Palette ─────────────────────────────────────────
+// ── Color Palette ─────────────────────────────────────────
 class AppColors {
-  // Backgrounds - Premium gradient base
+  // Backgrounds -  gradient base
   static const background = Color(0xFFF8F9FA);
   static const surface = Color(0xFFFFFFFF);
   static const surfaceContainer = Color(0xFFF3F4F6);
@@ -14,7 +14,7 @@ class AppColors {
   static const sidebarBg = Color(0xFFFFFFFF);
   static const sidebarHover = Color(0xFFF5F7FA);
 
-  // Accent — Premium coral/orange gradient (enhanced)
+  // Accent —  coral/orange gradient (enhanced)
   static const accent = Color(0xFFE85D3A);
   static const accentLight = Color(0xFFF06B4A);
   static const accentMuted = Color(0xFFD64F28);
@@ -44,7 +44,7 @@ class AppColors {
   static const shadowColor = Color(0x0A000000);
   static const shadowColorStrong = Color(0x14000000);
 
-  // Category palette — Premium refined colors
+  // Category palette —  refined colors
   static const categoryColors = <String, Color>{
     // Food & Drink
     'Dining': Color(0xFFE07A6E),
@@ -84,6 +84,7 @@ class AppColors {
     'Uncategorized': Color(0xFF9B9B9B),
   };
 }
+
 // ── Theme Builder ────────────────────────────────────────────────
 ThemeData buildAppTheme() {
   final base = ThemeData.light(useMaterial3: true);
@@ -192,6 +193,10 @@ ThemeData buildAppTheme() {
       onError: Colors.white,
       outline: AppColors.border,
       outlineVariant: AppColors.borderSubtle,
+      surfaceContainerLowest: AppColors.surface,
+      surfaceContainerLow: AppColors.surfaceContainer,
+      surfaceContainer: AppColors.surfaceContainer,
+      surfaceContainerHigh: AppColors.surfaceContainerHigh,
       surfaceContainerHighest: AppColors.surfaceContainerHighest,
     ),
     appBarTheme: AppBarTheme(
@@ -248,10 +253,7 @@ ThemeData buildAppTheme() {
         borderRadius: BorderRadius.circular(12),
         borderSide: const BorderSide(color: AppColors.accent, width: 1.5),
       ),
-      hintStyle: GoogleFonts.sora(
-        fontSize: 13,
-        color: AppColors.textTertiary,
-      ),
+      hintStyle: GoogleFonts.sora(fontSize: 13, color: AppColors.textTertiary),
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
     ),
     elevatedButtonTheme: ElevatedButtonThemeData(
@@ -261,10 +263,7 @@ ThemeData buildAppTheme() {
         elevation: 0,
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        textStyle: GoogleFonts.sora(
-          fontSize: 13,
-          fontWeight: FontWeight.w600,
-        ),
+        textStyle: GoogleFonts.sora(fontSize: 13, fontWeight: FontWeight.w600),
       ),
     ),
     outlinedButtonTheme: OutlinedButtonThemeData(
@@ -273,19 +272,13 @@ ThemeData buildAppTheme() {
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         side: BorderSide(color: Colors.white.withValues(alpha: 0.08)),
-        textStyle: GoogleFonts.sora(
-          fontSize: 13,
-          fontWeight: FontWeight.w500,
-        ),
+        textStyle: GoogleFonts.sora(fontSize: 13, fontWeight: FontWeight.w500),
       ),
     ),
     textButtonTheme: TextButtonThemeData(
       style: TextButton.styleFrom(
         foregroundColor: AppColors.accent,
-        textStyle: GoogleFonts.sora(
-          fontSize: 13,
-          fontWeight: FontWeight.w600,
-        ),
+        textStyle: GoogleFonts.sora(fontSize: 13, fontWeight: FontWeight.w600),
       ),
     ),
     tabBarTheme: TabBarThemeData(
@@ -310,7 +303,10 @@ ThemeData buildAppTheme() {
     ),
     snackBarTheme: SnackBarThemeData(
       backgroundColor: AppColors.surfaceContainerHighest,
-      contentTextStyle: GoogleFonts.sora(fontSize: 13, color: AppColors.textPrimary),
+      contentTextStyle: GoogleFonts.sora(
+        fontSize: 13,
+        color: AppColors.textPrimary,
+      ),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       behavior: SnackBarBehavior.floating,
     ),

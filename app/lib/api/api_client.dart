@@ -52,19 +52,36 @@ class ApiClient {
     );
   }
 
+  Future<Map<String, dynamic>> updateTransaction(
+    String id, {
+    String? category,
+    bool? pinned,
+  }) async {
+    final body = <String, dynamic>{};
+    if (category != null) body['category'] = category;
+    if (pinned != null) body['pinned'] = pinned;
+
+    final response = await _client.patch(
+      _uri('/api/transactions/$id'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode(body),
+    );
+    return jsonDecode(response.body) as Map<String, dynamic>;
+  }
+
   Future<CleanTransaction> updateTransactionCategory(
     String id,
     String category,
   ) async {
-    final response = await _client.patch(
-      _uri('/api/transactions/$id'),
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({'category': category}),
-    );
-    final json = jsonDecode(response.body) as Map<String, dynamic>;
+    final result = await updateTransaction(id, category: category);
     return CleanTransaction.fromJson(
-      json['transaction'] as Map<String, dynamic>,
+      result['transaction'] as Map<String, dynamic>,
     );
+  }
+
+  Future<Set<String>> getPinnedTransactions() async {
+    final response = await _client.get(_uri('/api/transactions/pinned'));
+    return (jsonDecode(response.body) as List<dynamic>).cast<String>().toSet();
   }
 
   // Sync
@@ -267,7 +284,7 @@ class ApiClient {
     bool createRule = false,
     String? rulePattern,
   }) async {
-    await _client.post(
+    final response = await _client.post(
       _uri('/api/transactions/$id/categorize'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({
@@ -276,6 +293,11 @@ class ApiClient {
         'rulePattern': rulePattern,
       }),
     );
+
+    if (response.statusCode >= 400) {
+      final errorBody = jsonDecode(response.body) as Map<String, dynamic>;
+      throw Exception(errorBody['error'] ?? 'Failed to categorize transaction');
+    }
   }
 
   // Settings
@@ -311,6 +333,15 @@ class ApiClient {
     if (response.statusCode >= 400) {
       final errorBody = jsonDecode(response.body) as Map<String, dynamic>;
       throw Exception(errorBody['error'] ?? 'Failed to clear overrides');
+    }
+    return jsonDecode(response.body) as Map<String, dynamic>;
+  }
+
+  Future<Map<String, dynamic>> clearPins() async {
+    final response = await _client.post(_uri('/api/settings/clear-pins'));
+    if (response.statusCode >= 400) {
+      final errorBody = jsonDecode(response.body) as Map<String, dynamic>;
+      throw Exception(errorBody['error'] ?? 'Failed to clear manual tags');
     }
     return jsonDecode(response.body) as Map<String, dynamic>;
   }

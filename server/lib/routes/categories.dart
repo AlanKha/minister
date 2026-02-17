@@ -253,31 +253,34 @@ Router categoryRoutes() {
         );
       }
 
-      // Load overrides and add this transaction
-      final overrides = loadOverrides();
-      overrides[id] = category;
-      saveOverrides(overrides);
-
-      // If createRule is true, add a new regex rule
+      // Validate regex first before making any changes
       if (createRule && rulePattern != null && rulePattern.isNotEmpty) {
         try {
           RegExp(rulePattern, caseSensitive: false);
-
-          final rules = loadCategoryRules();
-          final newRule = CategoryRule(
-            id: DateTime.now().millisecondsSinceEpoch.toString(),
-            category: category,
-            pattern: rulePattern,
-            caseSensitive: false,
-          );
-          rules.add(newRule);
-          saveCategoryRules(rules);
         } catch (e) {
           return Response.badRequest(
             body: jsonEncode({'error': 'Invalid regex pattern: $e'}),
             headers: {'Content-Type': 'application/json'},
           );
         }
+      }
+
+      // Load overrides and add this transaction
+      final overrides = loadOverrides();
+      overrides[id] = category;
+      saveOverrides(overrides);
+
+      // Create the rule (already validated above)
+      if (createRule && rulePattern != null && rulePattern.isNotEmpty) {
+        final rules = loadCategoryRules();
+        final newRule = CategoryRule(
+          id: DateTime.now().millisecondsSinceEpoch.toString(),
+          category: category,
+          pattern: rulePattern,
+          caseSensitive: false,
+        );
+        rules.add(newRule);
+        saveCategoryRules(rules);
       }
 
       // Trigger re-categorization

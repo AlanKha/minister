@@ -19,6 +19,7 @@ String get _cleanFile => p.join(dataDir, 'transactions_clean.json');
 String get _overridesFile => p.join(dataDir, 'category_overrides.json');
 String get _categoryRulesFile => p.join(dataDir, 'category_rules.json');
 String get _balancesFile => p.join(dataDir, 'balances.json');
+String get _pinnedTransactionsFile => p.join(dataDir, 'pinned_transactions.json');
 String get _deletedDefaultsFile => p.join(dataDir, 'deleted_defaults.json');
 String get _defaultCategoryRulesFile => p.join(serverRoot, 'default_category_rules.json');
 String get _exampleDefaultCategoryRulesFile => p.join(serverRoot, 'example_default_category_rules.json');
@@ -90,6 +91,22 @@ void saveOverrides(Map<String, String> overrides) {
   Directory(dataDir).createSync(recursive: true);
   File(_overridesFile)
       .writeAsStringSync(const JsonEncoder.withIndent('  ').convert(overrides));
+}
+
+Set<String> loadPinnedTransactions() {
+  try {
+    final content = File(_pinnedTransactionsFile).readAsStringSync();
+    return (jsonDecode(content) as List<dynamic>).cast<String>().toSet();
+  } catch (_) {
+    return {};
+  }
+}
+
+void savePinnedTransactions(Set<String> pinned) {
+  Directory(dataDir).createSync(recursive: true);
+  File(_pinnedTransactionsFile).writeAsStringSync(
+    const JsonEncoder.withIndent('  ').convert(pinned.toList()),
+  );
 }
 
 String accountLabel(LinkedAccount acct) {

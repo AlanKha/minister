@@ -110,12 +110,33 @@ Router settingsRoutes() {
     }
   });
 
+  // POST /api/settings/clear-pins - Clear all pinned (manually tagged) transactions
+  router.post('/api/settings/clear-pins', (Request request) async {
+    try {
+      savePinnedTransactions({});
+
+      return Response.ok(
+        jsonEncode({
+          'success': true,
+          'message': 'Cleared all manual tags'
+        }),
+        headers: {'Content-Type': 'application/json'},
+      );
+    } catch (e) {
+      return Response.internalServerError(
+        body: jsonEncode({'error': e.toString()}),
+        headers: {'Content-Type': 'application/json'},
+      );
+    }
+  });
+
   // POST /api/settings/clear-transactions - Clear all transaction data
   router.post('/api/settings/clear-transactions', (Request request) async {
     try {
       saveTransactions([]);
       saveCleanTransactions([]);
       saveOverrides({});
+      savePinnedTransactions({});
 
       return Response.ok(
         jsonEncode({
@@ -160,6 +181,7 @@ Router settingsRoutes() {
       final rules = loadCategoryRules();
       final defaultRules = loadDefaultCategoryRules();
       final overrides = loadOverrides();
+      final pinned = loadPinnedTransactions();
       final accounts = readAccountData();
 
       return Response.ok(
@@ -169,6 +191,7 @@ Router settingsRoutes() {
           'categoryRules': rules.length,
           'defaultRules': defaultRules.length,
           'overrides': overrides.length,
+          'pinned': pinned.length,
           'accounts': accounts.accounts.length,
         }),
         headers: {'Content-Type': 'application/json'},

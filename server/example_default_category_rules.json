@@ -496,7 +496,7 @@
   },
   {
     "category": "Subscription",
-    "pattern": "YOUTUBE PREMIUM",
+    "pattern": "YOUTUBE",
     "caseSensitive": false
   },
   {

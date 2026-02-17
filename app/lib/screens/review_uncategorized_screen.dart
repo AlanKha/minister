@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:minister_shared/models/transaction.dart';
 import '../providers/categories_provider.dart';
 import '../providers/accounts_provider.dart';
+import '../providers/refresh_helpers.dart';
+import '../utils/snackbar_helpers.dart';
 import '../theme.dart';
 import '../widgets/category_chip.dart';
 
@@ -262,17 +264,13 @@ class ReviewUncategorizedScreen extends ConsumerWidget {
                       id: tx.id,
                       category: category,
                     );
-                    ref.invalidate(uncategorizedTransactionsProvider);
+                    invalidateTransactionsAndAnalyticsWidget(ref);
                     if (context.mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Categorized as $category')),
-                      );
+                      showSuccessSnackbar(context, 'Categorized as $category');
                     }
                   } catch (e) {
                     if (context.mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Error: $e')),
-                      );
+                      showErrorSnackbar(context, 'Error: $e');
                     }
                   }
                 },
@@ -313,30 +311,22 @@ class ReviewUncategorizedScreen extends ConsumerWidget {
                 ),
                 const SizedBox(height: 8),
                 DropdownButtonFormField<String>(
-                  initialValue: selectedCategory,
-                  items: [
-                    'Dining',
-                    'Grocery',
-                    'Shopping',
-                    'Superstore',
-                    'Transit',
-                    'Gas',
-                    'Rent',
-                    'Utilities',
-                    'Transfer',
-                    'Fee',
-                    'Loan',
-                    'Entertainment',
-                    'Travel',
-                    'Subscription',
-                    'Medical',
-                    'Personal Care',
-                    'Professional Services',
-                    'Education',
-                  ].map((c) => DropdownMenuItem(value: c, child: Text(c))).toList(),
+                  value: selectedCategory,
+                  items: (allCategories
+                          .where((c) => c != 'Uncategorized')
+                          .toList()
+                        ..sort())
+                      .map((c) => DropdownMenuItem(value: c, child: Text(c)))
+                      .toList(),
                   onChanged: (val) => setState(() => selectedCategory = val ?? 'Dining'),
-                  decoration: const InputDecoration(
-                    contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  decoration: InputDecoration(
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -369,9 +359,7 @@ class ReviewUncategorizedScreen extends ConsumerWidget {
             ElevatedButton(
               onPressed: () async {
                 if (patternController.text.isEmpty) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Please enter a pattern')),
-                  );
+                  showErrorSnackbar(context, 'Please enter a pattern');
                   return;
                 }
 
@@ -383,21 +371,15 @@ class ReviewUncategorizedScreen extends ConsumerWidget {
                     createRule: true,
                     rulePattern: patternController.text,
                   );
-                  ref.invalidate(uncategorizedTransactionsProvider);
+                  invalidateTransactionsAndAnalyticsWidget(ref);
                   ref.read(categoryRulesNotifierProvider.notifier).refresh();
                   if (context.mounted) {
                     Navigator.pop(ctx);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text('Categorized and rule created for $selectedCategory'),
-                      ),
-                    );
+                    showSuccessSnackbar(context, 'Categorized and rule created for $selectedCategory');
                   }
                 } catch (e) {
                   if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Error: $e')),
-                    );
+                    showErrorSnackbar(context, 'Error: $e');
                   }
                 }
               },

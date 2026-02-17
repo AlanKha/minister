@@ -1,19 +1,23 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 // Conditionally import platform-specific webview implementations
 import 'package:webview_flutter_android/webview_flutter_android.dart';
 import 'package:webview_flutter_wkwebview/webview_flutter_wkwebview.dart';
 import '../config.dart';
+import '../providers/refresh_helpers.dart';
+import '../utils/snackbar_helpers.dart';
 import '../theme.dart';
 
-class ConnectAccountScreen extends StatefulWidget {
+class ConnectAccountScreen extends ConsumerStatefulWidget {
   const ConnectAccountScreen({super.key});
 
   @override
-  State<ConnectAccountScreen> createState() => _ConnectAccountScreenState();
+  ConsumerState<ConnectAccountScreen> createState() => _ConnectAccountScreenState();
 }
 
-class _ConnectAccountScreenState extends State<ConnectAccountScreen>
+class _ConnectAccountScreenState extends ConsumerState<ConnectAccountScreen>
     with SingleTickerProviderStateMixin {
   late final WebViewController _controller;
   bool _isLoading = true;
@@ -53,6 +57,24 @@ class _ConnectAccountScreenState extends State<ConnectAccountScreen>
 
     controller
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
+      ..addJavaScriptChannel(
+        'FlutterChannel',
+        onMessageReceived: (JavaScriptMessage message) {
+          try {
+            final data = jsonDecode(message.message) as Map<String, dynamic>;
+            if (data['type'] == 'success') {
+              invalidateAccountsWidget(ref);
+              if (mounted) {
+                final count = data['accounts'] ?? 0;
+                showSuccessSnackbar(
+                  context,
+                  'Successfully connected $count account${count != 1 ? 's' : ''}',
+                );
+              }
+            }
+          } catch (_) {}
+        },
+      )
       ..setNavigationDelegate(
         NavigationDelegate(
           onProgress: (int progress) {
@@ -400,15 +422,8 @@ class _ConnectAccountScreenState extends State<ConnectAccountScreen>
   }
 
   Future<void> _injectCustomStyling() async {
-    await _controller.runJavaScript('''
-      // Add Flutter channel for communication
-      window.FlutterChannel = {
-        postMessage: function(message) {
-          // This will be handled by JavaScript channels if needed
-          console.log('Flutter message:', message);
-        }
-      };
-    ''');
+    // FlutterChannel is now provided by the native JavaScript channel
+    // No additional injection needed
   }
 
   @override

@@ -86,7 +86,7 @@ class AdaptiveShell extends StatelessWidget {
   }
 }
 
-// ── Desktop: premium dark sidebar ──────────────────────────────
+// ── Desktop: dark sidebar ──────────────────────────────
 class _DesktopShell extends StatelessWidget {
   final StatefulNavigationShell navigationShell;
   const _DesktopShell({required this.navigationShell});
@@ -221,8 +221,8 @@ class _SidebarItemState extends State<_SidebarItem> {
               color: widget.isActive
                   ? AppColors.accent.withValues(alpha: 0.1)
                   : _hovered
-                      ? AppColors.sidebarHover
-                      : Colors.transparent,
+                  ? AppColors.sidebarHover
+                  : Colors.transparent,
               borderRadius: BorderRadius.circular(10),
               border: widget.isActive
                   ? Border.all(
@@ -260,21 +260,22 @@ class _SidebarItemState extends State<_SidebarItem> {
                   color: widget.isActive
                       ? AppColors.accent
                       : _hovered
-                          ? AppColors.textPrimary
-                          : AppColors.textSecondary,
+                      ? AppColors.textPrimary
+                      : AppColors.textSecondary,
                 ),
                 const SizedBox(width: 12),
                 Text(
                   widget.label,
                   style: TextStyle(
                     fontSize: 13,
-                    fontWeight:
-                        widget.isActive ? FontWeight.w600 : FontWeight.w500,
+                    fontWeight: widget.isActive
+                        ? FontWeight.w600
+                        : FontWeight.w500,
                     color: widget.isActive
                         ? AppColors.accent
                         : _hovered
-                            ? AppColors.textPrimary
-                            : AppColors.textSecondary,
+                        ? AppColors.textPrimary
+                        : AppColors.textSecondary,
                   ),
                 ),
               ],

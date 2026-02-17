@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:minister_shared/models/transaction.dart';
 import '../providers/accounts_provider.dart';
 import '../providers/transactions_provider.dart';
+import '../providers/refresh_helpers.dart';
+import '../utils/snackbar_helpers.dart';
 import '../widgets/category_chip.dart';
 import '../theme.dart';
 
@@ -20,6 +22,29 @@ class _TransactionDetailScreenState
     extends ConsumerState<TransactionDetailScreen> {
   bool _saving = false;
   CleanTransaction? _cachedTransaction;
+  bool _pinned = false;
+  bool _pinnedLoaded = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadPinnedState();
+  }
+
+  Future<void> _loadPinnedState() async {
+    try {
+      final client = ref.read(apiClientProvider);
+      final pinned = await client.getPinnedTransactions();
+      if (mounted) {
+        setState(() {
+          _pinned = pinned.contains(widget.transactionId);
+          _pinnedLoaded = true;
+        });
+      }
+    } catch (_) {
+      if (mounted) setState(() => _pinnedLoaded = true);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -118,6 +143,60 @@ class _TransactionDetailScreenState
             ],
           ),
         ),
+        const SizedBox(height: 20),
+
+        // Manual tag toggle
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+          decoration: BoxDecoration(
+            color: AppColors.surfaceContainer,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: AppColors.border),
+          ),
+          child: Row(
+            children: [
+              Icon(
+                _pinned ? Icons.push_pin_rounded : Icons.push_pin_outlined,
+                size: 20,
+                color: _pinned ? AppColors.accent : AppColors.textTertiary,
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Manual Tag',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                    Text(
+                      'Keep this category during re-categorization',
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: AppColors.textTertiary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              if (!_pinnedLoaded)
+                const SizedBox(
+                  width: 20, height: 20,
+                  child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.accent),
+                )
+              else
+                Switch.adaptive(
+                  value: _pinned,
+                  onChanged: _saving ? null : (val) => _togglePin(tx.id, val),
+                  activeTrackColor: AppColors.accent,
+                ),
+            ],
+          ),
+        ),
         const SizedBox(height: 28),
 
         // Change category
@@ -133,7 +212,7 @@ class _TransactionDetailScreenState
         Wrap(
           spacing: 8,
           runSpacing: 8,
-          children: allCategories.where((c) => c != 'Uncategorized').map((cat) {
+          children: allCategories.map((cat) {
             final isSelected = cat == tx.category;
             final catColor =
                 AppColors.categoryColors[cat] ?? AppColors.textTertiary;
@@ -183,26 +262,43 @@ class _TransactionDetailScreenState
     );
   }
 
-  Future<void> _updateCategory(String id, String category) async {
+  Future<void> _togglePin(String id, bool pinned) async {
     setState(() => _saving = true);
     try {
       final client = ref.read(apiClientProvider);
-      await client.updateTransactionCategory(id, category);
-      // Update the cached transaction with the new category
-      if (_cachedTransaction != null) {
-        _cachedTransaction!.category = category;
-      }
-      ref.invalidate(transactionsProvider);
+      await client.updateTransaction(id, pinned: pinned);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Category updated to $category')),
+        setState(() => _pinned = pinned);
+        showSuccessSnackbar(
+          context,
+          pinned ? 'Category pinned' : 'Category unpinned',
         );
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Error: $e')));
+        showErrorSnackbar(context, 'Error: $e');
+      }
+    } finally {
+      if (mounted) setState(() => _saving = false);
+    }
+  }
+
+  Future<void> _updateCategory(String id, String category) async {
+    setState(() => _saving = true);
+    try {
+      final client = ref.read(apiClientProvider);
+      await client.updateTransaction(id, category: category, pinned: true);
+      if (_cachedTransaction != null) {
+        _cachedTransaction!.category = category;
+      }
+      setState(() => _pinned = true);
+      invalidateTransactionsAndAnalyticsWidget(ref);
+      if (mounted) {
+        showSuccessSnackbar(context, 'Category updated to $category');
+      }
+    } catch (e) {
+      if (mounted) {
+        showErrorSnackbar(context, 'Error: $e');
       }
     } finally {
       if (mounted) setState(() => _saving = false);

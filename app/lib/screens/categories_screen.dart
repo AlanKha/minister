@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:minister_shared/models/category_rule.dart';
 import '../providers/categories_provider.dart';
+import '../utils/snackbar_helpers.dart';
 import '../theme.dart';
 import '../widgets/category_chip.dart';
 
@@ -262,21 +263,11 @@ class CategoriesScreen extends ConsumerWidget {
                 final notifier = ref.read(categoryRulesNotifierProvider.notifier);
                 final count = await notifier.importDefaults();
                 if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('Imported $count default rules'),
-                      backgroundColor: AppColors.positive,
-                    ),
-                  );
+                  showSuccessSnackbar(context, 'Imported $count default rules');
                 }
               } catch (e) {
                 if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('Error importing rules: $e'),
-                      backgroundColor: AppColors.negative,
-                    ),
-                  );
+                  showErrorSnackbar(context, 'Error importing rules: $e');
                 }
               }
             },
@@ -327,11 +318,13 @@ class CategoriesScreen extends ConsumerWidget {
                 ),
                 const SizedBox(height: 8),
                 DropdownButtonFormField<String>(
-                  initialValue: categoryController.text.isEmpty
+                  value: categoryController.text.isEmpty
                       ? null
                       : categoryController.text,
-                  items: allCategories
-                      .where((c) => c != 'Uncategorized')
+                  items: (allCategories
+                          .where((c) => c != 'Uncategorized')
+                          .toList()
+                        ..sort())
                       .map((c) => DropdownMenuItem(value: c, child: Text(c)))
                       .toList(),
                   onChanged: (val) => categoryController.text = val ?? '',
@@ -445,9 +438,7 @@ class CategoriesScreen extends ConsumerWidget {
               onPressed: () async {
                 if (categoryController.text.isEmpty ||
                     patternController.text.isEmpty) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Please fill all fields')),
-                  );
+                  showErrorSnackbar(context, 'Please fill all fields');
                   return;
                 }
 
@@ -461,15 +452,11 @@ class CategoriesScreen extends ConsumerWidget {
                       );
                   if (context.mounted) {
                     Navigator.pop(ctx);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('✓ Rule created')),
-                    );
+                    showSuccessSnackbar(context, 'Rule created');
                   }
                 } catch (e) {
                   if (context.mounted) {
-                    ScaffoldMessenger.of(
-                      context,
-                    ).showSnackBar(SnackBar(content: Text('Error: $e')));
+                    showErrorSnackbar(context, 'Error: $e');
                   }
                 }
               },
@@ -511,9 +498,11 @@ class CategoriesScreen extends ConsumerWidget {
                 ),
                 const SizedBox(height: 8),
                 DropdownButtonFormField<String>(
-                  initialValue: categoryController.text,
-                  items: allCategories
-                      .where((c) => c != 'Uncategorized')
+                  value: categoryController.text,
+                  items: (allCategories
+                          .where((c) => c != 'Uncategorized')
+                          .toList()
+                        ..sort())
                       .map((c) => DropdownMenuItem(value: c, child: Text(c)))
                       .toList(),
                   onChanged: (val) => categoryController.text = val ?? '',
@@ -571,9 +560,7 @@ class CategoriesScreen extends ConsumerWidget {
               onPressed: () async {
                 if (categoryController.text.isEmpty ||
                     patternController.text.isEmpty) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Please fill all fields')),
-                  );
+                  showErrorSnackbar(context, 'Please fill all fields');
                   return;
                 }
 
@@ -588,15 +575,11 @@ class CategoriesScreen extends ConsumerWidget {
                       );
                   if (context.mounted) {
                     Navigator.pop(ctx);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('✓ Rule updated')),
-                    );
+                    showSuccessSnackbar(context, 'Rule updated');
                   }
                 } catch (e) {
                   if (context.mounted) {
-                    ScaffoldMessenger.of(
-                      context,
-                    ).showSnackBar(SnackBar(content: Text('Error: $e')));
+                    showErrorSnackbar(context, 'Error: $e');
                   }
                 }
               },
@@ -637,15 +620,11 @@ class CategoriesScreen extends ConsumerWidget {
                     .deleteRule(rule.id);
                 if (context.mounted) {
                   Navigator.pop(ctx);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('✓ Rule deleted')),
-                  );
+                  showSuccessSnackbar(context, 'Rule deleted');
                 }
               } catch (e) {
                 if (context.mounted) {
-                  ScaffoldMessenger.of(
-                    context,
-                  ).showSnackBar(SnackBar(content: Text('Error: $e')));
+                  showErrorSnackbar(context, 'Error: $e');
                 }
               }
             },

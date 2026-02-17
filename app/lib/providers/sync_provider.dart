@@ -1,7 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'accounts_provider.dart';
-import 'transactions_provider.dart';
-import 'analytics_provider.dart';
+import 'refresh_helpers.dart';
 
 class SyncState {
   final bool isSyncing;
@@ -46,11 +45,8 @@ class SyncNotifier extends StateNotifier<SyncState> {
   }
 
   void _refreshAll() {
-    ref.invalidate(transactionsProvider);
-    ref.invalidate(categoryBreakdownProvider);
-    ref.invalidate(monthlyBreakdownProvider);
-    ref.invalidate(weeklyBreakdownProvider);
-    ref.invalidate(accountsProvider);
+    invalidateTransactionsAndAnalytics(ref);
+    invalidateAccounts(ref);
   }
 }
 

@@ -84,17 +84,14 @@ Router transactionRoutes() {
   router.patch('/api/transactions/<id>', (Request request, String id) async {
     final body =
         jsonDecode(await request.readAsString()) as Map<String, dynamic>;
-    final category = body['category'];
+    final category = body['category'] as String?;
+    final pinned = body['pinned'] as bool?;
 
-    if (category == null || category is! String || category.isEmpty) {
+    if (category == null && pinned == null) {
       return Response(400,
-          body: jsonEncode({'error': 'category is required'}),
+          body: jsonEncode({'error': 'category or pinned is required'}),
           headers: {'Content-Type': 'application/json'});
     }
-
-    final overrides = loadOverrides();
-    overrides[id] = category;
-    saveOverrides(overrides);
 
     final transactions = loadCleanTransactions();
     final txIndex = transactions.indexWhere((t) => t.id == id);
@@ -105,12 +102,46 @@ Router transactionRoutes() {
       );
     }
 
-    transactions[txIndex].category = category;
-    saveCleanTransactions(transactions);
+    // Handle pinned state
+    if (pinned != null) {
+      final pinnedSet = loadPinnedTransactions();
+      if (pinned) {
+        pinnedSet.add(id);
+      } else {
+        pinnedSet.remove(id);
+      }
+      savePinnedTransactions(pinnedSet);
+    }
+
+    // Handle category change
+    if (category != null && category.isNotEmpty) {
+      final overrides = loadOverrides();
+      if (category == 'Uncategorized') {
+        // Remove override so rules/default take effect
+        overrides.remove(id);
+      } else {
+        overrides[id] = category;
+      }
+      saveOverrides(overrides);
+      transactions[txIndex].category = category;
+      saveCleanTransactions(transactions);
+    }
 
     return Response.ok(
-      jsonEncode(
-          {'success': true, 'transaction': transactions[txIndex].toJson()}),
+      jsonEncode({
+        'success': true,
+        'transaction': transactions[txIndex].toJson(),
+        'pinned': loadPinnedTransactions().contains(id),
+      }),
+      headers: {'Content-Type': 'application/json'},
+    );
+  });
+
+  // Get all pinned transaction IDs
+  router.get('/api/transactions/pinned', (Request request) {
+    final pinned = loadPinnedTransactions();
+    return Response.ok(
+      jsonEncode(pinned.toList()),
       headers: {'Content-Type': 'application/json'},
     );
   });

@@ -85,7 +85,7 @@ class DashboardScreen extends ConsumerWidget {
         },
         child: CustomScrollView(
           slivers: [
-            // Premium Header
+            //  Header
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(24, 32, 24, 0),
@@ -145,7 +145,7 @@ class DashboardScreen extends ConsumerWidget {
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 24),
-                child: _PremiumCard(
+                child: _Card(
                   title: 'Spending by Category',
                   subtitle: 'Tap sections to see details',
                   child: SizedBox(
@@ -220,7 +220,7 @@ class DashboardScreen extends ConsumerWidget {
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 24),
-                child: _PremiumCard(
+                child: _Card(
                   child: transactions.when(
                     data: (page) {
                       if (page.data.isEmpty) {
@@ -265,12 +265,12 @@ class DashboardScreen extends ConsumerWidget {
   }
 }
 
-class _PremiumCard extends StatelessWidget {
+class _Card extends StatelessWidget {
   final String? title;
   final String? subtitle;
   final Widget child;
 
-  const _PremiumCard({this.title, this.subtitle, required this.child});
+  const _Card({this.title, this.subtitle, required this.child});
 
   @override
   Widget build(BuildContext context) {

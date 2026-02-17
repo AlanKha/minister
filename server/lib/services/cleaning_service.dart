@@ -72,10 +72,24 @@ CleanTransaction cleanTransaction(
 List<CleanTransaction> cleanAllTransactions() {
   final transactions = loadTransactions();
   final overrides = loadOverrides();
+  final pinned = loadPinnedTransactions();
 
-  final cleaned = transactions
-      .map((tx) => cleanTransaction(tx, overrides))
-      .toList();
+  // Load existing clean transactions to preserve categories for pinned ones
+  final existingClean = <String, CleanTransaction>{};
+  if (pinned.isNotEmpty) {
+    for (final tx in loadCleanTransactions()) {
+      existingClean[tx.id] = tx;
+    }
+  }
+
+  final cleaned = transactions.map((tx) {
+    final result = cleanTransaction(tx, overrides);
+    // If this transaction is pinned, preserve its existing category
+    if (pinned.contains(tx.id) && existingClean.containsKey(tx.id)) {
+      result.category = existingClean[tx.id]!.category;
+    }
+    return result;
+  }).toList();
 
   saveCleanTransactions(cleaned);
   return cleaned;

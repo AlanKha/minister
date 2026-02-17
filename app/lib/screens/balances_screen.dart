@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:shimmer/shimmer.dart';
 import '../providers/accounts_provider.dart';
 import '../providers/balances_provider.dart';
+import '../utils/snackbar_helpers.dart';
 import '../theme.dart';
 
 final _currencyFormat = NumberFormat.currency(symbol: '\$');
@@ -25,11 +26,12 @@ class _BalancesScreenState extends ConsumerState<BalancesScreen> {
       final client = ref.read(apiClientProvider);
       await client.refreshBalances();
       ref.invalidate(balancesProvider);
+      if (mounted) {
+        showSuccessSnackbar(context, 'Balances refreshed');
+      }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Refresh failed: $e')),
-        );
+        showErrorSnackbar(context, 'Refresh failed: $e');
       }
     } finally {
       if (mounted) setState(() => _refreshing = false);

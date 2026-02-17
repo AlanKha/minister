@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:minister_shared/models/category_rule.dart';
 import 'package:minister_shared/models/transaction.dart';
 import 'accounts_provider.dart';
+import 'refresh_helpers.dart';
 
 final categoryRulesProvider =
     FutureProvider<List<CategoryRule>>((ref) async {
@@ -54,6 +55,8 @@ class CategoryRulesNotifier extends StateNotifier<AsyncValue<List<CategoryRule>>
         caseSensitive: caseSensitive,
       );
       await _loadRules();
+      // Backend re-cleans all transactions on rule CRUD
+      invalidateTransactionsAndAnalytics(ref);
     } catch (e, st) {
       state = AsyncValue.error(e, st);
       rethrow;
@@ -75,6 +78,7 @@ class CategoryRulesNotifier extends StateNotifier<AsyncValue<List<CategoryRule>>
         caseSensitive: caseSensitive,
       );
       await _loadRules();
+      invalidateTransactionsAndAnalytics(ref);
     } catch (e, st) {
       state = AsyncValue.error(e, st);
       rethrow;
@@ -86,6 +90,7 @@ class CategoryRulesNotifier extends StateNotifier<AsyncValue<List<CategoryRule>>
       final client = ref.read(apiClientProvider);
       await client.deleteCategoryRule(id);
       await _loadRules();
+      invalidateTransactionsAndAnalytics(ref);
     } catch (e, st) {
       state = AsyncValue.error(e, st);
       rethrow;
@@ -101,8 +106,8 @@ class CategoryRulesNotifier extends StateNotifier<AsyncValue<List<CategoryRule>>
       final client = ref.read(apiClientProvider);
       final result = await client.importDefaultRules();
       await _loadRules();
-      // Invalidate the import check provider
       ref.invalidate(shouldImportDefaultsProvider);
+      invalidateTransactionsAndAnalytics(ref);
       return result['imported'] as int? ?? 0;
     } catch (e, st) {
       state = AsyncValue.error(e, st);

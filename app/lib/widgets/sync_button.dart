@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/sync_provider.dart';
+import '../utils/snackbar_helpers.dart';
 import '../theme.dart';
 
 class SyncButton extends ConsumerWidget {
@@ -23,12 +24,14 @@ class SyncButton extends ConsumerWidget {
                 await ref.read(syncProvider.notifier).syncAll();
                 if (context.mounted) {
                   final state = ref.read(syncProvider);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content:
-                          Text(state.error ?? state.lastResult ?? 'Done'),
-                    ),
-                  );
+                  if (state.error != null) {
+                    showErrorSnackbar(context, state.error!);
+                  } else {
+                    showSuccessSnackbar(
+                      context,
+                      state.lastResult ?? 'Sync complete',
+                    );
+                  }
                 }
               },
         icon: syncState.isSyncing

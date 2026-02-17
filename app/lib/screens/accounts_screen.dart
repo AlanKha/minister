@@ -56,7 +56,7 @@ class AccountsScreen extends ConsumerWidget {
             onRefresh: () async => ref.invalidate(accountsProvider),
             child: CustomScrollView(
               slivers: [
-                // Premium Header
+                //  Header
                 SliverToBoxAdapter(
                   child: Padding(
                     padding: const EdgeInsets.fromLTRB(24, 32, 24, 24),
