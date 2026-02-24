@@ -1,13 +1,28 @@
 #!/bin/bash
 
 # Minister Development Startup Script
-# Starts the Dart server and Flutter macOS app
+# Starts the Dart server and Flutter app on the specified platform
+# Usage: ./scripts/dev.sh [macos|web|ios]
 
 set -e
 
 PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
-echo "🚀 Starting Minister Development Environment"
+# Parse platform argument (default to macos)
+PLATFORM="${1:-macos}"
+
+# Validate platform
+case "$PLATFORM" in
+    macos|web|ios)
+        ;;
+    *)
+        echo "❌ Invalid platform: $PLATFORM"
+        echo "Usage: ./scripts/dev.sh [macos|web|ios]"
+        exit 1
+        ;;
+esac
+
+echo "🚀 Starting Minister Development Environment ($PLATFORM)"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
 # Check if Docker is running
@@ -71,12 +86,41 @@ fi
 
 # Start the Flutter app
 echo ""
-echo "📱 Starting Flutter macOS app..."
-echo ""
 cd "$PROJECT_ROOT/app"
 flutter clean > /dev/null 2>&1 || true
 flutter pub get > /dev/null 2>&1
-flutter run -d macos
+
+case "$PLATFORM" in
+    macos)
+        echo "📱 Starting Flutter macOS app..."
+        echo ""
+        flutter run -d macos
+        ;;
+    web)
+        echo "🌐 Starting Flutter web app..."
+        echo ""
+        flutter run -d chrome
+        ;;
+    ios)
+        echo "📱 Starting Flutter iOS app..."
+        echo ""
+        # Find available iOS devices
+        IOS_DEVICES=$(flutter devices --machine | grep -o '"id":"[^"]*","isSupported":true,"targetPlatform":"ios"' | grep -o '"id":"[^"]*"' | cut -d'"' -f4 || true)
+
+        if [ -z "$IOS_DEVICES" ]; then
+            echo "❌ No iOS devices found. Please:"
+            echo "   1. Connect an iPhone/iPad via USB, or"
+            echo "   2. Enable wireless debugging on your device"
+            echo "   3. Make sure your device is on the same network"
+            exit 1
+        fi
+
+        # Use the first available iOS device
+        FIRST_IOS_DEVICE=$(echo "$IOS_DEVICES" | head -n 1)
+        echo "Using device: $FIRST_IOS_DEVICE"
+        flutter run -d "$FIRST_IOS_DEVICE"
+        ;;
+esac
 
 echo ""
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
