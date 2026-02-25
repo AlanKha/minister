@@ -26,7 +26,23 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
 // ── Accounts ─────────────────────────────────────────────────────────────────
 
 export async function getAccounts(): Promise<AccountData> {
-  return request<AccountData>('/api/accounts');
+  const raw = await request<Array<{
+    id: string;
+    institution?: string;
+    display_name?: string;
+    last4?: string;
+    linked_at: string;
+  }>>('/api/accounts');
+  return {
+    accounts: raw.map((a) => ({
+      id: a.id,
+      institution: a.institution,
+      displayName: a.display_name,
+      last4: a.last4,
+      linkedAt: a.linked_at,
+      label: a.display_name ?? a.institution ?? 'Unknown',
+    })),
+  };
 }
 
 // ── Transactions ──────────────────────────────────────────────────────────────
@@ -79,17 +95,26 @@ export interface AnalyticsParams {
 
 export async function getCategoryBreakdown(params: AnalyticsParams = {}): Promise<CategoryBreakdown[]> {
   const qs = new URLSearchParams(params as Record<string, string>).toString();
-  return request<CategoryBreakdown[]>(`/api/analytics/categories${qs ? `?${qs}` : ''}`);
+  const raw = await request<Array<{ category: string; count: number; total_cents: number; total: string }>>(
+    `/api/analytics/categories${qs ? `?${qs}` : ''}`,
+  );
+  return raw.map((d) => ({ category: d.category, count: d.count, totalCents: d.total_cents, total: d.total }));
 }
 
 export async function getMonthlyBreakdown(params: AnalyticsParams = {}): Promise<MonthlyBreakdown[]> {
   const qs = new URLSearchParams(params as Record<string, string>).toString();
-  return request<MonthlyBreakdown[]>(`/api/analytics/monthly${qs ? `?${qs}` : ''}`);
+  const raw = await request<Array<{ month: string; count: number; total_cents: number; total: string }>>(
+    `/api/analytics/monthly${qs ? `?${qs}` : ''}`,
+  );
+  return raw.map((d) => ({ month: d.month, count: d.count, totalCents: d.total_cents, total: d.total }));
 }
 
 export async function getWeeklyBreakdown(params: AnalyticsParams = {}): Promise<WeeklyBreakdown[]> {
   const qs = new URLSearchParams(params as Record<string, string>).toString();
-  return request<WeeklyBreakdown[]>(`/api/analytics/weekly${qs ? `?${qs}` : ''}`);
+  const raw = await request<Array<{ week_start: string; count: number; total_cents: number; total: string }>>(
+    `/api/analytics/weekly${qs ? `?${qs}` : ''}`,
+  );
+  return raw.map((d) => ({ weekStart: d.week_start, count: d.count, totalCents: d.total_cents, total: d.total }));
 }
 
 // ── Category Rules ────────────────────────────────────────────────────────────

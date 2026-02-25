@@ -4,7 +4,6 @@ import { Pressable, Text, View } from 'react-native';
 import { CleanTransaction } from '../models/transaction';
 import { AppColors, getCategoryColor } from '../theme/colors';
 import { formatCents } from '../utils/currency';
-import { CategoryChip } from './CategoryChip';
 
 interface TransactionTileProps {
   transaction: CleanTransaction;
@@ -13,7 +12,7 @@ interface TransactionTileProps {
 
 export function TransactionTile({ transaction, onPress }: TransactionTileProps) {
   const isExpense = transaction.amount < 0;
-  const amountColor = isExpense ? AppColors.textPrimary : AppColors.positive;
+  const amountColor = isExpense ? AppColors.negative : AppColors.positive;
   const categoryColor = getCategoryColor(transaction.category);
 
   return (
@@ -22,39 +21,29 @@ export function TransactionTile({ transaction, onPress }: TransactionTileProps) 
       style={({ pressed }) => ({
         flexDirection: 'row',
         alignItems: 'center',
-        paddingVertical: 12,
-        paddingHorizontal: 16,
-        backgroundColor: pressed ? AppColors.surfaceContainer : AppColors.surface,
+        paddingVertical: 14,
+        paddingHorizontal: 18,
+        backgroundColor: pressed ? AppColors.surfaceContainer : 'transparent',
       })}
     >
       {/* Category dot */}
       <View
         style={{
-          width: 36,
-          height: 36,
-          borderRadius: 18,
-          backgroundColor: categoryColor + '22',
-          alignItems: 'center',
-          justifyContent: 'center',
-          marginRight: 12,
+          width: 8,
+          height: 8,
+          borderRadius: 4,
+          backgroundColor: categoryColor,
+          marginRight: 14,
+          flexShrink: 0,
         }}
-      >
-        <View
-          style={{
-            width: 10,
-            height: 10,
-            borderRadius: 5,
-            backgroundColor: categoryColor,
-          }}
-        />
-      </View>
+      />
 
-      {/* Description + category */}
-      <View style={{ flex: 1 }}>
+      {/* Description + meta */}
+      <View style={{ flex: 1, marginRight: 12 }}>
         <Text
           numberOfLines={1}
           style={{
-            fontSize: 14,
+            fontSize: 13,
             fontFamily: 'Sora_500Medium',
             color: AppColors.textPrimary,
             marginBottom: 3,
@@ -62,11 +51,21 @@ export function TransactionTile({ transaction, onPress }: TransactionTileProps) 
         >
           {transaction.description}
         </Text>
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-          <CategoryChip category={transaction.category} small />
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
           <Text
             style={{
-              fontSize: 11,
+              fontSize: 10,
+              fontFamily: 'Sora_600SemiBold',
+              color: categoryColor,
+              letterSpacing: 0.3,
+            }}
+          >
+            {transaction.category}
+          </Text>
+          <Text style={{ fontSize: 10, color: AppColors.textTertiary, fontFamily: 'Sora_400Regular' }}>·</Text>
+          <Text
+            style={{
+              fontSize: 10,
               fontFamily: 'Sora_400Regular',
               color: AppColors.textTertiary,
             }}
@@ -77,18 +76,19 @@ export function TransactionTile({ transaction, onPress }: TransactionTileProps) 
       </View>
 
       {/* Amount + pin */}
-      <View style={{ alignItems: 'flex-end', gap: 4 }}>
+      <View style={{ alignItems: 'flex-end', gap: 3 }}>
         <Text
           style={{
-            fontSize: 15,
-            fontFamily: 'Sora_600SemiBold',
+            fontSize: 14,
+            fontFamily: 'Sora_700Bold',
             color: amountColor,
+            letterSpacing: -0.3,
           }}
         >
           {formatCents(transaction.amount)}
         </Text>
         {transaction.pinned && (
-          <Feather name="bookmark" size={12} color={AppColors.accent} />
+          <Feather name="bookmark" size={10} color={AppColors.accent} />
         )}
       </View>
     </Pressable>

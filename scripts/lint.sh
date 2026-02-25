@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Minister Lint Script
-# Runs static analysis on all Dart packages (app, server, shared)
+# Runs TypeScript type checking on all packages (app, server)
 
 set -e
 
@@ -15,19 +15,18 @@ RESET="\033[0m"
 
 exit_code=0
 
-run_analyze() {
+run_typecheck() {
     local name="$1"
     local dir="$2"
-    local cmd="$3"
 
     echo ""
-    echo -e "${BOLD}Analyzing ${name}...${RESET}"
+    echo -e "${BOLD}Type-checking ${name}...${RESET}"
     echo "────────────────────────────────"
 
-    if output=$($cmd 2>&1); then
+    if output=$(cd "$dir" && npx tsc --noEmit 2>&1); then
         echo -e "${GREEN}No issues found.${RESET}"
     else
-        echo "$output" | tail -n +2  # skip the "Analyzing..." header line dart prints
+        echo "$output"
         exit_code=1
     fi
 }
@@ -35,9 +34,8 @@ run_analyze() {
 echo -e "${BOLD}Minister Lint${RESET}"
 echo "════════════════════════════════"
 
-run_analyze "shared" "$PROJECT_ROOT/shared" "dart analyze $PROJECT_ROOT/shared"
-run_analyze "server" "$PROJECT_ROOT/server" "dart analyze $PROJECT_ROOT/server"
-run_analyze "app"    "$PROJECT_ROOT/app"    "flutter analyze $PROJECT_ROOT/app"
+run_typecheck "server" "$PROJECT_ROOT/server"
+run_typecheck "app"    "$PROJECT_ROOT/app"
 
 echo ""
 echo "════════════════════════════════"

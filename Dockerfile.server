@@ -1,38 +1,18 @@
-# Build stage
-FROM dart:3.5 as builder
-
+FROM node:20-alpine AS builder
 WORKDIR /app
+COPY server/package.json server/package-lock.json ./
+RUN npm ci
+COPY server/src ./src
+COPY server/tsconfig.json ./
+RUN npm run build
 
-# Copy shared package
-COPY shared/ ./shared/
-
-# Copy server package
-COPY server/ ./server/
-
-# Copy public directory (static files)
-COPY server/public/ ./public/
-
-# Build the server
-WORKDIR /app/server
-RUN dart pub get
-RUN dart compile exe bin/server.dart -o bin/server
-
-# Runtime stage
-FROM dart:3.5
-
+FROM node:20-alpine
 WORKDIR /app
-
-# Copy built executable from builder
-COPY --from=builder /app/server/bin/server /app/bin/server
-
-# Copy public directory for static files
-COPY server/public /app/public
-
-# Create data directory
+COPY server/package.json server/package-lock.json ./
+RUN npm ci --omit=dev
+COPY --from=builder /app/dist ./dist
+COPY server/public ./public
+COPY server/example_default_category_rules.json ./
 RUN mkdir -p /app/data
-
-# Expose port
 EXPOSE 3000
-
-# Run the server
-CMD ["/app/bin/server"]
+CMD ["node", "dist/index.js"]

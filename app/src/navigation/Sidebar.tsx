@@ -41,32 +41,45 @@ export function Sidebar({ state, navigation }: DrawerContentComponentProps) {
       ? AppColors.positive
       : syncStatus === 'error'
       ? AppColors.negative
-      : AppColors.accent;
+      : AppColors.textTertiary;
 
   return (
     <View style={{ flex: 1, backgroundColor: AppColors.sidebarBg, paddingTop: 32, paddingBottom: 24 }}>
       {/* Logo */}
-      <View style={{ paddingHorizontal: 20, marginBottom: 32 }}>
+      <View style={{ paddingHorizontal: 22, marginBottom: 28, flexDirection: 'row', alignItems: 'center', gap: 12 }}>
         <View
           style={{
-            width: 36,
-            height: 36,
-            borderRadius: 10,
+            width: 30,
+            height: 30,
+            borderRadius: 8,
             backgroundColor: AppColors.accent,
             alignItems: 'center',
             justifyContent: 'center',
-            marginBottom: 10,
           }}
         >
-          <Text style={{ color: '#fff', fontFamily: 'Sora_700Bold', fontSize: 16 }}>M</Text>
+          <Text style={{ color: '#fff', fontFamily: 'Sora_700Bold', fontSize: 14, letterSpacing: -0.5 }}>M</Text>
         </View>
-        <Text style={{ color: '#fff', fontFamily: 'Sora_700Bold', fontSize: 18, letterSpacing: -0.3 }}>
-          minister
-        </Text>
-        <Text style={{ color: 'rgba(255,255,255,0.45)', fontFamily: 'Sora_400Regular', fontSize: 11 }}>
-          finance
-        </Text>
+        <View>
+          <Text style={{ color: AppColors.sidebarText, fontFamily: 'Sora_700Bold', fontSize: 14, letterSpacing: -0.3 }}>
+            minister
+          </Text>
+          <Text
+            style={{
+              color: 'rgba(242,242,248,0.28)',
+              fontFamily: 'Sora_400Regular',
+              fontSize: 9,
+              letterSpacing: 1.8,
+              textTransform: 'uppercase',
+              marginTop: 1,
+            }}
+          >
+            finance
+          </Text>
+        </View>
       </View>
+
+      {/* Separator */}
+      <View style={{ height: 1, backgroundColor: 'rgba(255,255,255,0.05)', marginBottom: 12 }} />
 
       {/* Nav items */}
       <View style={{ flex: 1 }}>
@@ -79,39 +92,41 @@ export function Sidebar({ state, navigation }: DrawerContentComponentProps) {
               style={({ pressed }) => ({
                 flexDirection: 'row',
                 alignItems: 'center',
-                paddingHorizontal: 16,
+                paddingHorizontal: 22,
                 paddingVertical: 11,
-                marginHorizontal: 8,
-                marginVertical: 2,
-                borderRadius: 10,
+                position: 'relative',
                 backgroundColor: isActive
-                  ? 'rgba(232,93,58,0.15)'
+                  ? 'rgba(255,92,56,0.07)'
                   : pressed
-                  ? AppColors.sidebarHover
+                  ? 'rgba(255,255,255,0.03)'
                   : 'transparent',
               })}
             >
-              {/* Active indicator */}
-              <View
-                style={{
-                  width: 3,
-                  height: 20,
-                  borderRadius: 2,
-                  backgroundColor: isActive ? AppColors.accent : 'transparent',
-                  marginRight: 12,
-                }}
-              />
+              {/* Active left indicator */}
+              {isActive && (
+                <View
+                  style={{
+                    position: 'absolute',
+                    left: 0,
+                    top: 0,
+                    bottom: 0,
+                    width: 2,
+                    backgroundColor: AppColors.accent,
+                  }}
+                />
+              )}
               <Feather
                 name={item.icon}
-                size={18}
-                color={isActive ? AppColors.accent : 'rgba(255,255,255,0.55)'}
+                size={15}
+                color={isActive ? AppColors.accent : 'rgba(242,242,248,0.32)'}
               />
               <Text
                 style={{
-                  marginLeft: 10,
+                  marginLeft: 11,
                   fontFamily: isActive ? 'Sora_600SemiBold' : 'Sora_400Regular',
-                  fontSize: 14,
-                  color: isActive ? '#fff' : 'rgba(255,255,255,0.6)',
+                  fontSize: 13,
+                  color: isActive ? AppColors.sidebarText : 'rgba(242,242,248,0.48)',
+                  letterSpacing: 0.1,
                 }}
               >
                 {item.label}
@@ -121,6 +136,9 @@ export function Sidebar({ state, navigation }: DrawerContentComponentProps) {
         })}
       </View>
 
+      {/* Separator */}
+      <View style={{ height: 1, backgroundColor: 'rgba(255,255,255,0.05)', marginBottom: 14 }} />
+
       {/* Sync button */}
       <Pressable
         onPress={() => sync()}
@@ -128,24 +146,22 @@ export function Sidebar({ state, navigation }: DrawerContentComponentProps) {
         style={({ pressed }) => ({
           flexDirection: 'row',
           alignItems: 'center',
-          marginHorizontal: 16,
-          marginTop: 12,
-          paddingHorizontal: 16,
-          paddingVertical: 12,
-          borderRadius: 10,
-          backgroundColor: pressed ? 'rgba(232,93,58,0.1)' : 'rgba(255,255,255,0.05)',
-          borderWidth: 1,
-          borderColor: 'rgba(255,255,255,0.1)',
-          opacity: syncStatus === 'syncing' ? 0.6 : 1,
+          marginHorizontal: 14,
+          paddingHorizontal: 14,
+          paddingVertical: 10,
+          borderRadius: 8,
+          backgroundColor: pressed ? 'rgba(255,255,255,0.05)' : 'transparent',
+          opacity: syncStatus === 'syncing' ? 0.5 : 1,
         })}
       >
-        <Feather name="refresh-cw" size={16} color={syncColor} />
+        <Feather name="refresh-cw" size={13} color={syncColor} />
         <Text
           style={{
-            marginLeft: 10,
+            marginLeft: 9,
             fontFamily: 'Sora_500Medium',
-            fontSize: 13,
+            fontSize: 12,
             color: syncColor,
+            letterSpacing: 0.2,
           }}
         >
           {syncLabel}

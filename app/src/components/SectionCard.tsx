@@ -15,11 +15,8 @@ export function SectionCard({ children, style }: SectionCardProps) {
           backgroundColor: AppColors.surface,
           borderRadius: 16,
           padding: 20,
-          shadowColor: '#000',
-          shadowOffset: { width: 0, height: 1 },
-          shadowOpacity: 0.06,
-          shadowRadius: 6,
-          elevation: 2,
+          borderWidth: 1,
+          borderColor: AppColors.border,
         },
         style,
       ]}

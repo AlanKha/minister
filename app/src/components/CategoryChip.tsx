@@ -13,19 +13,19 @@ export function CategoryChip({ category, small = false }: CategoryChipProps) {
   return (
     <View
       style={{
-        backgroundColor: color + '22',
-        borderRadius: 20,
-        paddingHorizontal: small ? 8 : 10,
-        paddingVertical: small ? 3 : 5,
+        backgroundColor: color + '28',
+        borderRadius: 4,
+        paddingHorizontal: small ? 6 : 8,
+        paddingVertical: small ? 2 : 4,
         alignSelf: 'flex-start',
       }}
     >
       <Text
         style={{
           fontSize: small ? 10 : 11,
-          fontFamily: 'Sora_500Medium',
+          fontFamily: 'Sora_600SemiBold',
           color,
-          letterSpacing: 0.2,
+          letterSpacing: 0.3,
         }}
       >
         {category}

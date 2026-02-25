@@ -10,7 +10,6 @@ import {
   TextInput,
   View,
 } from 'react-native';
-import { SectionCard } from '../components/SectionCard';
 import {
   useCategoryRules,
   useCreateCategoryRule,
@@ -19,7 +18,7 @@ import {
   useUpdateCategoryRule,
 } from '../hooks/useCategoryRules';
 import { CategoryRule } from '../models/categoryRule';
-import { AppColors, CATEGORIES } from '../theme/colors';
+import { AppColors, CATEGORIES, getCategoryColor } from '../theme/colors';
 
 interface RuleFormState {
   category: string;
@@ -41,9 +40,9 @@ export function CategoriesScreen() {
   const [form, setForm] = useState<RuleFormState>(EMPTY_FORM);
   const [testInput, setTestInput] = useState('');
 
-  function openCreate() {
+  function openCreate(category?: string) {
     setEditing(null);
-    setForm(EMPTY_FORM);
+    setForm(category ? { ...EMPTY_FORM, category } : EMPTY_FORM);
     setTestInput('');
     setModalVisible(true);
   }
@@ -68,11 +67,7 @@ export function CategoriesScreen() {
   function handleDelete(id: string) {
     Alert.alert('Delete Rule', 'Are you sure you want to delete this rule?', [
       { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Delete',
-        style: 'destructive',
-        onPress: () => deleteRule(id),
-      },
+      { text: 'Delete', style: 'destructive', onPress: () => deleteRule(id) },
     ]);
   }
 
@@ -86,115 +81,301 @@ export function CategoriesScreen() {
     }
   }
 
+  // Group rules by category
+  const grouped = (rules ?? []).reduce<Record<string, CategoryRule[]>>((acc, rule) => {
+    (acc[rule.category] ??= []).push(rule);
+    return acc;
+  }, {});
+  const sortedCategories = Object.keys(grouped).sort((a, b) => a.localeCompare(b));
+  const totalRules = rules?.length ?? 0;
+
   return (
     <View style={{ flex: 1, backgroundColor: AppColors.background }}>
       <ScrollView contentContainerStyle={{ padding: 24, gap: 20 }}>
         {/* Header */}
-        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-          <Text style={{ fontSize: 26, fontFamily: 'Sora_700Bold', color: AppColors.textPrimary, letterSpacing: -0.5 }}>
-            Categories
+        <View>
+          <Text
+            style={{
+              fontSize: 10,
+              fontFamily: 'Sora_600SemiBold',
+              color: AppColors.accent,
+              letterSpacing: 2,
+              textTransform: 'uppercase',
+              marginBottom: 8,
+            }}
+          >
+            Rules
           </Text>
-          <View style={{ flexDirection: 'row', gap: 8 }}>
-            <Pressable
-              onPress={() => importDefaults()}
-              disabled={importing}
-              style={({ pressed }) => ({
-                paddingHorizontal: 14,
-                paddingVertical: 8,
-                borderRadius: 10,
-                backgroundColor: pressed ? AppColors.surfaceContainer : AppColors.surface,
-                borderWidth: 1,
-                borderColor: AppColors.border,
-              })}
-            >
-              <Text style={{ fontSize: 13, fontFamily: 'Sora_500Medium', color: AppColors.textSecondary }}>
-                {importing ? 'Importing…' : 'Import Defaults'}
+          <View style={{ flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between' }}>
+            <View>
+              <Text
+                style={{
+                  fontSize: 30,
+                  fontFamily: 'Sora_700Bold',
+                  color: AppColors.textPrimary,
+                  letterSpacing: -1,
+                }}
+              >
+                Categories
               </Text>
-            </Pressable>
-            <Pressable
-              onPress={openCreate}
-              style={({ pressed }) => ({
-                paddingHorizontal: 14,
-                paddingVertical: 8,
-                borderRadius: 10,
-                backgroundColor: AppColors.accent,
-                opacity: pressed ? 0.85 : 1,
-                flexDirection: 'row',
-                alignItems: 'center',
-                gap: 6,
-              })}
-            >
-              <Feather name="plus" size={16} color="#fff" />
-              <Text style={{ fontSize: 13, fontFamily: 'Sora_600SemiBold', color: '#fff' }}>New Rule</Text>
-            </Pressable>
+              {!isLoading && (
+                <Text
+                  style={{
+                    fontSize: 13,
+                    fontFamily: 'Sora_400Regular',
+                    color: AppColors.textTertiary,
+                    marginTop: 4,
+                  }}
+                >
+                  {totalRules} {totalRules === 1 ? 'rule' : 'rules'} across {sortedCategories.length}{' '}
+                  {sortedCategories.length === 1 ? 'category' : 'categories'}
+                </Text>
+              )}
+            </View>
+            <View style={{ flexDirection: 'row', gap: 8, paddingBottom: 4 }}>
+              <Pressable
+                onPress={() => importDefaults()}
+                disabled={importing}
+                style={({ pressed }) => ({
+                  paddingHorizontal: 14,
+                  paddingVertical: 8,
+                  borderRadius: 10,
+                  backgroundColor: pressed ? AppColors.surfaceContainer : AppColors.surface,
+                  borderWidth: 1,
+                  borderColor: AppColors.border,
+                })}
+              >
+                <Text
+                  style={{ fontSize: 12, fontFamily: 'Sora_500Medium', color: AppColors.textSecondary }}
+                >
+                  {importing ? 'Importing…' : 'Import Defaults'}
+                </Text>
+              </Pressable>
+              <Pressable
+                onPress={() => openCreate()}
+                style={({ pressed }) => ({
+                  paddingHorizontal: 14,
+                  paddingVertical: 8,
+                  borderRadius: 10,
+                  backgroundColor: AppColors.accent,
+                  opacity: pressed ? 0.85 : 1,
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  gap: 6,
+                })}
+              >
+                <Feather name="plus" size={14} color="#fff" />
+                <Text style={{ fontSize: 12, fontFamily: 'Sora_600SemiBold', color: '#fff' }}>
+                  New Rule
+                </Text>
+              </Pressable>
+            </View>
           </View>
         </View>
 
-        {/* Rule list */}
-        <SectionCard style={{ paddingHorizontal: 0, paddingVertical: 0, overflow: 'hidden' }}>
-          {isLoading ? (
-            <View style={{ padding: 20 }}>
-              <Text style={{ fontFamily: 'Sora_400Regular', color: AppColors.textTertiary }}>Loading…</Text>
-            </View>
-          ) : !rules?.length ? (
-            <View style={{ padding: 40, alignItems: 'center' }}>
-              <Feather name="tag" size={32} color={AppColors.textTertiary} />
-              <Text style={{ fontSize: 15, fontFamily: 'Sora_500Medium', color: AppColors.textSecondary, marginTop: 12 }}>
-                No rules yet
-              </Text>
-              <Text style={{ fontSize: 13, fontFamily: 'Sora_400Regular', color: AppColors.textTertiary, marginTop: 6, textAlign: 'center' }}>
-                Create rules to auto-categorize transactions
-              </Text>
-            </View>
-          ) : (
-            rules.map((rule, i) => (
-              <View key={rule.id}>
-                <View style={{ flexDirection: 'row', alignItems: 'center', padding: 16 }}>
-                  <View style={{ flex: 1 }}>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 4 }}>
+        {/* Grouped rule list */}
+        {isLoading ? (
+          <View
+            style={{
+              backgroundColor: AppColors.surface,
+              borderRadius: 16,
+              padding: 20,
+              borderWidth: 1,
+              borderColor: AppColors.border,
+            }}
+          >
+            <Text style={{ fontFamily: 'Sora_400Regular', color: AppColors.textTertiary }}>Loading…</Text>
+          </View>
+        ) : !rules?.length ? (
+          <View
+            style={{
+              backgroundColor: AppColors.surface,
+              borderRadius: 16,
+              padding: 40,
+              borderWidth: 1,
+              borderColor: AppColors.border,
+              alignItems: 'center',
+            }}
+          >
+            <Feather name="tag" size={32} color={AppColors.textTertiary} />
+            <Text
+              style={{
+                fontSize: 15,
+                fontFamily: 'Sora_500Medium',
+                color: AppColors.textSecondary,
+                marginTop: 12,
+              }}
+            >
+              No rules yet
+            </Text>
+            <Text
+              style={{
+                fontSize: 13,
+                fontFamily: 'Sora_400Regular',
+                color: AppColors.textTertiary,
+                marginTop: 6,
+                textAlign: 'center',
+              }}
+            >
+              Create rules to automatically categorize transactions
+            </Text>
+          </View>
+        ) : (
+          <View
+            style={{
+              backgroundColor: AppColors.surface,
+              borderRadius: 16,
+              borderWidth: 1,
+              borderColor: AppColors.border,
+              overflow: 'hidden',
+            }}
+          >
+            {sortedCategories.map((category, catIdx) => {
+              const catRules = grouped[category];
+              const color = getCategoryColor(category);
+              return (
+                <View key={category}>
+                  {/* Category header */}
+                  <View
+                    style={{
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      paddingHorizontal: 16,
+                      paddingVertical: 11,
+                      backgroundColor: AppColors.surfaceContainer,
+                      borderTopWidth: catIdx > 0 ? 1 : 0,
+                      borderTopColor: AppColors.border,
+                    }}
+                  >
+                    <View
+                      style={{
+                        width: 8,
+                        height: 8,
+                        borderRadius: 2,
+                        backgroundColor: color,
+                        marginRight: 10,
+                      }}
+                    />
+                    <Text
+                      style={{
+                        fontSize: 12,
+                        fontFamily: 'Sora_700Bold',
+                        color,
+                        letterSpacing: 0.5,
+                        flex: 1,
+                      }}
+                    >
+                      {category.toUpperCase()}
+                    </Text>
+                    <Text
+                      style={{
+                        fontSize: 11,
+                        fontFamily: 'Sora_400Regular',
+                        color: AppColors.textTertiary,
+                        marginRight: 12,
+                      }}
+                    >
+                      {catRules.length} {catRules.length === 1 ? 'rule' : 'rules'}
+                    </Text>
+                    <Pressable
+                      onPress={() => openCreate(category)}
+                      style={({ pressed }) => ({
+                        padding: 4,
+                        borderRadius: 6,
+                        backgroundColor: pressed ? AppColors.surfaceHigh : 'transparent',
+                      })}
+                    >
+                      <Feather name="plus" size={14} color={AppColors.textTertiary} />
+                    </Pressable>
+                  </View>
+
+                  {/* Rules in this category */}
+                  {catRules.map((rule, ruleIdx) => (
+                    <View key={rule.id}>
                       <View
                         style={{
-                          paddingHorizontal: 8,
-                          paddingVertical: 3,
-                          borderRadius: 12,
-                          backgroundColor: AppColors.accentSurface,
+                          flexDirection: 'row',
+                          alignItems: 'center',
+                          paddingVertical: 12,
+                          paddingLeft: 34,
+                          paddingRight: 16,
                         }}
                       >
-                        <Text style={{ fontSize: 11, fontFamily: 'Sora_600SemiBold', color: AppColors.accent }}>
-                          {rule.category}
-                        </Text>
+                        <View style={{ flex: 1 }}>
+                          <Text
+                            style={{
+                              fontSize: 13,
+                              fontFamily: 'Sora_400Regular',
+                              color: AppColors.textPrimary,
+                              fontVariant: ['tabular-nums'],
+                            }}
+                          >
+                            {rule.pattern}
+                          </Text>
+                          {rule.caseSensitive && (
+                            <Text
+                              style={{
+                                fontSize: 10,
+                                fontFamily: 'Sora_400Regular',
+                                color: AppColors.textTertiary,
+                                marginTop: 2,
+                              }}
+                            >
+                              case-sensitive
+                            </Text>
+                          )}
+                        </View>
+                        <View style={{ flexDirection: 'row', gap: 4 }}>
+                          <Pressable
+                            onPress={() => openEdit(rule)}
+                            style={({ pressed }) => ({
+                              padding: 8,
+                              borderRadius: 8,
+                              backgroundColor: pressed ? AppColors.surfaceContainer : 'transparent',
+                            })}
+                          >
+                            <Feather name="edit-2" size={14} color={AppColors.textSecondary} />
+                          </Pressable>
+                          <Pressable
+                            onPress={() => handleDelete(rule.id)}
+                            style={({ pressed }) => ({
+                              padding: 8,
+                              borderRadius: 8,
+                              backgroundColor: pressed ? AppColors.negativeLight : 'transparent',
+                            })}
+                          >
+                            <Feather name="trash-2" size={14} color={AppColors.negative} />
+                          </Pressable>
+                        </View>
                       </View>
-                      {rule.caseSensitive && (
-                        <Text style={{ fontSize: 10, fontFamily: 'Sora_400Regular', color: AppColors.textTertiary }}>
-                          case-sensitive
-                        </Text>
+                      {ruleIdx < catRules.length - 1 && (
+                        <View
+                          style={{
+                            height: 1,
+                            backgroundColor: AppColors.borderSubtle,
+                            marginLeft: 34,
+                          }}
+                        />
                       )}
                     </View>
-                    <Text style={{ fontSize: 13, fontFamily: 'Sora_400Regular', color: AppColors.textSecondary }}>
-                      {rule.pattern}
-                    </Text>
-                  </View>
-                  <View style={{ flexDirection: 'row', gap: 8 }}>
-                    <Pressable onPress={() => openEdit(rule)} style={{ padding: 8, borderRadius: 8 }}>
-                      <Feather name="edit-2" size={15} color={AppColors.textSecondary} />
-                    </Pressable>
-                    <Pressable onPress={() => handleDelete(rule.id)} style={{ padding: 8, borderRadius: 8 }}>
-                      <Feather name="trash-2" size={15} color={AppColors.negative} />
-                    </Pressable>
-                  </View>
+                  ))}
                 </View>
-                {i < rules.length - 1 && (
-                  <View style={{ height: 1, backgroundColor: AppColors.borderSubtle, marginHorizontal: 16 }} />
-                )}
-              </View>
-            ))
-          )}
-        </SectionCard>
+              );
+            })}
+          </View>
+        )}
       </ScrollView>
 
       {/* Create/Edit Modal */}
       <Modal visible={modalVisible} transparent animationType="fade">
-        <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', alignItems: 'center', justifyContent: 'center' }}>
+        <View
+          style={{
+            flex: 1,
+            backgroundColor: 'rgba(0,0,0,0.6)',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
           <View
             style={{
               backgroundColor: AppColors.surface,
@@ -202,46 +383,79 @@ export function CategoriesScreen() {
               padding: 28,
               width: 480,
               maxWidth: '90%',
+              borderWidth: 1,
+              borderColor: AppColors.border,
             }}
           >
-            <Text style={{ fontSize: 18, fontFamily: 'Sora_700Bold', color: AppColors.textPrimary, marginBottom: 20 }}>
+            <Text
+              style={{
+                fontSize: 18,
+                fontFamily: 'Sora_700Bold',
+                color: AppColors.textPrimary,
+                marginBottom: 24,
+              }}
+            >
               {editing ? 'Edit Rule' : 'New Rule'}
             </Text>
 
-            {/* Category */}
-            <Text style={{ fontSize: 12, fontFamily: 'Sora_600SemiBold', color: AppColors.textSecondary, marginBottom: 6, letterSpacing: 0.3 }}>
-              CATEGORY
+            {/* Category picker */}
+            <Text
+              style={{
+                fontSize: 10,
+                fontFamily: 'Sora_600SemiBold',
+                color: AppColors.textTertiary,
+                letterSpacing: 1.4,
+                textTransform: 'uppercase',
+                marginBottom: 8,
+              }}
+            >
+              Category
             </Text>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 16 }}>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 20 }}>
               <View style={{ flexDirection: 'row', gap: 6 }}>
-                {CATEGORIES.map((cat) => (
-                  <Pressable
-                    key={cat}
-                    onPress={() => setForm((f) => ({ ...f, category: cat }))}
-                    style={{
-                      paddingHorizontal: 12,
-                      paddingVertical: 6,
-                      borderRadius: 16,
-                      backgroundColor: form.category === cat ? AppColors.accent : AppColors.surfaceContainer,
-                    }}
-                  >
-                    <Text
+                {CATEGORIES.map((cat) => {
+                  const catColor = getCategoryColor(cat);
+                  const isSelected = form.category === cat;
+                  return (
+                    <Pressable
+                      key={cat}
+                      onPress={() => setForm((f) => ({ ...f, category: cat }))}
                       style={{
-                        fontSize: 12,
-                        fontFamily: 'Sora_500Medium',
-                        color: form.category === cat ? '#fff' : AppColors.textSecondary,
+                        paddingHorizontal: 12,
+                        paddingVertical: 6,
+                        borderRadius: 6,
+                        backgroundColor: isSelected ? catColor + '28' : AppColors.surfaceContainer,
+                        borderWidth: 1,
+                        borderColor: isSelected ? catColor : 'transparent',
                       }}
                     >
-                      {cat}
-                    </Text>
-                  </Pressable>
-                ))}
+                      <Text
+                        style={{
+                          fontSize: 12,
+                          fontFamily: 'Sora_500Medium',
+                          color: isSelected ? catColor : AppColors.textSecondary,
+                        }}
+                      >
+                        {cat}
+                      </Text>
+                    </Pressable>
+                  );
+                })}
               </View>
             </ScrollView>
 
             {/* Pattern */}
-            <Text style={{ fontSize: 12, fontFamily: 'Sora_600SemiBold', color: AppColors.textSecondary, marginBottom: 6, letterSpacing: 0.3 }}>
-              REGEX PATTERN
+            <Text
+              style={{
+                fontSize: 10,
+                fontFamily: 'Sora_600SemiBold',
+                color: AppColors.textTertiary,
+                letterSpacing: 1.4,
+                textTransform: 'uppercase',
+                marginBottom: 8,
+              }}
+            >
+              Regex Pattern
             </Text>
             <TextInput
               value={form.pattern}
@@ -257,13 +471,37 @@ export function CategoriesScreen() {
                 fontSize: 14,
                 fontFamily: 'Sora_400Regular',
                 color: AppColors.textPrimary,
-                marginBottom: 12,
+                backgroundColor: AppColors.surfaceContainer,
+                marginBottom: 16,
               }}
             />
 
             {/* Case sensitive */}
-            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
-              <Text style={{ fontSize: 14, fontFamily: 'Sora_400Regular', color: AppColors.textPrimary }}>Case sensitive</Text>
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                marginBottom: 20,
+              }}
+            >
+              <View>
+                <Text
+                  style={{ fontSize: 14, fontFamily: 'Sora_400Regular', color: AppColors.textPrimary }}
+                >
+                  Case sensitive
+                </Text>
+                <Text
+                  style={{
+                    fontSize: 12,
+                    fontFamily: 'Sora_400Regular',
+                    color: AppColors.textTertiary,
+                    marginTop: 2,
+                  }}
+                >
+                  Match uppercase and lowercase exactly
+                </Text>
+              </View>
               <Switch
                 value={form.caseSensitive}
                 onValueChange={(v) => setForm((f) => ({ ...f, caseSensitive: v }))}
@@ -271,46 +509,74 @@ export function CategoriesScreen() {
               />
             </View>
 
-            {/* Test input */}
-            <Text style={{ fontSize: 12, fontFamily: 'Sora_600SemiBold', color: AppColors.textSecondary, marginBottom: 6, letterSpacing: 0.3 }}>
-              TEST (optional)
+            {/* Test */}
+            <Text
+              style={{
+                fontSize: 10,
+                fontFamily: 'Sora_600SemiBold',
+                color: AppColors.textTertiary,
+                letterSpacing: 1.4,
+                textTransform: 'uppercase',
+                marginBottom: 8,
+              }}
+            >
+              Test (optional)
             </Text>
             <TextInput
               value={testInput}
               onChangeText={setTestInput}
-              placeholder="Type a transaction description…"
+              placeholder="Type a transaction description to test…"
               placeholderTextColor={AppColors.textTertiary}
               style={{
                 borderWidth: 1,
-                borderColor: testResult === true ? AppColors.positive : testResult === false ? AppColors.negative : AppColors.border,
+                borderColor:
+                  testResult === true
+                    ? AppColors.positive
+                    : testResult === false
+                    ? AppColors.negative
+                    : AppColors.border,
                 borderRadius: 10,
                 paddingHorizontal: 14,
                 paddingVertical: 10,
                 fontSize: 14,
                 fontFamily: 'Sora_400Regular',
                 color: AppColors.textPrimary,
-                marginBottom: 4,
+                backgroundColor: AppColors.surfaceContainer,
+                marginBottom: 6,
               }}
             />
             {testResult !== null && (
-              <Text style={{ fontSize: 12, fontFamily: 'Sora_500Medium', color: testResult ? AppColors.positive : AppColors.negative, marginBottom: 16 }}>
+              <Text
+                style={{
+                  fontSize: 12,
+                  fontFamily: 'Sora_600SemiBold',
+                  color: testResult ? AppColors.positive : AppColors.negative,
+                  marginBottom: 20,
+                }}
+              >
                 {testResult ? '✓ Matches' : '✗ No match'}
               </Text>
             )}
 
             {/* Actions */}
-            <View style={{ flexDirection: 'row', gap: 10, marginTop: 8 }}>
+            <View style={{ flexDirection: 'row', gap: 10, marginTop: testResult !== null ? 0 : 14 }}>
               <Pressable
                 onPress={() => setModalVisible(false)}
                 style={({ pressed }) => ({
                   flex: 1,
                   paddingVertical: 12,
                   borderRadius: 12,
-                  backgroundColor: pressed ? AppColors.surfaceContainer : AppColors.surfaceContainer,
+                  backgroundColor: pressed ? AppColors.surfaceHigh : AppColors.surfaceContainer,
                   alignItems: 'center',
+                  borderWidth: 1,
+                  borderColor: AppColors.border,
                 })}
               >
-                <Text style={{ fontSize: 14, fontFamily: 'Sora_600SemiBold', color: AppColors.textSecondary }}>Cancel</Text>
+                <Text
+                  style={{ fontSize: 14, fontFamily: 'Sora_600SemiBold', color: AppColors.textSecondary }}
+                >
+                  Cancel
+                </Text>
               </Pressable>
               <Pressable
                 onPress={handleSave}

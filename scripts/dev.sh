@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Minister Development Startup Script
-# Starts the Dart server and React Native/Expo app on the specified platform
+# Starts the Node.js server and React Native/Expo app on the specified platform
 # Usage: ./scripts/dev.sh [macos|web|ios]
 
 set -e
@@ -66,7 +66,7 @@ fi
 
 # Start the server in Docker
 echo ""
-echo "📦 Starting Dart server in Docker..."
+echo "📦 Starting Node.js server in Docker..."
 echo "   Server will be available at http://localhost:3000"
 cd "$PROJECT_ROOT"
 
