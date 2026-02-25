@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Minister Development Startup Script
-# Starts the Dart server and Flutter app on the specified platform
+# Starts the Dart server and React Native/Expo app on the specified platform
 # Usage: ./scripts/dev.sh [macos|web|ios]
 
 set -e
@@ -9,7 +9,7 @@ set -e
 PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
 # Parse platform argument (default to macos)
-PLATFORM="${1:-macos}"
+PLATFORM="${1:-web}"
 
 # Validate platform
 case "$PLATFORM" in
@@ -25,28 +25,42 @@ esac
 echo "🚀 Starting Minister Development Environment ($PLATFORM)"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
-# Check if Docker is running
+# Check if Docker is available
 if ! command -v docker &> /dev/null; then
-    echo "❌ Docker not found. Install Docker Desktop from https://www.docker.com/products/docker-desktop"
+    echo "❌ Docker not found. Install via: brew install colima docker"
     exit 1
 fi
 
+# Start Docker daemon if not running (supports Colima and Docker Desktop)
 if ! docker ps > /dev/null 2>&1; then
-    echo "⏳ Docker daemon not running. Opening Docker.app..."
-    open /Applications/Docker.app
-    echo "⏳ Waiting for Docker to start (this takes a moment)..."
-    sleep 10
+    if command -v colima &> /dev/null; then
+        echo "⏳ Starting Colima..."
+        colima start
+    elif [ -d "/Applications/Docker.app" ]; then
+        echo "⏳ Starting Docker Desktop..."
+        open /Applications/Docker.app
+        sleep 10
+    else
+        echo "❌ Docker daemon not running. Start it with: colima start"
+        exit 1
+    fi
 
-    # Check again
+    # Wait for daemon to be ready
+    echo "⏳ Waiting for Docker daemon..."
+    for i in $(seq 1 20); do
+        if docker ps > /dev/null 2>&1; then break; fi
+        sleep 1
+    done
+
     if ! docker ps > /dev/null 2>&1; then
-        echo "❌ Docker daemon failed to start. Please open Docker.app manually."
+        echo "❌ Docker daemon failed to start."
         exit 1
     fi
 fi
 
-# Check if Flutter is installed
-if ! command -v flutter &> /dev/null; then
-    echo "❌ Flutter not found. Install from https://flutter.dev/docs/get-started/install"
+# Check if npx/node is available
+if ! command -v node &> /dev/null; then
+    echo "❌ Node.js not found. Install from https://nodejs.org"
     exit 1
 fi
 
@@ -84,41 +98,42 @@ if [ $attempt -eq $max_attempts ]; then
     echo "⚠️  Server may not be responding. Check with: docker-compose logs"
 fi
 
-# Start the Flutter app
+# Start the Expo/React Native app
 echo ""
 cd "$PROJECT_ROOT/app"
-flutter clean > /dev/null 2>&1 || true
-flutter pub get > /dev/null 2>&1
 
 case "$PLATFORM" in
     macos)
-        echo "📱 Starting Flutter macOS app..."
-        echo ""
-        flutter run -d macos
+        # Check for full Xcode.app (Command Line Tools alone aren't enough)
+        if [ -d "/Applications/Xcode.app" ] || xcodebuild -version &> /dev/null 2>&1; then
+            echo "📱 Starting React Native macOS app (native)..."
+            echo ""
+            # Run pod install if Pods directory is missing or out of date
+            if [ ! -f "$PROJECT_ROOT/app/macos/Pods/Manifest.lock" ]; then
+                echo "⏳ Installing CocoaPods dependencies..."
+                cd "$PROJECT_ROOT/app/macos" && pod install
+                cd "$PROJECT_ROOT/app"
+            fi
+            npx react-native run-macos
+        else
+            echo "⚠️  Xcode.app not found — native macOS build unavailable."
+            echo "   Install Xcode from the App Store, then run: ./scripts/dev.sh macos"
+            echo ""
+            echo "🌐 Starting Expo dev server (web preview) instead..."
+            echo "   Open http://localhost:8081 in your browser"
+            echo ""
+            npx expo start --web
+        fi
         ;;
     web)
-        echo "🌐 Starting Flutter web app..."
+        echo "🌐 Starting Expo web app..."
         echo ""
-        flutter run -d chrome
+        npx expo start --web
         ;;
     ios)
-        echo "📱 Starting Flutter iOS app..."
+        echo "📱 Starting Expo iOS app..."
         echo ""
-        # Find available iOS devices
-        IOS_DEVICES=$(flutter devices --machine | grep -o '"id":"[^"]*","isSupported":true,"targetPlatform":"ios"' | grep -o '"id":"[^"]*"' | cut -d'"' -f4 || true)
-
-        if [ -z "$IOS_DEVICES" ]; then
-            echo "❌ No iOS devices found. Please:"
-            echo "   1. Connect an iPhone/iPad via USB, or"
-            echo "   2. Enable wireless debugging on your device"
-            echo "   3. Make sure your device is on the same network"
-            exit 1
-        fi
-
-        # Use the first available iOS device
-        FIRST_IOS_DEVICE=$(echo "$IOS_DEVICES" | head -n 1)
-        echo "Using device: $FIRST_IOS_DEVICE"
-        flutter run -d "$FIRST_IOS_DEVICE"
+        npx expo run:ios
         ;;
 esac
 

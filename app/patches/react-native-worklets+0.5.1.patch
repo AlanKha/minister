@@ -1,0 +1,63 @@
+diff --git a/node_modules/react-native-worklets/apple/worklets/apple/AnimationFrameQueue.mm b/node_modules/react-native-worklets/apple/worklets/apple/AnimationFrameQueue.mm
+index 6d9f323..6673328 100644
+--- a/node_modules/react-native-worklets/apple/worklets/apple/AnimationFrameQueue.mm
++++ b/node_modules/react-native-worklets/apple/worklets/apple/AnimationFrameQueue.mm
+@@ -9,12 +9,14 @@
+ 
+ constexpr auto TIME_SAMPLES_AMOUNT = 4;
+ 
++#if !TARGET_OS_OSX
+ namespace FrameRateRange {
+ const auto BEST = CAFrameRateRangeMake(60, 120, 120);
+ const auto STANDARD = CAFrameRateRangeMake(30, 60, 60);
+ const auto LOW = CAFrameRateRangeMake(24, 30, 30);
+ const auto POOR = CAFrameRateRangeMake(10, 24, 24);
+ } // namespace FrameRateRange
++#endif // !TARGET_OS_OSX
+ 
+ @implementation AnimationFrameQueue {
+   /* DisplayLink is thread safe. */
+@@ -23,7 +25,9 @@ @implementation AnimationFrameQueue {
+   std::mutex callbacksMutex_;
+   std::chrono::duration<double, std::milli> timeDeltas_[TIME_SAMPLES_AMOUNT];
+   int timeDeltaIndex_;
++#if !TARGET_OS_OSX
+   CAFrameRateRange currentFrameRate_;
++#endif // !TARGET_OS_OSX
+ }
+ 
+ typedef void (^AnimationFrameCallback)(WorkletsDisplayLink *displayLink);
+@@ -33,6 +37,7 @@ @implementation AnimationFrameQueue {
+ - (instancetype)init
+ {
+   AssertJavaScriptQueue();
++#if !TARGET_OS_OSX
+   if constexpr (worklets::StaticFeatureFlags::getFlag("IOS_DYNAMIC_FRAMERATE_ENABLED")) {
+     bool supportsProMotion = [UIScreen mainScreen].maximumFramesPerSecond > 60;
+     SEL frameCallback = supportsProMotion ? @selector(executeQueueForProMotion:) : @selector(executeQueue:);
+@@ -41,6 +46,9 @@ - (instancetype)init
+   } else {
+     displayLink_ = [WorkletsDisplayLink displayLinkWithTarget:self selector:@selector(executeQueue:)];
+   }
++#else
++  displayLink_ = [WorkletsDisplayLink displayLinkWithTarget:self selector:@selector(executeQueue:)];
++#endif
+ 
+ #if TARGET_OS_OSX
+   // nothing
+@@ -92,6 +100,7 @@ - (void)executeQueue:(WorkletsDisplayLink *)displayLink
+   }
+ }
+ 
++#if !TARGET_OS_OSX
+ - (void)executeQueueForProMotion:(WorkletsDisplayLink *)displayLink
+ {
+   auto start = std::chrono::high_resolution_clock::now();
+@@ -124,6 +133,7 @@ - (void)executeQueueForProMotion:(WorkletsDisplayLink *)displayLink
+     currentFrameRate_ = frameRateRange;
+   }
+ }
++#endif // !TARGET_OS_OSX
+ 
+ - (std::vector<std::function<void(double)>>)pullCallbacks
+ {
